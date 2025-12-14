@@ -2,36 +2,17 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BiKirala | Sağlam</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiKirala | Sade</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    
     <style>
-        body { background-color: #f4f4f4; padding-bottom: 80px; font-family: sans-serif; }
-        
-        /* HEADER */
-        .header { background: #FFD000; padding: 15px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .logo { font-size: 22px; font-weight: 900; color: black; text-decoration: none; }
-        
-        /* KATEGORİLER */
-        .cat-scroll { overflow-x: auto; white-space: nowrap; padding: 10px; background: white; }
-        .cat-btn { display: inline-block; padding: 5px 15px; background: #eee; border-radius: 20px; margin-right: 5px; color: #333; text-decoration: none; font-weight: bold; font-size: 14px; cursor: pointer; }
-        .cat-btn.active { background: black; color: #FFD000; }
-
-        /* KARTLAR */
-        .card { border: none; border-radius: 10px; margin-bottom: 15px; background: white; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .card-img-top { height: 220px; object-fit: cover; }
-        .price-tag { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #FFD000; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
-
-        /* ALT MENÜ */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #ddd; z-index: 2000; }
-        .nav-item { text-align: center; color: #aaa; font-size: 10px; cursor: pointer; }
-        .nav-item i { font-size: 22px; display: block; margin-bottom: 3px; }
-        .nav-item.active { color: black; font-weight: bold; }
-        .add-btn { width: 50px; height: 50px; background: black; color: #FFD000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-top: -25px; border: 4px solid #f4f4f4; }
-
+        body { padding-bottom: 70px; background: #f4f4f4; font-family: sans-serif; }
+        .header { background: #FFD000; padding: 15px; position: sticky; top: 0; z-index: 1000; }
+        .card { margin-bottom: 15px; border: none; border-radius: 10px; overflow: hidden; }
+        .card-img-top { height: 200px; object-fit: cover; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; height: 60px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #ddd; }
         .page { display: none; }
         .page.active { display: block; }
     </style>
@@ -39,67 +20,40 @@
 <body>
 
     <div class="header d-flex justify-content-between align-items-center">
-        <div class="logo">bi<span>kirala</span></div>
-        <span class="badge bg-dark">TR</span>
-    </div>
-
-    <div class="cat-scroll">
-        <div class="cat-btn active" onclick="kategoriSec('Hepsi', this)">Tümü</div>
-        <div class="cat-btn" onclick="kategoriSec('Vasıta', this)">🚗 Vasıta</div>
-        <div class="cat-btn" onclick="kategoriSec('Elektronik', this)">💻 Elektronik</div>
-        <div class="cat-btn" onclick="kategoriSec('Emlak', this)">🏠 Emlak</div>
+        <h4 class="m-0 fw-bold">bi<span class="bg-dark text-white rounded px-1">kirala</span></h4>
     </div>
 
     <div class="container mt-3">
-        
-        <div id="page-vitrin" class="page active">
-            <input type="text" id="arama" class="form-control mb-3" placeholder="İlan ara..." onkeyup="listele()">
+        <div id="sayfa-vitrin" class="page active">
             <div id="ilan-listesi">
                 </div>
         </div>
 
-        <div id="page-profil" class="page text-center pt-5">
-            <div style="width:80px;height:80px;background:#ddd;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:30px;"><i class="fas fa-user"></i></div>
-            <h4>Misafir</h4>
-            <p>Üyelik sistemi yakında.</p>
-        </div>
-        <div id="page-mesaj" class="page pt-5 text-center"><h5>Mesajlar</h5><p>Kutun boş.</p></div>
-    </div>
-
-    <div class="modal fade" id="ilanModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">İlan Ver</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body">
-                    
-                    <div class="p-3 bg-light text-center border rounded mb-3" onclick="document.getElementById('resimInput').click()">
-                        <span id="resimBilgi">📸 Fotoğraf Ekle (Zorunlu)</span>
-                        <input type="file" id="resimInput" class="d-none" accept="image/*" onchange="fotoPresle(this)">
-                    </div>
-
-                    <textarea id="inpAciklama" class="form-control mb-3" rows="3" placeholder="Açıklama (Ürün detayları...)"></textarea>
-
-                    <input type="text" id="inpAd" class="form-control mb-2" placeholder="Başlık (Örn: PS5)">
-                    <input type="number" id="inpFiyat" class="form-control mb-2" placeholder="Fiyat (TL)">
-                    <input type="text" id="inpTel" class="form-control mb-2" placeholder="Tel (53X...)">
-                    <select id="inpKat" class="form-select mb-3">
-                        <option value="Elektronik">Elektronik</option>
-                        <option value="Vasıta">Vasıta</option>
-                        <option value="Emlak">Emlak</option>
-                    </select>
-
-                    <button onclick="ilanYayinla()" id="btnGonder" class="btn btn-dark w-100">YAYINLA</button>
-                </div>
-            </div>
+        <div id="sayfa-profil" class="page text-center pt-5">
+            <h3>Profil</h3>
+            <p>Sistem çalışıyor.</p>
         </div>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="sayfaGec('vitrin', this)"><i class="fas fa-home"></i>Vitrin</div>
-        <div class="nav-item" onclick="sayfaGec('mesaj', this)"><i class="fas fa-comment"></i>Mesaj</div>
-        <div class="nav-item" onclick="modalAc()"><div class="add-btn"><i class="fas fa-plus"></i></div></div>
-        <div class="nav-item"><i class="fas fa-heart"></i>Favori</div>
-        <div class="nav-item" onclick="sayfaGec('profil', this)"><i class="fas fa-user"></i>Profil</div>
+        <div onclick="sayfaGec('vitrin')"><i class="fas fa-home fs-4"></i></div>
+        <div onclick="modalAc()"><i class="fas fa-plus-circle fs-1 text-warning"></i></div>
+        <div onclick="sayfaGec('profil')"><i class="fas fa-user fs-4"></i></div>
+    </div>
+
+    <div class="modal fade" id="ilanModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">İlan Ver</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="file" id="resimInput" class="form-control mb-2">
+                    <input type="text" id="inpAd" class="form-control mb-2" placeholder="Başlık">
+                    <input type="number" id="inpFiyat" class="form-control mb-2" placeholder="Fiyat">
+                    <input type="text" id="inpTel" class="form-control mb-2" placeholder="Telefon">
+                    <button onclick="ilanYayinla()" class="btn btn-dark w-100">YAYINLA</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -107,93 +61,69 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <script>
-        // GLOBAL DEĞİŞKENLER
-        let tumIlanlar = [];
-        let aktifKategori = "Hepsi";
-        let seciliResim = null;
-        let db; 
-
-        // 1. BAŞLANGIÇ
-        window.onload = function() {
-            // Örnek ilan ile açılış yap (Site boş görünmesin)
-            tumIlanlar = [{ad: "Örnek İlan", fiyat: "100", kat: "Elektronik", resim: "https://via.placeholder.com/400x300", aciklama: "Sistem çalışıyor.", tel: "555"}];
-            listele();
-            firebaseBaslat();
+        const firebaseConfig = {
+            apiKey: "AIzaSyARO3eKpa058215Sdo3Dqf6U7uTr-z4pMM",
+            authDomain: "kiralagitsin-855c9.firebaseapp.com",
+            projectId: "kiralagitsin-855c9",
+            storageBucket: "kiralagitsin-855c9.firebasestorage.app",
+            messagingSenderId: "677047831958",
+            appId: "1:677047831958:web:82c4d37ee0055bfbafa1b7"
         };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        let seciliResim = "https://via.placeholder.com/300";
 
-        // 2. FIREBASE BAĞLAN
-        function firebaseBaslat() {
-            try {
-                const firebaseConfig = {
-                    apiKey: "AIzaSyARO3eKpa058215Sdo3Dqf6U7uTr-z4pMM",
-                    authDomain: "kiralagitsin-855c9.firebaseapp.com",
-                    projectId: "kiralagitsin-855c9",
-                    storageBucket: "kiralagitsin-855c9.firebasestorage.app",
-                    messagingSenderId: "677047831958",
-                    appId: "1:677047831958:web:82c4d37ee0055bfbafa1b7"
-                };
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.firestore();
-                
-                db.collection("ilanlar").orderBy("tarih", "desc").onSnapshot(snap => {
-                    tumIlanlar = [];
-                    snap.forEach(doc => {
-                        let d = doc.data();
-                        d.id = doc.id;
-                        tumIlanlar.push(d);
-                    });
-                    listele(); // Gerçek verileri bas
-                });
-            } catch (e) {
-                console.log("Bağlantı sorunu: " + e.message);
-            }
-        }
-
-        // 3. FOTOĞRAF SIKIŞTIRMA (PRESLME)
-        function fotoPresle(input) {
-            const file = input.files[0];
-            if(!file) return;
-            
-            document.getElementById('resimBilgi').innerText = "⏳ İşleniyor...";
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    // Boyutu Küçült (Max 600px)
-                    const maxWidth = 600;
-                    const scale = maxWidth / img.width;
-                    canvas.width = maxWidth;
-                    canvas.height = img.height * scale;
-                    
-                    // Çiz ve Sıkıştır (Kalite 0.5)
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    seciliResim = canvas.toDataURL('image/jpeg', 0.5);
-                    
-                    document.getElementById('resimBilgi').innerText = "✔ Fotoğraf Hazır";
-                    document.getElementById('resimBilgi').style.color = "green";
-                }
-                img.src = e.target.result;
-            }
-            reader.readAsDataURL(file);
-        }
-
-        // 4. LİSTELEME
-        function listele() {
+        // VERİLERİ DİNLE
+        db.collection("ilanlar").orderBy("tarih", "desc").onSnapshot(snap => {
             const div = document.getElementById("ilan-listesi");
-            const arama = document.getElementById("arama").value.toLowerCase();
             div.innerHTML = "";
-
-            const sonuc = tumIlanlar.filter(d => {
-                const katUygun = (aktifKategori === 'Hepsi') || (d.kategori === aktifKategori);
-                const aramaUygun = d.ad.toLowerCase().includes(arama);
-                return katUygun && aramaUygun;
+            snap.forEach(doc => {
+                const d = doc.data();
+                div.innerHTML += `
+                <div class="card">
+                    <img src="${d.resim}" class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="fw-bold">${d.ad}</h5>
+                        <p>${d.fiyat} TL</p>
+                        <a href="https://wa.me/90${d.tel}" class="btn btn-warning w-100">Kirala</a>
+                    </div>
+                </div>`;
             });
+        });
 
-            if(sonuc.length === 0) { div.innerHTML = "<p class='text-center mt-5 text-muted'>Sonuç yok.</p>"; return; }
+        // FOTOĞRAF ÇEVİR
+        document.getElementById('resimInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(evt) { seciliResim = evt.target.result; }
+            reader.readAsDataURL(file);
+        });
 
-            sonuc.forEach(d => {
-                const link = `https://wa.me/90${d.tel}?text=İlan: ${d.
+        // YAYINLA
+        function ilanYayinla() {
+            const ad = document.getElementById('inpAd').value;
+            const fiyat = document.getElementById('inpFiyat').value;
+            const tel = document.getElementById('inpTel').value;
+
+            if(!ad) { alert("Başlık yaz!"); return; }
+
+            db.collection("ilanlar").add({
+                ad: ad, fiyat: fiyat, tel: tel, resim: seciliResim, tarih: Date.now()
+            }).then(() => {
+                alert("Tamamdır!");
+                location.reload();
+            });
+        }
+
+        function sayfaGec(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('sayfa-' + id).classList.add('active');
+        }
+
+        function modalAc() {
+            new bootstrap.Modal(document.getElementById('ilanModal')).show();
+        }
+    </script>
+</body>
+</html>
