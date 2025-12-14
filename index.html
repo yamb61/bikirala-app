@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BiKirala | Zırhlı</title>
+    <title>BiKirala | Hatasız</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,9 +13,6 @@
         :root { --primary: #FFD000; --dark: #000000; --gold: #FFD700; }
         body { background-color: #f0f2f5; font-family: 'Inter', sans-serif; padding-bottom: 80px; }
         
-        /* HATA KUTUSU (DEBUG) */
-        #debug-box { display: none; position: fixed; top: 0; left: 0; width: 100%; background: red; color: white; z-index: 99999; padding: 10px; font-size: 12px; text-align: center; }
-
         /* NAVBAR */
         .navbar { background-color: var(--dark); padding: 15px 0; position: sticky; top: 0; z-index: 1000; }
         .navbar-brand { font-weight: 900; color: white !important; font-size: 24px; }
@@ -26,15 +23,8 @@
         .ad-img { height: 220px; width: 100%; object-fit: cover; }
         .vitrin-card { border: 2px solid var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
         .vitrin-badge { position: absolute; top: 10px; right: 10px; background: var(--primary); color: black; font-weight: bold; padding: 3px 10px; border-radius: 20px; font-size: 11px; z-index: 2; }
-
         .ad-price { font-size: 18px; font-weight: 800; color: var(--dark); }
         .ad-title { font-weight: 600; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .verified-badge { color: #1DA1F2; margin-left: 5px; font-size: 14px; }
-
-        /* SLIDER */
-        .carousel-item img { height: 400px; object-fit: cover; width: 100%; }
-        .photo-box { width: 80px; height: 80px; border: 2px dashed #ccc; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #f9f9f9; overflow: hidden; }
-        .photo-box img { width: 100%; height: 100%; object-fit: cover; }
 
         /* GENEL */
         .btn-primary-c { background-color: var(--primary); color: var(--dark); font-weight: bold; border: none; border-radius: 20px; padding: 8px 20px; }
@@ -47,5 +37,348 @@
         .sidebar { width: 260px; background: white; border-radius: 15px; padding: 20px; height: fit-content; display: none; }
         .cat-item { display: block; padding: 12px 15px; margin-bottom: 5px; color: #555; text-decoration: none; font-weight: 600; border-radius: 10px; }
         .cat-item.active { background: var(--dark); color: var(--primary); }
+
+        /* FOTOĞRAF KUTULARI */
+        .photo-box { width: 80px; height: 80px; border: 2px dashed #ccc; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #f9f9f9; overflow: hidden; }
+        .photo-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        @media (min-width: 992px) { .sidebar { display: block; } .bottom-nav { display: none; } }
         
-        @media (min-width: 992px) { .sidebar { display: block; } .
+        /* HATA GÖSTERİCİ */
+        #error-log { display: none; background: #ff4444; color: white; padding: 10px; text-align: center; position: fixed; top: 0; width: 100%; z-index: 99999; }
+        #loader { position: fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; display:flex; align-items:center; justify-content:center; }
+    </style>
+</head>
+<body>
+
+    <div id="error-log"></div>
+    <div id="loader"><div class="spinner-border text-warning" style="width: 3rem; height: 3rem;"></div></div>
+
+    <nav class="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="#">bi<span>kirala</span></a>
+            <div class="d-none d-md-block w-50">
+                <input type="text" class="form-control rounded-pill" placeholder="🔍 Ne arıyorsun?" onkeyup="searchAds(this.value)">
+            </div>
+            <div class="ms-auto d-flex align-items-center">
+                <div id="auth-buttons">
+                    <button class="btn btn-outline-light btn-sm rounded-pill me-2" onclick="modalOpen('loginModal')">Giriş</button>
+                    <button class="btn btn-primary-c btn-sm" onclick="modalOpen('registerModal')">Kayıt</button>
+                </div>
+                <div id="user-info" class="d-none text-white d-flex align-items-center">
+                    <span id="nav-user" class="me-3 small fw-bold"></span>
+                    <button class="btn btn-outline-light btn-sm rounded-circle" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-3 d-block d-md-none">
+        <input type="text" class="form-control rounded-pill border-0 shadow-sm" placeholder="🔍 İlan ara..." onkeyup="searchAds(this.value)">
+    </div>
+
+    <div class="container main-wrapper">
+        <div class="sidebar">
+            <h6 class="fw-bold mb-3 ms-2">KATEGORİLER</h6>
+            <a href="#" class="cat-item active" onclick="filterCat('Hepsi', this)">Tümü</a>
+            <a href="#" class="cat-item" onclick="filterCat('Araba', this)">🚗 Araba</a>
+            <a href="#" class="cat-item" onclick="filterCat('Emlak', this)">🏠 Emlak</a>
+            <a href="#" class="cat-item" onclick="filterCat('Teknoloji', this)">💻 Teknoloji</a>
+            <a href="#" class="cat-item" onclick="filterCat('Giysi', this)">👕 Giysi</a>
+        </div>
+
+        <div class="content flex-grow-1">
+            <div id="page-home" class="page-section">
+                <div class="row" id="ads-container"></div>
+            </div>
+            <div id="page-fav" class="page-section d-none text-center pt-5">
+                <h4>Favoriler</h4><div id="fav-container" class="row mt-4"></div>
+            </div>
+            <div id="page-account" class="page-section d-none text-center pt-5">
+                <div style="width:100px; height:100px; background:var(--dark); color:var(--primary); border-radius:50%; margin:0 auto 20px; display:flex; align-items:center; justify-content:center; font-size:40px;"><i class="fas fa-user"></i></div>
+                <h3 id="profile-name">Misafir</h3>
+                <p id="profile-email" class="text-muted small">...</p>
+                <div id="verified-tag" class="d-none text-primary fw-bold mb-3"><i class="fas fa-check-circle"></i> Onaylı Hesap</div>
+                <div id="user-actions" class="d-none">
+                    <button id="admin-btn" onclick="openAdminPanel()" class="btn btn-danger w-75 mb-2 d-none">👑 YÖNETİCİ PANELİ</button><br>
+                    <button onclick="modalOpen('editProfileModal')" class="btn btn-outline-dark mb-2">Profili Düzenle</button><br>
+                    <button onclick="modalOpen('postModal')" class="btn btn-warning mb-2 fw-bold">İlan Ver</button><br>
+                    <button onclick="logout()" class="btn btn-dark">Çıkış Yap</button>
+                </div>
+                <button id="guest-login-btn" onclick="modalOpen('loginModal')" class="btn btn-warning fw-bold">Giriş Yap</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-icon active" onclick="switchPage('home', this)"><i class="fas fa-home"></i> Vitrin</div>
+        <div class="nav-icon" onclick="switchPage('fav', this)"><i class="fas fa-heart"></i> Favori</div>
+        <div class="nav-icon" onclick="checkAuthForPost()"><i class="fas fa-plus-circle" style="font-size: 35px; margin-top:-15px; color:var(--primary); background:black; border-radius:50%;"></i></div>
+        <div class="nav-icon" onclick="switchPage('account', this)"><i class="fas fa-user"></i> Hesabım</div>
+    </div>
+
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 rounded-4">
+                <div class="modal-body p-0">
+                    <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white p-2" data-bs-dismiss="modal" style="z-index:10;"></button>
+                    <div id="adCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner" id="carousel-slides"></div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#adCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#adCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+                    </div>
+                    <div class="p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-warning text-dark" id="d-cat">Kat</span>
+                            <div id="d-stars" class="text-warning small"></div>
+                        </div>
+                        <h3 class="fw-bold mt-2" id="d-title">Başlık</h3>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="text-muted small me-2" id="d-seller">Satıcı</span>
+                            <span id="d-verified" class="verified-badge d-none"><i class="fas fa-check-circle"></i></span>
+                        </div>
+                        <h2 class="text-primary fw-bold" id="d-price">0 TL</h2>
+                        <hr>
+                        <p class="text-muted" id="d-desc">...</p>
+                        
+                        <div class="bg-light p-3 rounded mb-3">
+                            <h6 class="fw-bold">Yorumlar</h6>
+                            <div id="review-list" class="mb-2 small text-muted">Henüz yorum yok.</div>
+                            <button onclick="openReviewModal()" class="btn btn-sm btn-outline-dark w-100">Yorum Yap</button>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a id="d-call" href="#" class="btn btn-dark flex-grow-1"><i class="fas fa-phone"></i> ARA</a>
+                            <button onclick="startChat()" class="btn btn-warning flex-grow-1 fw-bold">MESAJ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="postModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold">İlan Ver</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><p class="small text-muted text-center">3 adete kadar fotoğraf yükle.</p><div class="d-flex justify-content-center gap-2 mb-3"><div class="photo-box" onclick="triggerFile(1)"><img id="preview1" src="" class="d-none"><span id="plus1">+</span></div><div class="photo-box" onclick="triggerFile(2)"><img id="preview2" src="" class="d-none"><span id="plus2">+</span></div><div class="photo-box" onclick="triggerFile(3)"><img id="preview3" src="" class="d-none"><span id="plus3">+</span></div></div><input type="file" id="file1" class="d-none" onchange="previewImg(this, 1)"><input type="file" id="file2" class="d-none" onchange="previewImg(this, 2)"><input type="file" id="file3" class="d-none" onchange="previewImg(this, 3)"><input type="text" id="p-title" class="form-control mb-2" placeholder="Başlık"><input type="number" id="p-price" class="form-control mb-2" placeholder="Fiyat"><select id="p-cat" class="form-select mb-2"><option>Araba</option><option>Emlak</option><option>Teknoloji</option><option>Giysi</option></select><textarea id="p-desc" class="form-control mb-2" rows="3" placeholder="Açıklama"></textarea><input type="text" id="p-tel" class="form-control mb-3" placeholder="Telefon"><button onclick="postAd()" id="btnPost" class="btn btn-dark w-100 fw-bold">YAYINLA</button></div></div></div></div>
+    
+    <div class="modal fade" id="reviewModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content p-3 text-center"><h6>Puan Ver</h6><div class="mb-2 fs-3 text-warning"><i class="far fa-star" onclick="setRate(1)"></i><i class="far fa-star" onclick="setRate(2)"></i><i class="far fa-star" onclick="setRate(3)"></i><i class="far fa-star" onclick="setRate(4)"></i><i class="far fa-star" onclick="setRate(5)"></i></div><textarea id="review-txt" class="form-control mb-2" placeholder="Yorumun..."></textarea><button onclick="submitReview()" class="btn btn-success w-100">GÖNDER</button></div></div></div>
+    
+    <div class="modal fade" id="adminModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 class="modal-title">Yönetici Paneli</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body" id="admin-list"></div></div></div></div>
+    <div class="modal fade" id="editProfileModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content p-3"><h6>Profili Düzenle</h6><input type="text" id="edit-name" class="form-control mb-2" placeholder="Ad Soyad"><button onclick="saveProfile()" class="btn btn-dark w-100">KAYDET</button></div></div></div>
+    <div class="modal fade" id="loginModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content p-4 text-center"><h4>Giriş</h4><button onclick="googleLogin()" class="btn btn-outline-dark w-100 mb-2"><i class="fab fa-google"></i> Google</button><input id="l-mail" class="form-control mb-2" placeholder="Mail"><input type="password" id="l-pass" class="form-control mb-2" placeholder="Şifre"><button onclick="login()" class="btn btn-warning w-100 fw-bold">GİRİŞ</button></div></div></div>
+    <div class="modal fade" id="registerModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content p-4 text-center"><h4>Kayıt</h4><input id="r-mail" class="form-control mb-2" placeholder="Mail"><input type="password" id="r-pass" class="form-control mb-2" placeholder="Şifre"><button onclick="register()" class="btn btn-dark w-100 fw-bold">KAYIT</button></div></div></div>
+    <div class="modal fade" id="chatWindowModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-dark text-white"><h6 class="m-0" id="chat-receiver-name">Sohbet</h6><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><div id="chat-history" class="chat-box" style="height:300px;overflow-y:auto;background:#f9f9f9;padding:10px;margin-bottom:10px;"></div><div class="input-group"><input type="text" id="msg-input" class="form-control" placeholder="Mesaj..."><button onclick="sendMessage()" class="btn btn-warning fw-bold">GÖNDER</button></div></div></div></div></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // ============================================
+        // 1. ADMIN E-POSTA ADRESİNİ BURAYA YAZ:
+        const ADMINS = ["emeebabaoglu61@gmail.com"]; 
+        // ============================================
+
+        // HATA YAKALAYICI (BEYAZ EKRAN ÖNLEYİCİ)
+        window.onerror = function(msg) {
+            document.getElementById('error-log').style.display = 'block';
+            document.getElementById('error-log').innerText = "HATA: " + msg;
+            document.getElementById('loader').style.display = 'none';
+        };
+
+        // YÜKLEME KORUMASI (4 sn sonra kapanır)
+        setTimeout(() => document.getElementById('loader').style.display='none', 4000);
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyARO3eKpa058215Sdo3Dqf6U7uTr-z4pMM",
+            authDomain: "kiralagitsin-855c9.firebaseapp.com",
+            projectId: "kiralagitsin-855c9",
+            storageBucket: "kiralagitsin-855c9.firebasestorage.app",
+            messagingSenderId: "677047831958",
+            appId: "1:677047831958:web:82c4d37ee0055bfbafa1b7"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let currentUser = null;
+        let allAds = [];
+        let currentAd = null;
+        let uploadFiles = [null, null, null];
+        let currentRate = 0;
+        let currentChatId = null;
+
+        auth.onAuthStateChanged(user => {
+            document.getElementById('loader').style.display = 'none';
+            currentUser = user;
+            updateUI();
+        });
+
+        function updateUI() {
+            if(currentUser) {
+                document.getElementById('auth-buttons').classList.add('d-none');
+                document.getElementById('user-info').classList.remove('d-none');
+                document.getElementById('nav-user').innerText = currentUser.displayName || currentUser.email.split('@')[0];
+                document.getElementById('profile-name').innerText = currentUser.displayName || "Kullanıcı";
+                document.getElementById('profile-email').innerText = currentUser.email;
+                document.getElementById('user-actions').classList.remove('d-none');
+                document.getElementById('guest-login-btn').classList.add('d-none');
+                if(ADMINS.includes(currentUser.email)) document.getElementById('admin-btn').classList.remove('d-none');
+                db.collection("users").doc(currentUser.uid).get().then(doc => {
+                    if(doc.exists && doc.data().verified) document.getElementById('verified-tag').classList.remove('d-none');
+                });
+            } else {
+                document.getElementById('auth-buttons').classList.remove('d-none');
+                document.getElementById('user-info').classList.add('d-none');
+                document.getElementById('user-actions').classList.add('d-none');
+                document.getElementById('guest-login-btn').classList.remove('d-none');
+            }
+        }
+
+        // İLANLARI GETİR (HATA KORUMALI)
+        db.collection("ilanlar").orderBy("vitrin", "desc").orderBy("tarih", "desc").onSnapshot(snap => {
+            allAds = [];
+            snap.forEach(doc => { let d = doc.data(); d.id = doc.id; allAds.push(d); });
+            renderAds(allAds);
+        });
+
+        function renderAds(list) {
+            const container = document.getElementById('ads-container');
+            container.innerHTML = "";
+            list.forEach(ad => {
+                // ÇÖKME ÖNLEYİCİ: Veri eksikse varsayılan değer ata
+                const title = ad.baslik || ad.ad || "İsimsiz";
+                const images = ad.resimler || (ad.resim ? [ad.resim] : ["https://via.placeholder.com/300"]);
+                const thumb = images[0];
+                const vitrinClass = ad.vitrin ? "vitrin-card" : "";
+                const vitrinBadge = ad.vitrin ? '<div class="vitrin-badge">🔥 FIRSAT</div>' : '';
+
+                container.innerHTML += `
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="ad-card ${vitrinClass}" onclick="openDetail('${ad.id}')">
+                        ${vitrinBadge}
+                        <img src="${thumb}" class="ad-img">
+                        <div class="p-2">
+                            <div class="ad-price">${ad.fiyat} TL</div>
+                            <div class="ad-title">${title}</div>
+                            <small class="text-muted"><i class="fas fa-map-marker-alt"></i> TR</small>
+                            ${ad.verified ? '<small class="text-primary"><i class="fas fa-check-circle"></i></small>' : ''}
+                        </div>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function openDetail(id) {
+            currentAd = allAds.find(x => x.id === id);
+            
+            // KORUMALI VERİ OKUMA
+            const title = currentAd.baslik || currentAd.ad || "İsimsiz";
+            const price = currentAd.fiyat || "0";
+            const cat = currentAd.kategori || "Genel";
+            const desc = currentAd.aciklama || "Açıklama yok.";
+            const userEmail = currentAd.userEmail || "Bilinmiyor";
+            const images = currentAd.resimler || (currentAd.resim ? [currentAd.resim] : ["https://via.placeholder.com/300"]);
+
+            document.getElementById('d-title').innerText = title;
+            document.getElementById('d-price').innerText = price + " TL";
+            document.getElementById('d-cat').innerText = cat;
+            document.getElementById('d-desc').innerText = desc;
+            document.getElementById('d-seller').innerText = userEmail.split('@')[0];
+            document.getElementById('d-call').href = "tel:" + (currentAd.tel || "");
+
+            let slides = "";
+            images.forEach((img, index) => {
+                const active = index === 0 ? "active" : "";
+                slides += `<div class="carousel-item ${active}"><img src="${img}"></div>`;
+            });
+            document.getElementById('carousel-slides').innerHTML = slides;
+
+            if(currentAd.verified) document.getElementById('d-verified').classList.remove('d-none');
+            else document.getElementById('d-verified').classList.add('d-none');
+
+            loadReviews(id);
+            new bootstrap.Modal(document.getElementById('detailModal')).show();
+        }
+
+        function triggerFile(idx) { document.getElementById('file' + idx).click(); }
+        function previewImg(input, idx) {
+            const file = input.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const scale = 800 / img.width;
+                    canvas.width = 800;
+                    canvas.height = img.height * scale;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const base64 = canvas.toDataURL('image/jpeg', 0.6);
+                    uploadFiles[idx-1] = base64;
+                    document.getElementById('preview'+idx).src = base64;
+                    document.getElementById('preview'+idx).classList.remove('d-none');
+                    document.getElementById('plus'+idx).classList.add('d-none');
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function postAd() {
+            if(!currentUser) { alert("Giriş yap!"); return; }
+            const validImages = uploadFiles.filter(f => f !== null);
+            if(validImages.length === 0) { alert("En az 1 fotoğraf!"); return; }
+            
+            const btn = document.getElementById('btnPost');
+            btn.innerText = "Yükleniyor..."; btn.disabled = true;
+
+            db.collection("users").doc(currentUser.uid).get().then(doc => {
+                const isVerified = doc.exists ? doc.data().verified : false;
+                db.collection("ilanlar").add({
+                    baslik: document.getElementById('p-title').value,
+                    fiyat: document.getElementById('p-price').value,
+                    kategori: document.getElementById('p-cat').value,
+                    aciklama: document.getElementById('p-desc').value,
+                    tel: document.getElementById('p-tel').value,
+                    resimler: validImages,
+                    resim: validImages[0], 
+                    userId: currentUser.uid,
+                    userEmail: currentUser.email,
+                    verified: isVerified,
+                    vitrin: false,
+                    tarih: Date.now()
+                }).then(() => { alert("Yayında!"); location.reload(); });
+            });
+        }
+
+        function openReviewModal() { 
+            if(!currentUser) { alert("Giriş yap."); return; }
+            new bootstrap.Modal(document.getElementById('reviewModal')).show(); 
+        }
+        function setRate(n) { currentRate = n; alert(n + " Yıldız"); }
+        function submitReview() {
+            const txt = document.getElementById('review-txt').value;
+            db.collection("yorumlar").add({ adId: currentAd.id, text: txt, rate: currentRate, user: currentUser.email.split('@')[0], date: Date.now() })
+            .then(() => { alert("Yorum eklendi!"); bootstrap.Modal.getInstance(document.getElementById('reviewModal')).hide(); loadReviews(currentAd.id); });
+        }
+        function loadReviews(adId) {
+            db.collection("yorumlar").where("adId", "==", adId).get().then(snap => {
+                const div = document.getElementById('review-list');
+                div.innerHTML = "";
+                let totalRate = 0; let count = 0;
+                snap.forEach(doc => {
+                    const r = doc.data();
+                    div.innerHTML += `<div class="border-bottom p-1"><strong>${r.user}</strong> (${r.rate}★): ${r.text}</div>`;
+                    totalRate += r.rate; count++;
+                });
+                let starsHtml = "";
+                const avg = count > 0 ? Math.round(totalRate/count) : 0;
+                for(let i=0; i<5; i++) starsHtml += `<i class="fa${i<avg?'s':'r'} fa-star ${i<avg?'text-warning':''}"></i>`;
+                document.getElementById('d-stars').innerHTML = starsHtml + ` <small>(${count})</small>`;
+            }).catch(e => console.log("Yorum yok"));
+        }
+
+        function saveProfile() { currentUser.updateProfile({ displayName: document.getElementById('edit-name').value }).then(() => location.reload()); }
+        function openAdminPanel() {
+            new bootstrap.Modal(document.getElementById('adminModal')).show();
+            const listDiv = document.getElementById('admin-list');
