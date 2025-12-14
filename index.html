@@ -2,184 +2,460 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BiKirala | Stabil</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiKirala - Siyahın Asaleti, Sarının Enerjisi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* TEMEL RENKLER VE AYARLAR */
-        :root { --main-color: #FFD000; --dark-color: #000000; }
-        body { background-color: #f4f4f4; padding-bottom: 80px; font-family: sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+        body { font-family: 'Roboto', sans-serif; }
         
-        /* NAVBAR (ÜST KISIM) */
-        .navbar { background-color: var(--dark-color); padding: 15px; position: sticky; top: 0; z-index: 1000; }
-        .brand { font-size: 24px; font-weight: 900; color: white; text-decoration: none; }
-        .brand span { color: var(--main-color); }
+        /* Tema Renkleri */
+        .theme-dark { background-color: #1a1a1a; }
+        .theme-yellow { color: #FFD700; }
+        .bg-theme-yellow { background-color: #FFD700; color: #000; }
+        .border-theme-yellow { border-color: #FFD700; }
         
-        /* KATEGORİLER (SOL MENÜ) */
-        .wrapper { display: flex; margin-top: 20px; gap: 20px; padding: 0 15px; }
-        .sidebar { width: 250px; background: white; padding: 20px; border-radius: 10px; height: fit-content; display: none; }
-        .cat-btn { display: block; padding: 10px; color: #333; text-decoration: none; font-weight: bold; border-radius: 5px; margin-bottom: 5px; }
-        .cat-btn:hover, .cat-btn.active { background: var(--dark-color); color: var(--main-color); }
-
-        /* İÇERİK VE KARTLAR */
-        .content { flex: 1; }
-        .card { border: none; border-radius: 10px; overflow: hidden; margin-bottom: 20px; background: white; cursor: pointer; transition: 0.2s; }
-        .card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .card-img-top { height: 200px; object-fit: cover; }
-        .price-badge { font-size: 18px; font-weight: 800; color: var(--dark-color); }
-        
-        /* ALT MENÜ (MOBİL) */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 60px; background: var(--dark-color); display: flex; justify-content: space-around; align-items: center; z-index: 2000; border-top: 4px solid var(--main-color); }
-        .nav-item { color: #888; text-align: center; font-size: 10px; cursor: pointer; flex: 1; }
-        .nav-item i { font-size: 20px; margin-bottom: 3px; display: block; }
-        .nav-item.active { color: var(--main-color); font-weight: bold; }
-
-        /* MASAÜSTÜ GÖRÜNÜMÜ AYARI */
-        @media (min-width: 768px) { 
-            .sidebar { display: block; } 
-            .bottom-nav { display: none; } 
-        }
-
-        /* HATA KUTUSU (GİZLİ) */
-        #error-box { display:none; position:fixed; top:0; left:0; width:100%; background:red; color:white; padding:10px; text-align:center; z-index:99999; }
+        /* Modal Geçiş Efektleri */
+        .modal { transition: opacity 0.25s ease; }
+        body.modal-active { overflow-x: hidden; overflow-y: hidden !important; }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 text-gray-800 pb-20 md:pb-0">
 
-    <div id="error-box"></div>
+    <header class="theme-dark text-white sticky top-0 z-50 shadow-lg border-b-4 border-yellow-400">
+        <div class="container mx-auto px-4 h-20 flex justify-between items-center">
+            
+            <a href="#" class="text-3xl font-bold tracking-tighter flex items-center gap-2">
+                <span class="bg-theme-yellow px-2 rounded text-black">Bi</span><span class="text-white">Kirala</span>
+            </a>
 
-    <div class="navbar d-flex justify-content-between align-items-center">
-        <a href="#" class="brand">bi<span>kirala</span></a>
+            <div class="hidden md:flex flex-1 mx-10 max-w-2xl relative">
+                <input type="text" placeholder="Kelime, ilan no veya mağaza adı ile ara..." class="w-full py-3 px-4 rounded-l-md text-gray-800 outline-none focus:ring-2 focus:ring-yellow-400">
+                <button class="bg-theme-yellow px-6 rounded-r-md font-bold hover:bg-yellow-500 transition">
+                    <i class="fa-solid fa-search"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div id="auth-buttons" class="hidden md:flex items-center gap-4 text-sm font-medium">
+                    <button onclick="toggleModal('login-modal')" class="hover:text-yellow-400 transition">Giriş Yap</button>
+                    <span class="text-gray-500">|</span>
+                    <button onclick="toggleModal('register-modal')" class="hover:text-yellow-400 transition">Kayıt Ol</button>
+                </div>
+
+                <div id="user-menu" class="hidden flex items-center gap-3">
+                    <div class="text-right leading-tight hidden md:block">
+                        <div class="text-xs text-gray-400">Hoşgeldin</div>
+                        <div class="font-bold text-yellow-400">Ahmet Y.</div>
+                    </div>
+                    <img src="https://i.pravatar.cc/150?img=11" class="w-10 h-10 rounded-full border-2 border-yellow-400 cursor-pointer" onclick="toggleModal('profile-modal')">
+                </div>
+
+                <button onclick="checkLoginForAd()" class="bg-theme-yellow px-5 py-2 rounded font-bold shadow-lg hover:bg-yellow-500 transition flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> <span class="hidden md:inline">Ücretsiz İlan Ver</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="md:hidden bg-gray-800 p-2">
+        <div class="flex relative">
+            <input type="text" placeholder="Ne arıyorsun?" class="w-full py-2 px-3 rounded text-sm outline-none">
+            <button class="absolute right-0 top-0 h-full px-3 text-gray-500"><i class="fa-solid fa-search"></i></button>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-6 flex gap-6">
         
-        <div id="auth-section">
-            <button class="btn btn-outline-light btn-sm" onclick="modalAc('loginModal')">Giriş Yap</button>
-            <button class="btn btn-warning btn-sm fw-bold" onclick="modalAc('registerModal')">Kayıt Ol</button>
-        </div>
-        <div id="profile-section" class="d-none">
-            <span class="text-white small me-2" id="user-display"></span>
-            <button class="btn btn-light btn-sm rounded-circle" onclick="cikisYap()"><i class="fas fa-sign-out-alt"></i></button>
-        </div>
-    </div>
+        <aside class="hidden md:block w-64 flex-shrink-0">
+            <div class="bg-white shadow rounded border border-gray-200 overflow-hidden">
+                <div class="bg-gray-100 p-3 font-bold text-gray-700 border-b">Kategoriler</div>
+                <ul class="text-sm">
+                    <li class="border-b hover:bg-yellow-50 cursor-pointer p-3 flex justify-between items-center group">
+                        <span><i class="fa-solid fa-home w-6 text-gray-400 group-hover:text-yellow-600"></i> Emlak</span> <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i>
+                    </li>
+                    <li class="border-b hover:bg-yellow-50 cursor-pointer p-3 flex justify-between items-center group">
+                        <span><i class="fa-solid fa-car w-6 text-gray-400 group-hover:text-yellow-600"></i> Vasıta</span> <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i>
+                    </li>
+                    <li class="border-b hover:bg-yellow-50 cursor-pointer p-3 flex justify-between items-center group">
+                        <span><i class="fa-solid fa-laptop w-6 text-gray-400 group-hover:text-yellow-600"></i> Elektronik</span> <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i>
+                    </li>
+                    <li class="hover:bg-yellow-50 cursor-pointer p-3 flex justify-between items-center group">
+                        <span><i class="fa-solid fa-couch w-6 text-gray-400 group-hover:text-yellow-600"></i> Ev Eşyası</span> <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="mt-4 bg-theme-yellow p-4 rounded text-center shadow-lg cursor-pointer">
+                <h3 class="font-bold text-black">Günün Fırsatı</h3>
+                <p class="text-sm mb-2">Acil Satılık Villa!</p>
+                <button class="bg-black text-white text-xs px-3 py-1 rounded">İncele</button>
+            </div>
+        </aside>
 
-    <div class="wrapper">
-        <div class="sidebar">
-            <h5 class="fw-bold mb-3">Kategoriler</h5>
-            <a href="#" class="cat-btn active" onclick="kategoriSec('Hepsi', this)">Tümü</a>
-            <a href="#" class="cat-btn" onclick="kategoriSec('Vasıta', this)">🚗 Vasıta</a>
-            <a href="#" class="cat-btn" onclick="kategoriSec('Emlak', this)">🏠 Emlak</a>
-            <a href="#" class="cat-btn" onclick="kategoriSec('Teknoloji', this)">💻 Teknoloji</a>
-            <a href="#" class="cat-btn" onclick="kategoriSec('Giysi', this)">👕 Giysi</a>
-        </div>
+        <main class="flex-1">
+            
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-star text-yellow-500"></i> BiKirala Vitrin</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white border-2 border-yellow-400 rounded shadow hover:shadow-xl transition cursor-pointer relative group">
+                    <div class="absolute top-0 left-0 bg-yellow-400 text-xs font-bold px-2 py-1 z-10">VİTRİN</div>
+                    <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-40 object-cover">
+                    <div class="p-3">
+                        <h3 class="font-bold text-gray-800 truncate">Sahibinden Temiz Villa</h3>
+                        <p class="text-sm text-gray-500">İstanbul, Sarıyer</p>
+                        <div class="text-red-600 font-bold mt-2">15.000 TL</div>
+                    </div>
+                    <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition duration-300">
+                         <button onclick="showPhone('0532 555 55 55')" class="bg-green-500 text-white p-2 rounded-full hover:bg-green-600" title="Ara"><i class="fa-solid fa-phone"></i></button>
+                         <button class="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600" title="Mesaj At"><i class="fa-solid fa-comment"></i></button>
+                    </div>
+                </div>
 
-        <div class="content">
-            <div id="sayfa-vitrin" class="page-section">
-                <input type="text" class="form-control mb-3" placeholder="🔍 İlan ara..." onkeyup="aramaYap(this.value)">
-                <div class="row" id="ilan-listesi">
-                    <p class="text-center mt-5 text-muted">Yükleniyor...</p>
+                <div class="bg-white border-2 border-yellow-400 rounded shadow hover:shadow-xl transition cursor-pointer relative group">
+                    <div class="absolute top-0 left-0 bg-red-600 text-white text-xs font-bold px-2 py-1 z-10">ACİL</div>
+                    <img src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-40 object-cover">
+                    <div class="p-3">
+                        <h3 class="font-bold text-gray-800 truncate">Haftalık Audi A3</h3>
+                        <p class="text-sm text-gray-500">Ankara, Çankaya</p>
+                        <div class="text-red-600 font-bold mt-2">2.500 TL <span class="text-xs text-gray-400">/gün</span></div>
+                    </div>
                 </div>
             </div>
 
-            <div id="sayfa-hesap" class="page-section d-none text-center pt-5">
-                <i class="fas fa-user-circle fa-4x mb-3 text-secondary"></i>
-                <h3 id="hesap-baslik">Misafir</h3>
-                <div id="hesap-butonlar" class="d-none mt-3">
-                    <button id="btn-admin" class="btn btn-danger w-50 mb-2 d-none" onclick="adminPaneliAc()">YÖNETİCİ PANELİ</button><br>
-                    <button class="btn btn-warning w-50 mb-2" onclick="modalAc('ilanModal')">İlan Ver</button><br>
-                    <button class="btn btn-dark w-50" onclick="cikisYap()">Çıkış</button>
+            <h2 class="text-xl font-bold mb-4 border-b pb-2">Son Eklenen İlanlar</h2>
+            <div class="grid grid-cols-1 md:grid-cols-1 gap-2">
+                <div class="bg-white p-2 border hover:bg-gray-50 flex gap-4 cursor-pointer items-center">
+                    <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" class="w-32 h-24 object-cover rounded border">
+                    <div class="flex-1">
+                        <h3 class="font-bold text-blue-800 text-lg">Profesyonel Sony Kamera Seti Kiralık</h3>
+                        <p class="text-sm text-gray-500 mt-1">İzmir > Karşıyaka > Fotoğrafçılık</p>
+                        <p class="text-xs text-gray-400 mt-2">İlan No: 1029384</p>
+                    </div>
+                    <div class="text-right px-4">
+                        <div class="font-bold text-xl text-black">850 TL</div>
+                        <div class="text-xs text-gray-400">15 Aralik 2025</div>
+                        <button class="mt-2 bg-theme-yellow text-xs px-3 py-1 rounded font-bold hover:bg-yellow-500">Mesaj At</button>
+                    </div>
                 </div>
-                <div id="misafir-butonlar" class="mt-3">
-                    <button class="btn btn-dark w-50" onclick="modalAc('loginModal')">Giriş Yap</button>
+                
+                 <div class="bg-white p-2 border hover:bg-gray-50 flex gap-4 cursor-pointer items-center">
+                    <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" class="w-32 h-24 object-cover rounded border">
+                    <div class="flex-1">
+                        <h3 class="font-bold text-blue-800 text-lg">Günlük Kiralık Modern Koltuk Takımı</h3>
+                        <p class="text-sm text-gray-500 mt-1">İstanbul > Kadıköy > Eşya</p>
+                        <p class="text-xs text-gray-400 mt-2">İlan No: 992831</p>
+                    </div>
+                    <div class="text-right px-4">
+                        <div class="font-bold text-xl text-black">400 TL</div>
+                        <div class="text-xs text-gray-400">14 Aralik 2025</div>
+                        <button class="mt-2 bg-theme-yellow text-xs px-3 py-1 rounded font-bold hover:bg-yellow-500">Mesaj At</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div class="md:hidden fixed bottom-0 w-full bg-gray-900 border-t-2 border-yellow-400 flex justify-around py-3 text-gray-400 text-xs z-50">
+        <a href="#" class="flex flex-col items-center text-yellow-400">
+            <i class="fa-solid fa-home text-lg"></i>
+            <span>Vitrin</span>
+        </a>
+        <a href="#" class="flex flex-col items-center hover:text-white">
+            <i class="fa-solid fa-search text-lg"></i>
+            <span>Ara</span>
+        </a>
+        <button onclick="checkLoginForAd()" class="flex flex-col items-center -mt-8">
+            <div class="bg-theme-yellow text-black rounded-full w-14 h-14 flex items-center justify-center border-4 border-gray-900 shadow-lg">
+                <i class="fa-solid fa-plus text-2xl"></i>
+            </div>
+            <span class="mt-1 font-bold text-white">İlan Ver</span>
+        </button>
+        <a href="#" class="flex flex-col items-center hover:text-white">
+            <i class="fa-solid fa-comment-dots text-lg"></i>
+            <span>Mesajlar</span>
+        </a>
+        <a onclick="toggleModal('profile-modal')" class="flex flex-col items-center hover:text-white cursor-pointer">
+            <i class="fa-solid fa-user text-lg"></i>
+            <span>Profilim</span>
+        </a>
+    </div>
+
+    <div id="login-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="modal-overlay absolute w-full h-full bg-black opacity-75" onclick="toggleModal('login-modal')"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
+            <div class="modal-content py-4 text-left px-6">
+                <div class="flex justify-between items-center pb-3">
+                    <p class="text-2xl font-bold text-gray-900">Giriş Yap</p>
+                    <div class="cursor-pointer z-50" onclick="toggleModal('login-modal')">
+                        <i class="fa-solid fa-times"></i>
+                    </div>
+                </div>
+                <form onsubmit="event.preventDefault(); loginUser();">
+                    <input class="w-full border p-3 rounded mb-4" type="email" placeholder="E-posta Adresi" required>
+                    <input class="w-full border p-3 rounded mb-2" type="password" placeholder="Şifre" required>
+                    <div class="text-right mb-4">
+                        <a href="#" onclick="toggleModal('login-modal'); toggleModal('forgot-modal')" class="text-sm text-blue-600 hover:underline">Şifremi Unuttum?</a>
+                    </div>
+                    <button class="w-full bg-theme-yellow text-black font-bold p-3 rounded hover:bg-yellow-500">Giriş Yap</button>
+                </form>
+                <div class="mt-4 text-center text-sm">
+                    Hesabın yok mu? <a href="#" onclick="toggleModal('login-modal'); toggleModal('register-modal')" class="text-blue-600 font-bold">Kayıt Ol</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="sayfaGec('vitrin', this)"><i class="fas fa-home"></i>Vitrin</div>
-        <div class="nav-item" onclick="kontrolIlanVer()"><i class="fas fa-plus-circle" style="font-size:35px; color:#FFD000; margin-top:-15px; background:black; border-radius:50%;"></i></div>
-        <div class="nav-item" onclick="sayfaGec('hesap', this)"><i class="fas fa-user"></i>Hesabım</div>
+    <div id="register-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="modal-overlay absolute w-full h-full bg-black opacity-75" onclick="toggleModal('register-modal')"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
+            <div class="modal-content py-4 text-left px-6">
+                <div class="flex justify-between items-center pb-3">
+                    <p class="text-2xl font-bold">BiKirala'ya Üye Ol</p>
+                    <div class="cursor-pointer" onclick="toggleModal('register-modal')"><i class="fa-solid fa-times"></i></div>
+                </div>
+                <form onsubmit="event.preventDefault(); registerUser();">
+                    <div class="flex gap-2 mb-4">
+                        <input class="w-1/2 border p-3 rounded" type="text" placeholder="Ad" required>
+                        <input class="w-1/2 border p-3 rounded" type="text" placeholder="Soyad" required>
+                    </div>
+                    <input class="w-full border p-3 rounded mb-4" type="email" placeholder="E-posta" required>
+                    <input class="w-full border p-3 rounded mb-4" type="tel" placeholder="Telefon (05..)" required>
+                    <input class="w-full border p-3 rounded mb-4" type="password" placeholder="Şifre" required>
+                    <button class="w-full bg-gray-900 text-white font-bold p-3 rounded hover:bg-gray-800">Ücretsiz Kayıt Ol</button>
+                </form>
+            </div>
+        </div>
     </div>
 
-    <div class="modal fade" id="ilanModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">İlan Ver</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body">
-        <div class="p-3 bg-light text-center border rounded mb-3" onclick="document.getElementById('resimInp').click()"><span id="resimTxt">📸 Fotoğraf Ekle</span><input type="file" id="resimInp" class="d-none" onchange="resimOnizle(this)"></div>
-        <input type="text" id="i-baslik" class="form-control mb-2" placeholder="Başlık">
-        <input type="number" id="i-fiyat" class="form-control mb-2" placeholder="Fiyat">
-        <select id="i-kat" class="form-select mb-2"><option>Vasıta</option><option>Emlak</option><option>Teknoloji</option><option>Giysi</option></select>
-        <textarea id="i-aciklama" class="form-control mb-2" placeholder="Açıklama"></textarea>
-        <input type="text" id="i-tel" class="form-control mb-2" placeholder="Telefon">
-        <button onclick="ilanYayinla()" class="btn btn-dark w-100">YAYINLA</button>
-    </div></div></div></div>
-
-    <div class="modal fade" id="detayModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-body p-0">
-        <button class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
-        <img id="d-img" src="" style="width:100%; height:300px; object-fit:cover;">
-        <div class="p-3">
-            <h4 id="d-baslik" class="fw-bold">...</h4>
-            <h3 id="d-fiyat" class="text-warning fw-bold">...</h3>
-            <p id="d-aciklama" class="text-muted">...</p>
-            <hr>
-            <a id="d-ara" href="#" class="btn btn-dark w-100"><i class="fas fa-phone"></i> ARA</a>
-            <button id="d-sil" onclick="ilaniSil()" class="btn btn-outline-danger w-100 mt-2 d-none">SİL (Yönetici)</button>
+    <div id="forgot-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="modal-overlay absolute w-full h-full bg-black opacity-75" onclick="toggleModal('forgot-modal')"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50">
+            <div class="modal-content py-4 px-6">
+                <h3 class="text-xl font-bold mb-2">Şifreni Sıfırla</h3>
+                <p class="text-sm text-gray-600 mb-4">E-posta adresini gir, doğrulama linki gönderelim.</p>
+                <input class="w-full border p-3 rounded mb-4" type="email" placeholder="E-posta Adresi">
+                <button onclick="Swal.fire('Başarılı', 'Sıfırlama bağlantısı e-postana gönderildi.', 'success'); toggleModal('forgot-modal')" class="w-full bg-theme-yellow font-bold p-3 rounded">Gönder</button>
+            </div>
         </div>
-    </div></div></div></div>
+    </div>
 
-    <div class="modal fade" id="loginModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content p-4 text-center"><h4>Giriş</h4><input id="l-mail" class="form-control mb-2" placeholder="Email"><input type="password" id="l-pass" class="form-control mb-2" placeholder="Şifre"><button onclick="girisYap()" class="btn btn-warning w-100">GİRİŞ</button></div></div></div>
-    
-    <div class="modal fade" id="registerModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content p-4 text-center"><h4>Kayıt</h4><input id="r-mail" class="form-control mb-2" placeholder="Email"><input type="password" id="r-pass" class="form-control mb-2" placeholder="Şifre"><button onclick="kayitOl()" class="btn btn-dark w-100">KAYIT</button></div></div></div>
+    <div id="create-ad-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="modal-overlay absolute w-full h-full bg-black opacity-75" onclick="toggleModal('create-ad-modal')"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-4xl mx-auto rounded shadow-lg z-50 h-[90vh] overflow-y-auto">
+            <div class="modal-content py-4 px-6">
+                <div class="flex justify-between items-center border-b pb-2 mb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">Yeni İlan Oluştur</h2>
+                    <button onclick="toggleModal('create-ad-modal')" class="text-red-500 font-bold">Kapat</button>
+                </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+                <form id="adForm" onsubmit="event.preventDefault(); processPayment();">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block font-bold mb-1">İlan Başlığı</label>
+                                <input type="text" class="w-full border p-2 rounded" placeholder="Örn: Temiz Kiralık Kamera" required>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block font-bold mb-1">Fiyat (TL)</label>
+                                    <input type="number" class="w-full border p-2 rounded" required>
+                                </div>
+                                <div>
+                                    <label class="block font-bold mb-1">Periyot</label>
+                                    <select class="w-full border p-2 rounded">
+                                        <option>Günlük</option>
+                                        <option>Haftalık</option>
+                                        <option>Aylık</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1">Kategori</label>
+                                <select class="w-full border p-2 rounded">
+                                    <option>Emlak</option>
+                                    <option>Vasıta</option>
+                                    <option>Elektronik</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1">Açıklama</label>
+                                <textarea class="w-full border p-2 rounded h-24" placeholder="Ürünün detaylarını yazınız..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1">Konum (İl/İlçe)</label>
+                                <input type="text" class="w-full border p-2 rounded" placeholder="İstanbul, Kadıköy" required>
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1">Telefon Numarası</label>
+                                <input type="tel" class="w-full border p-2 rounded" value="0532 XXX XX XX" readonly>
+                                <span class="text-xs text-gray-500">*Profilindeki numara kullanılır.</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="bg-gray-100 p-4 rounded border-dashed border-2 border-gray-400 text-center">
+                                <i class="fa-solid fa-camera text-3xl text-gray-400 mb-2"></i>
+                                <p class="font-bold">Fotoğrafları Yükle (Max 10)</p>
+                                <input type="file" multiple accept="image/*" class="mt-2 text-sm">
+                                <p class="text-xs text-red-500 mt-2">En az 1, en çok 10 fotoğraf seçin.</p>
+                            </div>
+
+                            <div class="border rounded p-4 bg-yellow-50 border-yellow-200">
+                                <h3 class="font-bold text-lg mb-2">İlanını Öne Çıkar (Doping)</h3>
+                                
+                                <label class="flex items-center gap-3 p-2 border rounded bg-white mb-2 cursor-pointer hover:bg-gray-50">
+                                    <input type="radio" name="doping" value="standart" checked>
+                                    <div>
+                                        <div class="font-bold">Standart İlan</div>
+                                        <div class="text-xs">Ücretsiz listeleme.</div>
+                                    </div>
+                                    <div class="ml-auto font-bold">0 TL</div>
+                                </label>
+
+                                <label class="flex items-center gap-3 p-2 border rounded bg-white mb-2 cursor-pointer border-yellow-400 shadow-sm">
+                                    <input type="radio" name="doping" value="vitrin">
+                                    <div>
+                                        <div class="font-bold text-black"><span class="bg-theme-yellow px-1 rounded text-xs mr-1">VİTRİN</span> Ana Sayfa Vitrini</div>
+                                        <div class="text-xs">10 Kat daha fazla görüntülenme.</div>
+                                    </div>
+                                    <div class="ml-auto font-bold text-red-600">150 TL</div>
+                                </label>
+
+                                <label class="flex items-center gap-3 p-2 border rounded bg-white cursor-pointer hover:bg-red-50 border-red-200">
+                                    <input type="radio" name="doping" value="acil">
+                                    <div>
+                                        <div class="font-bold text-red-600">Acil Acil Vitrini</div>
+                                        <div class="text-xs">Acil etiketi ve kırmızı çerçeve.</div>
+                                    </div>
+                                    <div class="ml-auto font-bold text-red-600">75 TL</div>
+                                </label>
+                            </div>
+
+                            <div id="payment-area" class="hidden bg-gray-900 text-white p-4 rounded">
+                                <h4 class="font-bold mb-2"><i class="fa-solid fa-credit-card"></i> Kart Bilgileri</h4>
+                                <input type="text" placeholder="Kart Numarası" class="w-full bg-gray-800 border-none rounded mb-2 p-2 text-white">
+                                <div class="flex gap-2">
+                                    <input type="text" placeholder="SKT (AA/YY)" class="w-1/2 bg-gray-800 border-none rounded p-2 text-white">
+                                    <input type="text" placeholder="CVC" class="w-1/2 bg-gray-800 border-none rounded p-2 text-white">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 border-t pt-4 flex justify-end gap-3">
+                        <button type="button" onclick="toggleModal('create-ad-modal')" class="px-6 py-2 rounded border hover:bg-gray-100">İptal</button>
+                        <button type="submit" class="bg-theme-yellow text-black font-bold px-8 py-2 rounded shadow-lg hover:bg-yellow-500">İlanı Yayınla</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // --- 1. ADMIN AYARI (BURAYA E-POSTANI YAZ) ---
-        const ADMIN_EMAIL = "emeebabaoglu61@gmail.com";
-        // ---------------------------------------------
+        // Kullanıcı Durumu (Basit Simülasyon)
+        let isLoggedIn = false;
 
-        // FIREBASE AYARLARI
-        const firebaseConfig = {
-            apiKey: "AIzaSyARO3eKpa058215Sdo3Dqf6U7uTr-z4pMM",
-            authDomain: "kiralagitsin-855c9.firebaseapp.com",
-            projectId: "kiralagitsin-855c9",
-            storageBucket: "kiralagitsin-855c9.firebasestorage.app",
-            messagingSenderId: "677047831958",
-            appId: "1:677047831958:web:82c4d37ee0055bfbafa1b7"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+        // Modal Aç/Kapa Fonksiyonu
+        function toggleModal(modalID) {
+            const modal = document.getElementById(modalID);
+            modal.classList.toggle('opacity-0');
+            modal.classList.toggle('pointer-events-none');
+            document.body.classList.toggle('modal-active');
+        }
 
-        let aktifKullanici = null;
-        let tumIlanlar = [];
-        let seciliIlanId = null;
-        let yuklenecekResim = null;
+        // Giriş Yapma Simülasyonu
+        function loginUser() {
+            isLoggedIn = true;
+            document.getElementById('auth-buttons').classList.add('hidden');
+            document.getElementById('user-menu').classList.remove('hidden');
+            document.getElementById('user-menu').classList.add('flex');
+            toggleModal('login-modal');
+            Swal.fire({
+                icon: 'success',
+                title: 'Giriş Başarılı',
+                text: 'Hoşgeldin Ahmet! Artık ilan verebilirsin.',
+                confirmButtonColor: '#FFD700',
+                confirmButtonText: 'Tamam'
+            });
+        }
 
-        // KULLANICI DURUMU İZLE
-        auth.onAuthStateChanged(user => {
-            aktifKullanici = user;
-            arayuzGuncelle();
+        // Kayıt Olma Simülasyonu
+        function registerUser() {
+            toggleModal('register-modal');
+            Swal.fire({
+                icon: 'success',
+                title: 'Kayıt Oluşturuldu',
+                text: 'Aramıza hoşgeldin! Şimdi giriş yapabilirsin.',
+                confirmButtonColor: '#000'
+            });
+        }
+
+        // İlan Ver Buton Kontrolü
+        function checkLoginForAd() {
+            if (!isLoggedIn) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Giriş Yapmalısın',
+                    text: 'İlan vermek için lütfen önce giriş yap.',
+                    confirmButtonText: 'Giriş Yap',
+                    confirmButtonColor: '#FFD700'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        toggleModal('login-modal');
+                    }
+                });
+            } else {
+                toggleModal('create-ad-modal');
+            }
+        }
+
+        // Ödeme Alanını Dinleme (Radio Button)
+        const radioButtons = document.querySelectorAll('input[name="doping"]');
+        const paymentArea = document.getElementById('payment-area');
+        
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value !== 'standart') {
+                    paymentArea.classList.remove('hidden');
+                } else {
+                    paymentArea.classList.add('hidden');
+                }
+            });
         });
 
-        function arayuzGuncelle() {
-            if(aktifKullanici) {
-                document.getElementById('auth-section').classList.add('d-none');
-                document.getElementById('profile-section').classList.remove('d-none');
-                document.getElementById('user-display').innerText = aktifKullanici.email;
-                
-                document.getElementById('hesap-baslik').innerText = aktifKullanici.email;
-                document.getElementById('hesap-butonlar').classList.remove('d-none');
-                document.getElementById('misafir-butonlar').classList.add('d-none');
+        // Ödeme ve İlan Yayınlama İşlemi
+        function processPayment() {
+            const selectedDoping = document.querySelector('input[name="doping"]:checked').value;
+            
+            toggleModal('create-ad-modal');
+            
+            let message = "İlanınız başarıyla yayına alındı ve onay sürecine girdi.";
+            if (selectedDoping !== 'standart') {
+                message = "Ödeme başarıyla alındı! İlanınız Vitrin dopingiyle yayına girdi.";
+            }
 
-                if(aktifKullanici.email === ADMIN_EMAIL) {
-                    document.getElementById('btn-admin').classList.remove('d-none');
-                }
-            } else {
-                document.getElementById('auth-section').classList.remove('d-none');
-                document.getElementById('profile-section').classList.add('d-none');
-                
-                document.getElementById('hesap-baslik').innerText = "Misafir";
-                document.getElementById('hes
+            Swal.fire({
+                icon: 'success',
+                title: 'Tebrikler!',
+                text: message,
+                confirmButtonColor: '#FFD700',
+                confirmButtonText: 'Tamam'
+            });
+        }
+
+        // Telefon Göster
+        function showPhone(number) {
+            Swal.fire({
+                title: 'İletişim Bilgisi',
+                text: number,
+                icon: 'info',
+                confirmButtonColor: '#000',
+                footer: '<a href="tel:'+number+'">Hemen Ara</a>'
+            });
+        }
+    </script>
+</body>
+</html>
