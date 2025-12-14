@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BiKirala | Full Paket</title>
+    <title>BiKirala | Stabil</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,7 +13,7 @@
         :root { --primary: #FFD000; --dark: #000000; --gray: #1a1a1a; }
         body { background-color: #f0f2f5; font-family: 'Inter', sans-serif; padding-bottom: 80px; }
         
-        /* TASARIM AYARLARI */
+        /* NAVBAR & HEADER */
         .navbar { background-color: var(--dark); padding: 15px 0; position: sticky; top: 0; z-index: 1000; }
         .navbar-brand { font-weight: 900; color: white !important; font-size: 24px; }
         .navbar-brand span { color: var(--primary); }
@@ -25,11 +25,10 @@
         .btn-primary-c { background-color: var(--primary); color: var(--dark); font-weight: bold; border: none; border-radius: 20px; padding: 8px 20px; transition: 0.3s; }
         .btn-primary-c:hover { background-color: #e6bc00; transform: scale(1.05); }
         
-        /* GOOGLE BUTONU */
         .btn-google { background: white; color: #333; border: 1px solid #ddd; font-weight: bold; width: 100%; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; }
         .btn-google:hover { background: #f1f1f1; }
 
-        /* SIDEBAR & LAYOUT */
+        /* ANA YAPI */
         .main-wrapper { display: flex; margin-top: 20px; gap: 20px; }
         .sidebar { width: 260px; background: white; border-radius: 15px; padding: 20px; height: fit-content; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .cat-item { display: block; padding: 12px 15px; margin-bottom: 5px; color: #555; text-decoration: none; font-weight: 600; border-radius: 10px; transition: 0.2s; }
@@ -158,10 +157,11 @@
                         <h5>Açıklama</h5>
                         <p class="text-muted" id="d-desc">...</p>
                         <hr>
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 mb-3">
                             <a id="d-call" href="#" class="btn btn-dark flex-grow-1 py-3"><i class="fas fa-phone"></i> ARA</a>
                             <button onclick="startChat()" class="btn btn-warning flex-grow-1 py-3 fw-bold"><i class="fas fa-comment"></i> MESAJ AT</button>
                         </div>
+                        <button id="btn-delete" onclick="deleteAd()" class="btn btn-outline-danger w-100 d-none"><i class="fas fa-trash"></i> İLANI SİL</button>
                     </div>
                 </div>
             </div>
@@ -196,21 +196,14 @@
         <div class="modal-dialog modal-sm modal-dialog-centered">
             <div class="modal-content text-center p-4">
                 <h4 class="fw-bold mb-3">Giriş Yap</h4>
-                
                 <button onclick="loginWithGoogle()" class="btn-google mb-3">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
                     Google ile Giriş Yap
                 </button>
-                
                 <div class="text-muted small mb-3">- VEYA -</div>
-
                 <input type="email" id="l-email" class="form-control mb-2" placeholder="E-Posta">
                 <input type="password" id="l-pass" class="form-control mb-2" placeholder="Şifre">
-                
-                <div class="text-end mb-3">
-                    <a href="#" class="text-decoration-none small text-muted" onclick="switchModal('loginModal','forgotModal')">Şifremi Unuttum?</a>
-                </div>
-
+                <div class="text-end mb-3"><a href="#" class="text-decoration-none small text-muted" onclick="switchModal('loginModal','forgotModal')">Şifremi Unuttum?</a></div>
                 <button onclick="login()" class="btn btn-warning w-100 fw-bold mb-2">GİRİŞ</button>
                 <small class="text-muted">Hesabın yok mu? <a href="#" onclick="switchModal('loginModal','registerModal')">Kayıt Ol</a></small>
             </div>
@@ -306,25 +299,19 @@
             }
         }
 
-        // --- GOOGLE GİRİŞİ ---
         function loginWithGoogle() {
             var provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider)
                 .then(() => { bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide(); })
-                .catch(err => alert("Google Giriş Hatası: " + err.message));
+                .catch(err => alert("Google Hata: " + err.message));
         }
 
-        // --- ŞİFRE SIFIRLAMA ---
         function resetPassword() {
             const email = document.getElementById('f-email').value;
-            if(!email) { alert("Lütfen e-posta adresini gir."); return; }
-            
+            if(!email) { alert("E-posta gir."); return; }
             auth.sendPasswordResetEmail(email)
-                .then(() => {
-                    alert("Şifre sıfırlama linki e-postana gönderildi!");
-                    switchModal('forgotModal', 'loginModal');
-                })
-                .catch(err => alert("Hata: " + err.message));
+                .then(() => { alert("Link gönderildi!"); switchModal('forgotModal', 'loginModal'); })
+                .catch(err => alert(err.message));
         }
 
         function login() {
@@ -332,15 +319,15 @@
             const p = document.getElementById('l-pass').value;
             auth.signInWithEmailAndPassword(e, p)
                 .then(() => { bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide(); })
-                .catch(err => alert("Hata: " + err.message));
+                .catch(err => alert(err.message));
         }
 
         function register() {
             const e = document.getElementById('r-email').value;
             const p = document.getElementById('r-pass').value;
             auth.createUserWithEmailAndPassword(e, p)
-                .then(() => { bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide(); alert("Kayıt Başarılı!"); })
-                .catch(err => alert("Hata: " + err.message));
+                .then(() => { bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide(); alert("Başarılı!"); })
+                .catch(err => alert(err.message));
         }
 
         function logout() { auth.signOut(); location.reload(); }
@@ -352,18 +339,22 @@
             renderAds(allAds);
         });
 
+        // BUG FİX: Hem 'baslik' hem 'ad' (eski kayıtlar) desteği
         function renderAds(list) {
             const container = document.getElementById('ads-container');
             container.innerHTML = "";
             if(list.length === 0) { container.innerHTML = "<p class='text-center w-100 mt-5'>İlan bulunamadı.</p>"; return; }
             list.forEach(ad => {
+                // Burada "undefined" hatasını çözüyoruz:
+                const realTitle = ad.baslik || ad.ad || "İsimsiz İlan"; 
+                
                 container.innerHTML += `
                 <div class="col-6 col-md-4 col-lg-3">
                     <div class="ad-card cursor-pointer" onclick="openDetail('${ad.id}')">
                         <img src="${ad.resim}" class="ad-img">
                         <div class="p-2">
                             <div class="ad-price">${ad.fiyat} TL</div>
-                            <div class="ad-title">${ad.baslik}</div>
+                            <div class="ad-title">${realTitle}</div>
                             <small class="text-muted"><i class="fas fa-map-marker-alt"></i> TR</small>
                         </div>
                     </div>
@@ -388,25 +379,50 @@
                 baslik: title, fiyat: price, kategori: cat, aciklama: desc, tel: tel,
                 resim: selectedImg, userId: currentUser.uid, userEmail: currentUser.email, tarih: Date.now()
             }).then(() => {
-                alert("İlan Yayında!"); location.reload();
+                alert("Yayında!"); location.reload();
             }).catch(err => { alert(err.message); btn.innerText = "YAYINLA"; btn.disabled = false; });
         }
 
         function openDetail(id) {
             currentAd = allAds.find(x => x.id === id);
             if(!currentAd) return;
+            
+            // Hata Düzeltmesi Burada da Var
+            const realTitle = currentAd.baslik || currentAd.ad || "İsimsiz İlan";
+
             document.getElementById('d-img').src = currentAd.resim;
-            document.getElementById('d-title').innerText = currentAd.baslik;
+            document.getElementById('d-title').innerText = realTitle;
             document.getElementById('d-price').innerText = currentAd.fiyat + " TL";
             document.getElementById('d-cat').innerText = currentAd.kategori;
             document.getElementById('d-desc').innerText = currentAd.aciklama || "Açıklama yok.";
             document.getElementById('d-call').href = "tel:" + currentAd.tel;
+            
+            // SİLME BUTONU KONTROLÜ
+            const btnDel = document.getElementById('btn-delete');
+            if(currentUser && currentAd.userId === currentUser.uid) {
+                btnDel.classList.remove('d-none');
+            } else {
+                btnDel.classList.add('d-none');
+            }
+
             modalOpen('detailModal');
+        }
+
+        // İLAN SİLME FONKSİYONU (YENİ)
+        function deleteAd() {
+            if(confirm("Bu ilanı silmek istediğine emin misin?")) {
+                db.collection("ilanlar").doc(currentAd.id).delete()
+                .then(() => {
+                    alert("Silindi.");
+                    bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();
+                })
+                .catch(err => alert("Hata: " + err.message));
+            }
         }
 
         function startChat() {
             if(!currentUser) { modalOpen('loginModal'); return; }
-            if(currentAd.userId === currentUser.uid) { alert("Bu ilan zaten senin!"); return; }
+            if(currentAd.userId === currentUser.uid) { alert("Bu senin ilanın."); return; }
             const u1 = currentUser.uid < currentAd.userId ? currentUser.uid : currentAd.userId;
             const u2 = currentUser.uid > currentAd.userId ? currentUser.uid : currentAd.userId;
             const chatId = `${u1}_${u2}_${currentAd.id}`;
@@ -475,13 +491,18 @@
         function filterCat(cat, btn) {
             document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
             btn.classList.add('active');
+            // Hata düzeltmeli filtreleme
             if(cat === "Hepsi") renderAds(allAds);
             else renderAds(allAds.filter(x => x.kategori === cat));
         }
 
         function searchAds(val) {
             const v = val.toLowerCase();
-            renderAds(allAds.filter(x => x.baslik.toLowerCase().includes(v)));
+            // Hata düzeltmeli arama
+            renderAds(allAds.filter(x => {
+                const title = x.baslik || x.ad || "";
+                return title.toLowerCase().includes(v);
+            }));
         }
 
         function modalOpen(id) { new bootstrap.Modal(document.getElementById(id)).show(); }
