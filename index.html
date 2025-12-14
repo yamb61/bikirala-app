@@ -3,40 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BiKirala | Çalışan Sürüm</title>
+    <title>BiKirala | Sorunsuz</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        body { background-color: #f8f9fa; font-family: sans-serif; padding-bottom: 80px; }
+        body { background-color: #f4f4f4; padding-bottom: 80px; font-family: sans-serif; }
         
-        /* HATA KUTUSU */
-        #hata-kutusu { display:none; background:red; color:white; padding:15px; text-align:center; position:fixed; top:0; width:100%; z-index:9999; }
+        /* HATA KUTUSU (DEBUG) */
+        #debug-panel { display:none; background:red; color:white; padding:15px; text-align:center; font-weight:bold; position:fixed; top:0; left:0; width:100%; z-index:99999; }
 
         /* HEADER */
-        .header { background: #FFD000; padding: 15px; position: sticky; top: 0; z-index: 999; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .logo { font-size: 20px; font-weight: 900; color: black; text-decoration: none; }
+        .header { background: #FFD000; padding: 15px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .logo { font-size: 22px; font-weight: 900; color: black; text-decoration: none; }
         
         /* KATEGORİLER */
-        .cat-scroll { overflow-x: auto; white-space: nowrap; padding: 10px; background: white; border-bottom: 1px solid #ddd; }
-        .cat-btn { border: 1px solid #ddd; background: white; padding: 5px 15px; border-radius: 20px; margin-right: 5px; font-size: 13px; font-weight: bold; color: #555; text-decoration: none; display: inline-block; }
-        .cat-btn.active { background: black; color: #FFD000; border-color: black; }
+        .cat-scroll { overflow-x: auto; white-space: nowrap; padding: 10px; background: white; }
+        .cat-btn { display: inline-block; padding: 5px 15px; background: #eee; border-radius: 20px; margin-right: 5px; color: #333; text-decoration: none; font-weight: bold; font-size: 14px; }
+        .cat-btn.active { background: black; color: #FFD000; }
 
         /* KARTLAR */
-        .card { border: none; border-radius: 12px; margin-bottom: 15px; background: white; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; }
+        .card { border: none; border-radius: 10px; margin-bottom: 15px; background: white; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .card-img-top { height: 220px; object-fit: cover; }
-        .price-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #FFD000; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 13px; }
-        
-        /* DETAY SAYFASI */
-        #page-detay { background: white; min-height: 100vh; position: fixed; top: 0; left: 0; width: 100%; z-index: 2000; overflow-y: auto; display: none; padding-bottom: 100px; }
-        .detay-img { width: 100%; height: 350px; object-fit: cover; }
-        .detay-header { position: absolute; top: 15px; left: 15px; z-index: 2001; }
-        .btn-back { background: rgba(0,0,0,0.6); color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
-        .detay-body { padding: 20px; border-radius: 25px 25px 0 0; background: white; margin-top: -30px; position: relative; }
-        .detay-nav { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; background: white; border-top: 1px solid #eee; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; }
+        .price-tag { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #FFD000; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
 
         /* ALT MENÜ */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #ddd; z-index: 1000; }
-        .nav-item { text-align: center; font-size: 10px; color: #aaa; width: 20%; cursor: pointer; }
-        .nav-
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #ddd; z-index: 2000; }
+        .nav-item { text-align: center; color: #aaa; font-size: 10px; cursor: pointer; }
+        .nav-item i { font-size: 22px; display: block; margin-bottom: 3px; }
+        .nav-item.active { color: black; font-weight: bold; }
+        .add-btn { width: 50px; height: 50px; background: black; color: #FFD000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-top: -25px; border: 4px solid #f4f4f4; }
+
+        /* SAYFALAR */
+        .page { display: none; }
+        .page.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="debug-panel"></div>
+
+    <div class="header d-flex justify-content-between align-items-center">
+        <a href="#" class="logo">bi<span>kirala</span></a>
+        <span class="badge bg-dark">TR</span>
+    </div>
+
+    <div class="cat-scroll">
+        <a href="#" class="cat-btn active" onclick="filtrele('Hepsi', this)">Tümü</a>
+        <a href="#" class="cat-btn" onclick="filtrele('Vasıta', this)">🚗 Vasıta</a>
+        <a href="#" class="cat-btn" onclick="filtrele('Elektronik', this)">💻 Elektronik</a>
+        <a href="#" class="cat-btn" onclick="filtrele('Emlak', this)">🏠 Emlak</a>
+    </div>
+
+    <div class="container mt-3">
+        
+        <div id="page-vitrin" class="page active">
+            <input type="text" id="arama" class="form-control mb-3" placeholder="İlan ara..." onkeyup="listeyiYenile()">
+            <div id="ilan-listesi">
+                <div class="text-center mt-5"><div class="spinner-border text-warning"></div><p>Yükleniyor...</p></div>
+            </div>
+        </div>
+
+        <div id="page-profil" class="page text-center pt-5">
+            <div style="width:80px;height:80px;background:#ddd;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:30px;"><i class="fas fa-user"></i></div>
+            <h4>Misafir</h4>
+            <p>Üyelik sistemi yakında.</p>
+        </div>
+        <div id="page-mesaj" class="page pt-5 text-center"><h5>Mesajlar</h5><p>Kutun boş.</p></div>
+    </div>
+
+    <div class="modal fade" id="ilanModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">İlan Ver</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    
+                    <div class="p-3 bg-light text-center border rounded mb-3" onclick="document.getElementById('resimInput').click()">
+                        <span id="resimBilgi">📸 Fotoğraf Ekle (Zorunlu)</span>
+                        <input type="file" id="resimInput" class="d-none" accept="image/*" onchange="resimIsle(this)">
+                    </div>
+
+                    <textarea id="inpAciklama" class="form-control mb-3" rows="3" placeholder="Açıklama (Ürün detayları...)"></textarea>
+
+                    <input type="text" id="inpAd" class="form-control mb-2" placeholder="Başlık (Örn: PS5)">
+                    <input type="number" id="inpFiyat" class="form-control mb-2" placeholder="Fiyat (TL)">
+                    <input type="text" id="inpTel" class="form-control mb-2" placeholder="Tel (53X...)">
+                    <select id="inpKat" class="form-select mb-3">
+                        <option value="Elektronik">Elektronik</option>
+                        <option value="Vasıta">Vasıta</option>
+                        <option value="Emlak">Emlak</option>
+                    </select>
+
+                    <button onclick="ilanGonder()" id="btnGonder" class="btn btn-dark w-100">YAYINLA</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="sayfa('vitrin', this)"><i class="fas fa-home"></i>Vitrin</div>
+        <div class="nav-item" onclick="sayfa('mesaj', this)"><i class="fas fa-comment"></i>Mesaj</div>
+        <div class="nav-item" onclick="modalAc()"><div class="add-btn"><i class="fas fa-plus"></i></div></div>
+        <div class="nav-item"><i class="fas fa-heart"></i>Favori</div>
+        <div class="nav-item" onclick="sayfa('profil', this)"><i class="fas fa-user"></i>Profil</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // HATA YAKALAYICI
+        window.onerror = function(msg) {
+            document.getElementById('debug-panel').style.display = 'block';
+            document.getElementById('debug-panel').innerText = "HATA: " + msg;
+        }
+
+        // FIREBASE BAŞLAT
+        const firebaseConfig = {
+            apiKey: "AIzaSyARO3eKpa058215Sdo3Dqf6U7uTr-z4pMM",
+            authDomain: "kiralagitsin-855c9.firebaseapp.com",
+            projectId: "kiralagitsin-855c9",
+            storageBucket: "kiralagitsin-855c9.firebasestorage.app",
+            messagingSenderId: "677047831958",
+            appId: "1:677047831958:web:82c4d37ee0055bfbafa1b7"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let tumVeriler = [];
+        let aktifKategori = "Hepsi";
+        let seciliResim = null;
+
+        // VERİ ÇEK
+        db.collection("ilanlar").orderBy("tarih", "desc").onSnapshot(snap => {
+            tumVeriler = [];
+            snap.forEach(doc => {
+                let d = doc.data();
+                d.id = doc.id;
+                tumVeriler.push(d);
+            });
+            listeyiYenile();
+        });
+
+        // LİSTELEME
+        function listeyiYenile() {
+            const div = document.getElementById("ilan-listesi");
+            const arama = document.getElementById("arama").value.toLowerCase();
+            div.innerHTML = "";
+
+            const sonuc = tumVeriler.filter(d => {
+                const katUygun = (aktifKategori === 'Hepsi') || (d.kategori === aktifKategori);
+                const aramaUygun = d.ad.toLowerCase().includes(arama);
+                return katUygun && aramaUygun;
+            });
+
+            if(sonuc.length === 0) { div.innerHTML = "<p class='text-center mt-5 text-muted'>İlan yok.</p>"; return; }
+
+            sonuc.forEach(d => {
+                // Detay sayfasını açmak yerine şimdilik WhatsApp'a yönlendiriyoruz (HATA RİSKİNİ SIFIRLAMAK İÇİN)
+                const mesaj = `Merhaba, ilanınız (${d.ad}) için yazıyorum.`;
+                const link = `https://wa.me/90${d.tel}?text=${encodeURIComponent(mesaj)}`;
+
+                div.innerHTML += `
+                <div class="card">
+                    <span class="price-tag">${d.fiyat} TL</span>
+                    <img src="${d.resim}" class="card-img-top">
+                    <div class="card-body p-2">
+                        <h6 class="fw-bold mb-1">${d.ad}</h6>
+                        <small class="text-muted d-block mb-2">${d.aciklama || d.kategori}</small>
+                        <a href="${link}" class="btn btn-dark w-100 rounded-pill">Kirala</a>
+                    </div>
+                </div>`;
+            });
+        }
+
+        // FOTOĞRAF
+        function resimIsle(input) {
+            const file = input.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                sec
