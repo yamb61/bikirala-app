@@ -3,42 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BiKirala | Ultimate</title>
+    <title>BiKirala | Full Paket</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        :root { --primary: #FFD000; --dark: #000000; --gray: #1a1a1a; --light: #f4f4f4; }
+        :root { --primary: #FFD000; --dark: #000000; --gray: #1a1a1a; }
         body { background-color: #f0f2f5; font-family: 'Inter', sans-serif; padding-bottom: 80px; }
         
-        /* === TASARIM: SİYAH & SARI === */
+        /* TASARIM AYARLARI */
         .navbar { background-color: var(--dark); padding: 15px 0; position: sticky; top: 0; z-index: 1000; }
         .navbar-brand { font-weight: 900; color: white !important; font-size: 24px; }
         .navbar-brand span { color: var(--primary); }
         
-        /* ARAMA ÇUBUĞU */
         .search-group { position: relative; width: 100%; max-width: 500px; }
         .search-inp { width: 100%; padding: 10px 20px; border-radius: 30px; border: none; outline: none; }
         .search-btn { position: absolute; right: 5px; top: 3px; background: var(--primary); border: none; border-radius: 50%; width: 34px; height: 34px; font-weight: bold; }
 
-        /* BUTONLAR */
         .btn-primary-c { background-color: var(--primary); color: var(--dark); font-weight: bold; border: none; border-radius: 20px; padding: 8px 20px; transition: 0.3s; }
         .btn-primary-c:hover { background-color: #e6bc00; transform: scale(1.05); }
-        .btn-outline-c { border: 2px solid var(--primary); color: var(--primary); font-weight: bold; border-radius: 20px; padding: 6px 15px; background: transparent; }
-        .btn-outline-c:hover { background: var(--primary); color: var(--dark); }
-
-        /* === LAYOUT === */
-        .main-wrapper { display: flex; margin-top: 20px; gap: 20px; }
         
-        /* SOL MENÜ (SIDEBAR) */
+        /* GOOGLE BUTONU */
+        .btn-google { background: white; color: #333; border: 1px solid #ddd; font-weight: bold; width: 100%; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; }
+        .btn-google:hover { background: #f1f1f1; }
+
+        /* SIDEBAR & LAYOUT */
+        .main-wrapper { display: flex; margin-top: 20px; gap: 20px; }
         .sidebar { width: 260px; background: white; border-radius: 15px; padding: 20px; height: fit-content; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .cat-item { display: block; padding: 12px 15px; margin-bottom: 5px; color: #555; text-decoration: none; font-weight: 600; border-radius: 10px; transition: 0.2s; }
         .cat-item:hover, .cat-item.active { background: var(--dark); color: var(--primary); }
-        .cat-item i { width: 25px; }
-
-        /* İÇERİK ALANI */
         .content { flex: 1; }
 
         /* KARTLAR */
@@ -47,21 +42,15 @@
         .ad-img { height: 220px; width: 100%; object-fit: cover; }
         .ad-price { font-size: 18px; font-weight: 800; color: var(--dark); }
         .ad-title { font-weight: 600; color: #333; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        /* MOBİL İÇİN ALT MENÜ */
+
+        /* MOBİL NAV */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--dark); height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 2000; border-top: 4px solid var(--primary); }
         .nav-icon { color: #777; text-align: center; font-size: 10px; cursor: pointer; flex: 1; }
         .nav-icon i { font-size: 20px; margin-bottom: 4px; display: block; }
         .nav-icon.active { color: var(--primary); font-weight: bold; }
 
-        /* RESPONSIVE */
-        @media (min-width: 992px) {
-            .sidebar { display: block; }
-            .bottom-nav { display: none; }
-        }
-        @media (max-width: 991px) {
-            .navbar .auth-buttons { display: none; } /* Mobilde üstteki giriş butonlarını gizle */
-        }
+        @media (min-width: 992px) { .sidebar { display: block; } .bottom-nav { display: none; } }
+        @media (max-width: 991px) { .navbar .auth-buttons { display: none; } }
 
         /* MESAJLAŞMA */
         .chat-box { height: 300px; overflow-y: auto; background: #f9f9f9; padding: 10px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 10px; }
@@ -69,7 +58,6 @@
         .msg-me { background: var(--primary); color: black; margin-left: auto; border-bottom-right-radius: 2px; }
         .msg-other { background: #e0e0e0; color: black; margin-right: auto; border-bottom-left-radius: 2px; }
 
-        /* YÜKLEME EKRANI */
         #loader { position: fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; display:flex; align-items:center; justify-content:center; }
     </style>
 </head>
@@ -80,12 +68,10 @@
     <nav class="navbar">
         <div class="container">
             <a class="navbar-brand" href="#">bi<span>kirala</span></a>
-            
             <div class="search-group mx-auto d-none d-md-block">
                 <input type="text" id="desktopSearch" class="search-inp" placeholder="Ne arıyorsun? (Araba, Emlak...)" onkeyup="searchAds(this.value)">
                 <button class="search-btn"><i class="fas fa-search"></i></button>
             </div>
-
             <div class="auth-buttons ms-3 d-flex gap-2 align-items-center">
                 <div id="guest-area" class="d-flex gap-2">
                     <button class="btn btn-outline-light rounded-pill btn-sm" onclick="modalOpen('loginModal')">Giriş Yap</button>
@@ -105,7 +91,6 @@
     </div>
 
     <div class="container main-wrapper">
-        
         <div class="sidebar">
             <h6 class="fw-bold mb-3 ms-2">KATEGORİLER</h6>
             <a href="#" class="cat-item active" onclick="filterCat('Hepsi', this)"><i class="fas fa-th-large"></i> Tümü</a>
@@ -117,10 +102,8 @@
         </div>
 
         <div class="content">
-            
             <div id="page-home" class="page-section">
-                <div class="row" id="ads-container">
-                    </div>
+                <div class="row" id="ads-container"></div>
             </div>
 
             <div id="page-fav" class="page-section d-none text-center pt-5">
@@ -131,8 +114,7 @@
 
             <div id="page-messages" class="page-section d-none">
                 <h4 class="mb-4">Mesajlarım</h4>
-                <div class="list-group" id="inbox-list">
-                    </div>
+                <div class="list-group" id="inbox-list"></div>
             </div>
 
             <div id="page-account" class="page-section d-none text-center pt-5">
@@ -144,11 +126,10 @@
                     <button class="btn btn-danger w-50" onclick="logout()">Çıkış Yap</button>
                 </div>
                 <div id="guest-actions" class="mt-4">
-                    <p>İlan vermek ve mesajlaşmak için giriş yapmalısın.</p>
+                    <p>İlan vermek için giriş yapmalısın.</p>
                     <button class="btn btn-dark w-50" onclick="modalOpen('loginModal')">Giriş Yap</button>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -169,7 +150,7 @@
                     <div class="p-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="badge bg-warning text-dark" id="d-cat">Kategori</span>
-                            <button class="btn btn-light rounded-circle" onclick="toggleFavCurrent()"><i class="far fa-heart text-danger"></i></button>
+                            <button class="btn btn-light rounded-circle"><i class="far fa-heart text-danger"></i></button>
                         </div>
                         <h3 class="fw-bold" id="d-title">Başlık</h3>
                         <h2 class="text-primary fw-bold" id="d-price">0 TL</h2>
@@ -215,8 +196,21 @@
         <div class="modal-dialog modal-sm modal-dialog-centered">
             <div class="modal-content text-center p-4">
                 <h4 class="fw-bold mb-3">Giriş Yap</h4>
+                
+                <button onclick="loginWithGoogle()" class="btn-google mb-3">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+                    Google ile Giriş Yap
+                </button>
+                
+                <div class="text-muted small mb-3">- VEYA -</div>
+
                 <input type="email" id="l-email" class="form-control mb-2" placeholder="E-Posta">
-                <input type="password" id="l-pass" class="form-control mb-3" placeholder="Şifre">
+                <input type="password" id="l-pass" class="form-control mb-2" placeholder="Şifre">
+                
+                <div class="text-end mb-3">
+                    <a href="#" class="text-decoration-none small text-muted" onclick="switchModal('loginModal','forgotModal')">Şifremi Unuttum?</a>
+                </div>
+
                 <button onclick="login()" class="btn btn-warning w-100 fw-bold mb-2">GİRİŞ</button>
                 <small class="text-muted">Hesabın yok mu? <a href="#" onclick="switchModal('loginModal','registerModal')">Kayıt Ol</a></small>
             </div>
@@ -231,6 +225,18 @@
                 <input type="password" id="r-pass" class="form-control mb-3" placeholder="Şifre">
                 <button onclick="register()" class="btn btn-dark w-100 fw-bold mb-2">KAYIT OL</button>
                 <small class="text-muted">Zaten üye misin? <a href="#" onclick="switchModal('registerModal','loginModal')">Giriş Yap</a></small>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="forgotModal" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content text-center p-4">
+                <h5 class="fw-bold mb-3">Şifre Sıfırla</h5>
+                <p class="small text-muted">E-posta adresini gir, sana sıfırlama linki gönderelim.</p>
+                <input type="email" id="f-email" class="form-control mb-3" placeholder="E-Posta Adresin">
+                <button onclick="resetPassword()" class="btn btn-dark w-100 fw-bold mb-3">LİNK GÖNDER</button>
+                <a href="#" class="small text-muted" onclick="switchModal('forgotModal','loginModal')">Girişe Dön</a>
             </div>
         </div>
     </div>
@@ -259,7 +265,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <script>
-        // --- 1. AYARLAR ---
         const firebaseConfig = {
             apiKey: "AIzaSyARO3eKpa058215Sdo3Dqf6U7uTr-z4pMM",
             authDomain: "kiralagitsin-855c9.firebaseapp.com",
@@ -272,39 +277,54 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // GLOBAL DEĞİŞKENLER
         let currentUser = null;
         let allAds = [];
-        let currentAd = null; // Detayına bakılan ilan
+        let currentAd = null;
         let currentChatId = null;
         let selectedImg = null;
 
-        // --- 2. AUTHENTICATION (ÜYELİK) ---
         auth.onAuthStateChanged(user => {
-            document.getElementById('loader').style.display = 'none'; // Yükleme bitti
+            document.getElementById('loader').style.display = 'none';
             currentUser = user;
             updateUI(user);
         });
 
         function updateUI(user) {
             if(user) {
-                // Giriş yapılmış
                 document.getElementById('guest-area').classList.add('d-none');
                 document.getElementById('user-area').classList.remove('d-none');
                 document.getElementById('guest-actions').classList.add('d-none');
                 document.getElementById('profile-actions').classList.remove('d-none');
-                document.getElementById('nav-username').innerText = user.email.split('@')[0];
+                document.getElementById('nav-username').innerText = user.displayName || user.email.split('@')[0];
                 document.getElementById('profile-email').innerText = user.email;
-                loadMyMessages(); // Mesajları yükle
             } else {
-                // Misafir
                 document.getElementById('guest-area').classList.remove('d-none');
                 document.getElementById('user-area').classList.add('d-none');
                 document.getElementById('guest-actions').classList.remove('d-none');
                 document.getElementById('profile-actions').classList.add('d-none');
                 document.getElementById('profile-email').innerText = "Misafir";
-                document.getElementById('inbox-list').innerHTML = "<p class='text-center text-muted'>Giriş yapmalısın.</p>";
             }
+        }
+
+        // --- GOOGLE GİRİŞİ ---
+        function loginWithGoogle() {
+            var provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then(() => { bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide(); })
+                .catch(err => alert("Google Giriş Hatası: " + err.message));
+        }
+
+        // --- ŞİFRE SIFIRLAMA ---
+        function resetPassword() {
+            const email = document.getElementById('f-email').value;
+            if(!email) { alert("Lütfen e-posta adresini gir."); return; }
+            
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    alert("Şifre sıfırlama linki e-postana gönderildi!");
+                    switchModal('forgotModal', 'loginModal');
+                })
+                .catch(err => alert("Hata: " + err.message));
         }
 
         function login() {
@@ -326,9 +346,6 @@
         function logout() { auth.signOut(); location.reload(); }
         function checkAuthForPost() { if(currentUser) modalOpen('postModal'); else modalOpen('loginModal'); }
 
-        // --- 3. İLAN YÖNETİMİ ---
-        
-        // Verileri Çek
         db.collection("ilanlar").orderBy("tarih", "desc").onSnapshot(snap => {
             allAds = [];
             snap.forEach(doc => { let d = doc.data(); d.id = doc.id; allAds.push(d); });
@@ -339,7 +356,6 @@
             const container = document.getElementById('ads-container');
             container.innerHTML = "";
             if(list.length === 0) { container.innerHTML = "<p class='text-center w-100 mt-5'>İlan bulunamadı.</p>"; return; }
-            
             list.forEach(ad => {
                 container.innerHTML += `
                 <div class="col-6 col-md-4 col-lg-3">
@@ -376,33 +392,25 @@
             }).catch(err => { alert(err.message); btn.innerText = "YAYINLA"; btn.disabled = false; });
         }
 
-        // --- 4. DETAY VE ETKİLEŞİM ---
         function openDetail(id) {
             currentAd = allAds.find(x => x.id === id);
             if(!currentAd) return;
-            
             document.getElementById('d-img').src = currentAd.resim;
             document.getElementById('d-title').innerText = currentAd.baslik;
             document.getElementById('d-price').innerText = currentAd.fiyat + " TL";
             document.getElementById('d-cat').innerText = currentAd.kategori;
             document.getElementById('d-desc').innerText = currentAd.aciklama || "Açıklama yok.";
             document.getElementById('d-call').href = "tel:" + currentAd.tel;
-            
             modalOpen('detailModal');
         }
 
-        // --- 5. MESAJLAŞMA SİSTEMİ (İÇ) ---
         function startChat() {
             if(!currentUser) { modalOpen('loginModal'); return; }
             if(currentAd.userId === currentUser.uid) { alert("Bu ilan zaten senin!"); return; }
-
-            // Sohbet ID: İki kullanıcı ID'sinin birleşimi (Unique olsun diye sıralıyoruz)
             const u1 = currentUser.uid < currentAd.userId ? currentUser.uid : currentAd.userId;
             const u2 = currentUser.uid > currentAd.userId ? currentUser.uid : currentAd.userId;
             const chatId = `${u1}_${u2}_${currentAd.id}`;
             currentChatId = chatId;
-
-            // Sohbeti oluştur veya aç
             document.getElementById('chat-receiver-name').innerText = "Satıcı ile Sohbet";
             bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();
             modalOpen('chatWindowModal');
@@ -412,14 +420,9 @@
         function sendMessage() {
             const txt = document.getElementById('msg-input').value;
             if(!txt || !currentChatId) return;
-
             db.collection("mesajlar").add({
-                chatId: currentChatId,
-                text: txt,
-                senderId: currentUser.uid,
-                senderEmail: currentUser.email,
-                tarih: Date.now(),
-                ilanBaslik: currentAd ? currentAd.baslik : "Sohbet"
+                chatId: currentChatId, text: txt, senderId: currentUser.uid,
+                senderEmail: currentUser.email, tarih: Date.now()
             });
             document.getElementById('msg-input').value = "";
         }
@@ -434,19 +437,10 @@
                     const cls = m.senderId === currentUser.uid ? "msg-me" : "msg-other";
                     box.innerHTML += `<div class="msg-bubble ${cls}">${m.text}</div>`;
                 });
-                box.scrollTop = box.scrollHeight; // En alta kaydır
+                box.scrollTop = box.scrollHeight;
             });
         }
 
-        function loadMyMessages() {
-            // Basit bir listeleme: Kullanıcının dahil olduğu son mesajları çekmek gerekir.
-            // Bu basit versiyonda, tüm mesajlar koleksiyonundan kullanıcının gönderdiği veya aldığı mesajları filtrelemek
-            // Firestore indekslemesi gerektirebilir. Şimdilik sadece "Başlatılan Sohbetler" gibi basit bir mantık kuralım.
-            // (Karmaşıklığı önlemek için mesaj kutusu şu an sadece görsel kalacak, chat butonundan ilerlenmeli)
-            document.getElementById('inbox-list').innerHTML = "<small class='text-muted p-3'>İlanlar üzerinden 'Mesaj At' diyerek sohbet başlatabilirsin.</small>";
-        }
-
-        // --- 6. YARDIMCI FONKSİYONLAR ---
         function compressImage(input) {
             const file = input.files[0];
             if(!file) return;
