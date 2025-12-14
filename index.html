@@ -3,95 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - Güvenli Kiralama Platformu</title>
+    <title>BiKirala - Türkiye'nin En Büyük Kiralama Platformu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-        body { font-family: 'Roboto', sans-serif; background-color: #f3f4f6; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
         
-        /* Tema Renkleri */
-        .bg-bi-yellow { background-color: #FFD700; }
-        .text-bi-yellow { color: #FFD700; }
-        .border-bi-yellow { border-color: #FFD700; }
+        /* BiKirala Özel Renkler */
+        .bk-yellow { background-color: #FFD000; color: #000; }
+        .bk-yellow-hover:hover { background-color: #ffc400; }
+        .bk-dark { background-color: #2D2D2D; }
         
-        /* Animasyonlar */
-        .page-section { display: none; }
-        .active-section { display: block; animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Gizleme/Gösterme Animasyonları */
+        .section-hidden { display: none !important; }
+        .section-visible { display: block !important; animation: fadeIn 0.3s ease-out; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        /* Kayan Yazı (Ticker) */
-        .ticker-wrap { width: 100%; overflow: hidden; background-color: #111; height: 40px; line-height: 40px; }
-        .ticker { display: inline-block; white-space: nowrap; animation: ticker 35s linear infinite; }
-        .ticker__item { display: inline-block; padding: 0 2rem; color: #FFD700; font-weight: bold; font-size: 0.9rem; }
-        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
+        /* Scrollbar Güzelleştirme */
+        ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
     </style>
 </head>
-<body class="pb-20 md:pb-0 text-gray-800">
+<body class="text-gray-800 pb-16 md:pb-0">
 
-    <div class="ticker-wrap border-b-2 border-yellow-500">
-        <div class="ticker">
-            <div class="ticker__item">🔥 ACİL: Kadıköy'de Sahibinden Kiralık Daire</div>
-            <div class="ticker__item">🚀 VİTRİN: Günlük Kiralık PlayStation 5</div>
-            <div class="ticker__item">🚗 FIRSAT: Dizel Otomatik araçlarda %10 İndirim</div>
-            <div class="ticker__item">🎸 Müzik Aletleri kategorimiz açıldı!</div>
-        </div>
-    </div>
-
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div class="container mx-auto px-4 h-20 flex justify-between items-center">
+    <header class="bg-white border-b sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-4 h-20 flex justify-between items-center gap-4">
             
-            <a href="#" onclick="showPage('home')" class="text-3xl font-black tracking-tighter flex items-center group select-none">
-                <span class="bg-bi-yellow px-2 py-1 rounded text-black transform group-hover:-rotate-3 transition duration-300 shadow-md">Bi</span>
-                <span class="ml-1 text-gray-800">Kirala</span>
+            <a href="javascript:void(0)" onclick="app.router('home')" class="text-3xl font-black tracking-tighter flex items-center group shrink-0">
+                <span class="bk-yellow px-2 py-1 rounded-md transform group-hover:-rotate-6 transition duration-300">Bi</span>
+                <span class="ml-1 text-gray-900">Kirala</span>
             </a>
 
-            <div class="hidden md:flex flex-1 mx-10 max-w-2xl relative">
-                <div class="flex w-full">
-                    <input type="text" id="main-search" onkeyup="searchAds(this.value)" placeholder="Ne kiralamak istiyorsun? (Örn: Villa, Gitar, Telefon)" class="w-full border-2 border-gray-200 border-r-0 rounded-l-lg p-3 focus:outline-none focus:border-yellow-400 transition">
-                    <button onclick="searchAds(document.getElementById('main-search').value)" class="bg-gray-900 text-white px-6 rounded-r-lg font-bold hover:bg-gray-800 transition">
-                        <i class="fa-solid fa-search"></i>
-                    </button>
-                </div>
+            <div class="hidden md:flex flex-1 max-w-2xl relative">
+                <input type="text" id="desktop-search" onkeyup="app.search(this.value)" placeholder="Kelime, ilan no veya kategori ara..." class="w-full bg-gray-100 border-2 border-transparent focus:bg-white focus:border-yellow-400 rounded-lg px-4 py-3 outline-none transition">
+                <button class="absolute right-2 top-2 bg-gray-900 text-white px-4 py-1.5 rounded-md hover:bg-gray-700 transition" onclick="app.search(document.getElementById('desktop-search').value)">
+                    <i class="fa-solid fa-search"></i>
+                </button>
             </div>
 
-            <div class="flex items-center gap-4 text-sm font-medium">
-                
-                <button id="admin-panel-btn" onclick="showPage('admin-panel')" class="hidden bg-red-600 text-white px-3 py-2 rounded-lg shadow-lg hover:bg-red-700 animate-pulse transition">
-                    <i class="fa-solid fa-user-secret"></i> Yönetim
+            <div class="flex items-center gap-3">
+                <button id="btn-admin" onclick="app.router('admin')" class="hidden bg-red-600 text-white px-3 py-2 rounded-lg font-bold hover:bg-red-700 shadow-lg animate-pulse">
+                    <i class="fa-solid fa-shield-halved"></i> Panel
                 </button>
 
-                <div id="guest-menu" class="flex items-center gap-3">
-                    <button onclick="toggleModal('login-modal')" class="hover:text-yellow-600 transition">Giriş Yap</button>
+                <div id="nav-guest" class="flex items-center gap-4 text-sm font-semibold">
+                    <button onclick="app.modal('login')" class="hover:text-yellow-600">Giriş Yap</button>
                     <span class="text-gray-300">|</span>
-                    <button onclick="toggleModal('register-modal')" class="hover:text-yellow-600 transition">Kayıt Ol</button>
+                    <button onclick="app.modal('register')" class="hover:text-yellow-600">Kayıt Ol</button>
                 </div>
 
-                <div id="user-menu" class="hidden flex items-center gap-3">
-                    <div class="text-right hidden lg:block cursor-pointer" onclick="showPage('profile')">
-                        <div class="text-xs text-gray-500">Hoşgeldin,</div>
-                        <div class="font-bold text-gray-900" id="nav-username">Kullanıcı</div>
+                <div id="nav-user" class="hidden flex items-center gap-3">
+                    <div class="text-right hidden lg:block cursor-pointer" onclick="app.router('profile')">
+                        <div class="text-xs text-gray-500">Hoşgeldin</div>
+                        <div class="font-bold leading-tight" id="user-display-name">Kullanıcı</div>
                     </div>
-                    <div class="relative group">
-                        <img id="nav-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-10 h-10 rounded-full border-2 border-yellow-400 cursor-pointer object-cover">
-                        <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border hidden group-hover:block z-50">
-                            <a href="#" onclick="showPage('profile')" class="block px-4 py-3 hover:bg-gray-50 border-b"><i class="fa-solid fa-user mr-2 text-gray-400"></i> Profilim</a>
-                            <a href="#" onclick="showPage('messages')" class="block px-4 py-3 hover:bg-gray-50 border-b"><i class="fa-solid fa-envelope mr-2 text-gray-400"></i> Mesajlar</a>
-                            <a href="#" onclick="logout()" class="block px-4 py-3 text-red-600 hover:bg-gray-50"><i class="fa-solid fa-sign-out-alt mr-2"></i> Çıkış Yap</a>
-                        </div>
-                    </div>
+                    <img id="user-display-img" onclick="app.router('profile')" src="" class="w-10 h-10 rounded-full border-2 border-yellow-400 object-cover cursor-pointer">
+                    <button onclick="app.logout()" class="text-red-500 hover:bg-red-50 p-2 rounded-full" title="Çıkış Yap"><i class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
 
-                <button onclick="checkLoginForAd()" class="bg-bi-yellow text-black px-5 py-2.5 rounded-lg font-bold shadow-md hover:bg-yellow-400 transition hidden md:flex items-center gap-2">
-                    <i class="fa-solid fa-plus-circle"></i> Ücretsiz İlan Ver
+                <button onclick="app.checkLoginForAd()" class="bk-yellow bk-yellow-hover text-black px-5 py-2.5 rounded-lg font-bold shadow-md transition hidden md:flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Ücretsiz İlan Ver
                 </button>
             </div>
         </div>
@@ -99,238 +78,166 @@
 
     <div class="container mx-auto px-4 py-6 min-h-screen">
 
-        <div id="home" class="page-section active-section">
+        <div id="page-home" class="section-visible">
             <div class="flex flex-col md:flex-row gap-6">
                 
-                <aside class="w-full md:w-64 flex-shrink-0">
-                    <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
-                        <div class="bg-gray-50 p-3 font-bold text-gray-700 border-b flex justify-between items-center">
-                            <span>Kategoriler</span>
-                            <i class="fa-solid fa-layer-group text-gray-400"></i>
-                        </div>
-                        <ul id="category-list" class="text-sm text-gray-600 max-h-[500px] overflow-y-auto">
+                <aside class="w-full md:w-64 shrink-0">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="p-4 bg-gray-50 border-b font-bold text-gray-700">Kategoriler</div>
+                        <ul id="category-list" class="text-sm">
                             </ul>
                     </div>
-                    
-                    <div onclick="checkLoginForAd()" class="mt-4 bg-gray-900 text-yellow-400 p-6 rounded-lg text-center cursor-pointer shadow-lg group hover:scale-[1.02] transition">
-                        <i class="fa-solid fa-rocket text-4xl mb-3 group-hover:animate-bounce"></i>
-                        <h3 class="font-bold text-lg">Hemen İlan Ver!</h3>
-                        <p class="text-xs text-gray-400 mt-1">Eşyalarını kiraya ver, para kazanmaya başla.</p>
+                    <div onclick="app.checkLoginForAd()" class="mt-4 bg-gradient-to-r from-gray-900 to-gray-800 text-yellow-400 p-6 rounded-xl text-center cursor-pointer shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
+                        <i class="fa-solid fa-bullhorn text-3xl mb-2"></i>
+                        <h3 class="font-bold text-lg text-white">İlanın Var mı?</h3>
+                        <p class="text-xs text-gray-400 mt-1">Hemen kiraya ver, kazan.</p>
                     </div>
                 </aside>
 
                 <main class="flex-1">
-                    
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="w-1 h-6 bg-yellow-400 rounded"></div>
-                        <h2 class="text-xl font-bold text-gray-800">BiKirala Vitrin</h2>
-                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded font-bold border border-yellow-200">Fırsatlar</span>
-                    </div>
-
-                    <div id="vitrin-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="mb-8">
+                        <div class="flex items-center gap-2 mb-4">
+                            <h2 class="text-xl font-bold text-gray-800">Vitrin İlanları</h2>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-bold">Öne Çıkanlar</span>
                         </div>
-
-                    <div class="flex justify-between items-end mb-3 border-b pb-2">
-                        <h2 class="text-xl font-bold text-gray-800">Tüm İlanlar</h2>
-                        <span id="ad-count-label" class="text-xs text-gray-500 font-medium">Yükleniyor...</span>
+                        <div id="vitrin-container" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            </div>
                     </div>
 
-                    <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
-                                <tr>
-                                    <th class="p-3">Görsel</th>
-                                    <th class="p-3">İlan Başlığı</th>
-                                    <th class="p-3">Kategori</th>
-                                    <th class="p-3">Fiyat</th>
-                                    <th class="p-3 hidden md:table-cell">Konum</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ads-table-body" class="divide-y">
-                                </tbody>
-                        </table>
-                        <div id="no-result-msg" class="hidden p-8 text-center text-gray-500">
-                            <i class="fa-solid fa-search text-3xl mb-2 text-gray-300"></i>
-                            <p>Aradığınız kriterde ilan bulunamadı.</p>
+                    <div>
+                        <div class="flex justify-between items-end mb-3 border-b pb-2">
+                            <h2 class="text-xl font-bold text-gray-800">Son Eklenenler</h2>
+                            <span id="result-text" class="text-xs text-gray-500">Tüm ilanlar</span>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-gray-50 text-gray-500">
+                                    <tr>
+                                        <th class="p-3">Görsel</th>
+                                        <th class="p-3">İlan Başlığı</th>
+                                        <th class="p-3">Kategori</th>
+                                        <th class="p-3">Fiyat</th>
+                                        <th class="p-3 hidden md:table-cell">Konum</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ads-list-body" class="divide-y">
+                                    </tbody>
+                            </table>
+                            <div id="no-data" class="hidden p-8 text-center text-gray-400">Aradığınız kriterde ilan bulunamadı.</div>
                         </div>
                     </div>
-
                 </main>
             </div>
         </div>
 
-        <div id="detail" class="page-section">
-            <button onclick="showPage('home')" class="mb-4 text-gray-500 hover:text-black flex items-center gap-2 font-medium">
-                <i class="fa-solid fa-arrow-left"></i> Geri Dön
+        <div id="page-detail" class="section-hidden">
+            <button onclick="app.router('home')" class="mb-4 text-gray-500 hover:text-black font-medium flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Listeye Dön
             </button>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white rounded-xl shadow-lg border p-6 relative">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white rounded-xl p-6 shadow-lg border relative">
                 
-                <button id="delete-ad-btn" class="hidden absolute top-4 right-4 bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-bold hover:bg-red-600 hover:text-white transition z-10">
-                    <i class="fa-solid fa-trash"></i> İlanı Sil
+                <button id="btn-delete-ad" class="hidden absolute top-4 right-4 bg-red-100 text-red-600 px-3 py-1 rounded text-sm font-bold hover:bg-red-600 hover:text-white transition z-10">
+                    <i class="fa-solid fa-trash"></i> Sil
                 </button>
 
                 <div class="md:col-span-2">
-                    <div class="relative h-[400px] bg-gray-100 rounded-lg overflow-hidden border mb-4 group">
-                        <img id="detail-img" src="" class="w-full h-full object-cover">
-                        <div class="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
-                            <i class="fa-solid fa-camera"></i> 1/10
-                        </div>
+                    <div class="h-[400px] bg-gray-200 rounded-lg overflow-hidden mb-2 border">
+                        <img id="d-img" class="w-full h-full object-cover">
                     </div>
-                    <div class="grid grid-cols-5 gap-2" id="detail-thumbs"></div>
-                    
-                    <div class="mt-8">
-                        <h3 class="text-lg font-bold border-b pb-2 mb-3 text-gray-800">İlan Açıklaması</h3>
-                        <p id="detail-desc" class="text-gray-600 leading-relaxed whitespace-pre-wrap"></p>
+                    <div class="flex gap-2" id="d-thumbs"></div>
+                    <div class="mt-6">
+                        <h3 class="font-bold text-lg border-b pb-2 mb-2">Açıklama</h3>
+                        <p id="d-desc" class="text-gray-600 whitespace-pre-wrap"></p>
                     </div>
                 </div>
 
                 <div class="md:col-span-1 space-y-6">
                     <div>
-                        <h1 id="detail-title" class="text-2xl font-bold text-gray-900 leading-tight mb-2"></h1>
-                        <div class="flex items-center gap-2 text-sm text-gray-500">
-                            <i class="fa-solid fa-location-dot"></i> <span id="detail-loc"></span>
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-gray-500 mt-1">
-                             <i class="fa-solid fa-tag"></i> <span id="detail-cat"></span>
-                        </div>
+                        <h1 id="d-title" class="text-2xl font-bold text-gray-900 leading-tight"></h1>
+                        <p class="text-gray-500 text-sm mt-1"><i class="fa-solid fa-location-dot"></i> <span id="d-loc"></span></p>
+                        <p class="text-gray-500 text-sm"><i class="fa-solid fa-layer-group"></i> <span id="d-cat"></span></p>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <span class="block text-xs text-gray-500 font-bold uppercase">Kiralama Bedeli</span>
+                        <span id="d-price" class="text-3xl font-black text-blue-600"></span>
                     </div>
 
-                    <div class="bg-gray-50 p-4 rounded-lg border">
-                        <div class="text-gray-500 text-xs font-bold uppercase mb-1">Kiralama Ücreti</div>
-                        <div id="detail-price" class="text-3xl font-bold text-bi-yellow bg-gray-900 inline-block px-3 py-1 rounded"></div>
-                    </div>
-
-                    <div class="border rounded-lg p-4 flex items-center gap-3">
-                        <img id="detail-owner-img" src="" class="w-14 h-14 rounded-full border">
+                    <div class="flex items-center gap-3 border p-3 rounded-lg">
+                        <img id="d-owner-img" class="w-12 h-12 rounded-full border">
                         <div>
-                            <div class="font-bold text-gray-900" id="detail-owner"></div>
-                            <div class="text-xs text-green-600 font-bold flex items-center gap-1">
-                                <i class="fa-solid fa-check-circle"></i> Onaylı Hesap
-                            </div>
+                            <div id="d-owner" class="font-bold"></div>
+                            <div class="text-xs text-green-600 font-bold"><i class="fa-solid fa-check-circle"></i> Doğrulanmış</div>
                         </div>
                     </div>
 
                     <div class="space-y-2">
-                        <button onclick="Swal.fire('Telefon', '0532 555 00 00', 'info')" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition">
-                            <i class="fa-solid fa-phone mr-2"></i> Ara
-                        </button>
-                        <button onclick="openChat()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">
-                            <i class="fa-solid fa-comment-dots mr-2"></i> Mesaj Gönder
-                        </button>
-                        <button onclick="toggleFav()" id="fav-btn" class="w-full border-2 border-gray-300 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50 transition">
-                            <i class="fa-regular fa-heart mr-2"></i> Favorilere Ekle
-                        </button>
-                    </div>
-
-                    <div class="rounded-lg overflow-hidden border">
-                        <img src="https://static.mapquest.com/mqmaps/3.0.4/images/unavailable_map.png" class="w-full h-32 object-cover opacity-70">
+                        <button onclick="app.showPhone()" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700"><i class="fa-solid fa-phone"></i> Ara</button>
+                        <button onclick="app.openChat()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700"><i class="fa-solid fa-comment"></i> Mesaj At</button>
+                        <button onclick="app.toggleFav()" id="d-fav-btn" class="w-full border-2 border-gray-300 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50"><i class="fa-regular fa-heart"></i> Favorile</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="profile" class="page-section">
-            <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg border overflow-hidden">
-                <div class="bg-gray-900 h-32 relative">
-                    <div class="absolute -bottom-12 left-6">
-                        <img id="profile-img" src="" class="w-24 h-24 rounded-full border-4 border-white object-cover bg-white">
-                        <label class="absolute bottom-0 right-0 bg-yellow-400 p-1.5 rounded-full text-xs cursor-pointer hover:bg-yellow-500 border border-white">
-                            <i class="fa-solid fa-camera"></i>
-                            <input type="file" class="hidden" onchange="changeProfilePic(this)">
+        <div id="page-profile" class="section-hidden">
+            <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden border">
+                <div class="bg-gray-800 h-32 relative">
+                    <div class="absolute -bottom-10 left-8">
+                        <img id="p-img" src="" class="w-24 h-24 rounded-full border-4 border-white bg-white object-cover">
+                        <label class="absolute bottom-0 right-0 bg-yellow-400 p-1 rounded-full cursor-pointer hover:bg-yellow-500 border border-white">
+                            <i class="fa-solid fa-pencil text-xs"></i>
+                            <input type="file" class="hidden" onchange="app.changeProfilePic(this)">
                         </label>
                     </div>
                 </div>
-                <div class="pt-16 pb-6 px-6">
-                    <h2 class="text-2xl font-bold mb-4">Profil Bilgileri</h2>
-                    <form onsubmit="event.preventDefault(); saveProfile();">
+                <div class="pt-14 px-8 pb-8">
+                    <h2 class="text-2xl font-bold mb-4">Profil Ayarları</h2>
+                    <form onsubmit="event.preventDefault(); app.saveProfile()">
                         <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="text-xs font-bold text-gray-500">Ad</label>
-                                <input type="text" id="p-name" class="w-full border p-2 rounded focus:border-yellow-400 outline-none">
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-gray-500">Soyad</label>
-                                <input type="text" id="p-surname" class="w-full border p-2 rounded focus:border-yellow-400 outline-none">
-                            </div>
+                            <input id="p-name" type="text" class="border p-2 rounded" placeholder="Ad">
+                            <input id="p-surname" type="text" class="border p-2 rounded" placeholder="Soyad">
                         </div>
-                        <div class="mb-4">
-                            <label class="text-xs font-bold text-gray-500">E-Posta</label>
-                            <input type="email" id="p-email" class="w-full border p-2 rounded bg-gray-100 text-gray-500" readonly>
-                        </div>
-                        <div class="mb-6">
-                            <label class="text-xs font-bold text-gray-500">Telefon</label>
-                            <input type="tel" id="p-phone" class="w-full border p-2 rounded focus:border-yellow-400 outline-none">
-                        </div>
-                        <button class="w-full bg-gray-900 text-white font-bold py-3 rounded hover:bg-black transition">Değişiklikleri Kaydet</button>
+                        <input id="p-email" type="email" class="w-full border p-2 rounded mb-4 bg-gray-100" readonly>
+                        <input id="p-phone" type="tel" class="w-full border p-2 rounded mb-6" placeholder="Telefon">
+                        <button class="w-full bg-gray-900 text-white font-bold py-3 rounded hover:bg-black">Bilgileri Güncelle</button>
                     </form>
                 </div>
             </div>
         </div>
 
-        <div id="messages" class="page-section">
-            <h2 class="text-2xl font-bold mb-4">Mesaj Kutusu</h2>
-            <div class="flex bg-white border rounded-xl shadow-lg h-[600px] overflow-hidden">
-                <div class="w-1/3 border-r bg-gray-50 overflow-y-auto">
-                    <div class="p-4 bg-white border-b font-bold text-gray-700">Sohbetler</div>
-                    <div class="p-4 hover:bg-yellow-50 cursor-pointer border-b transition bg-white border-l-4 border-l-yellow-400">
-                        <div class="font-bold text-sm">Sistem Mesajı</div>
-                        <div class="text-xs text-gray-500 truncate">Hoşgeldiniz! İlk ilanınızı hemen...</div>
-                    </div>
-                </div>
-                <div class="w-2/3 flex flex-col bg-gray-100">
-                    <div class="p-4 bg-white border-b font-bold shadow-sm flex items-center gap-2">
-                        <div class="w-2 h-2 bg-green-500 rounded-full"></div> Sistem Destek
-                    </div>
-                    <div id="chat-box" class="flex-1 p-4 overflow-y-auto space-y-4">
-                        </div>
-                    <div class="p-4 bg-white border-t flex gap-2">
-                        <input id="chat-input" type="text" class="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:border-yellow-400" placeholder="Bir mesaj yaz...">
-                        <button onclick="sendMsg()" class="bg-blue-600 text-white w-10 h-10 rounded-full hover:bg-blue-700 flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="admin-panel" class="page-section">
-            <div class="bg-gray-900 text-white rounded-xl shadow-xl p-6 mb-6">
+        <div id="page-admin" class="section-hidden">
+            <div class="bg-gray-900 text-white p-6 rounded-xl mb-6 shadow-xl">
                 <div class="flex justify-between items-center mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-red-600 p-2 rounded-lg"><i class="fa-solid fa-shield-halved text-2xl"></i></div>
-                        <div>
-                            <h2 class="text-2xl font-bold">Yönetici Paneli</h2>
-                            <p class="text-xs text-gray-400">Tam Yetkili Erişim Modu</p>
-                        </div>
-                    </div>
-                    <button onclick="showPage('home')" class="text-sm bg-gray-800 px-3 py-1 rounded hover:bg-gray-700">Paneli Kapat</button>
+                    <h2 class="text-3xl font-bold text-red-500 flex items-center gap-2"><i class="fa-solid fa-user-secret"></i> Yönetici Paneli</h2>
+                    <button onclick="app.router('home')" class="text-sm underline">Çıkış</button>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                        <p class="text-gray-400 text-xs uppercase">Toplam Kasa</p>
-                        <p id="admin-balance" class="text-3xl font-black text-green-400 mt-1">0.00 TL</p>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <div class="text-gray-400 text-xs uppercase">Kasa</div>
+                        <div id="admin-kasa" class="text-3xl font-black text-green-400">0 TL</div>
                     </div>
-                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                        <p class="text-gray-400 text-xs uppercase">Aktif İlan</p>
-                        <p id="admin-ad-count" class="text-3xl font-bold text-yellow-400 mt-1">0</p>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <div class="text-gray-400 text-xs uppercase">İlan Sayısı</div>
+                        <div id="admin-ilan-sayisi" class="text-3xl font-bold text-yellow-400">0</div>
                     </div>
-                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                        <p class="text-gray-400 text-xs uppercase">Kullanıcılar</p>
-                        <p id="admin-user-count" class="text-3xl font-bold text-blue-400 mt-1">1,240</p>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <div class="text-gray-400 text-xs uppercase">Üye Sayısı</div>
+                        <div class="text-3xl font-bold text-blue-400">1,204</div>
                     </div>
                 </div>
             </div>
-
+            
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-black text-green-400 p-4 rounded-lg shadow h-96 overflow-y-auto font-mono text-xs border border-gray-800">
-                    <h3 class="text-white border-b border-gray-700 pb-2 mb-2 font-bold">CANLI SİSTEM LOGLARI</h3>
-                    <div id="system-logs" class="space-y-1"></div>
+                <div class="bg-black text-green-400 p-4 rounded-xl h-96 overflow-y-auto font-mono text-xs border border-gray-700">
+                    <h3 class="text-white border-b border-gray-700 pb-2 mb-2">SİSTEM LOGLARI</h3>
+                    <div id="admin-logs"></div>
                 </div>
-                <div class="bg-white p-4 rounded-lg shadow h-96 overflow-y-auto">
-                    <h3 class="font-bold border-b pb-2 mb-2">Tüm İlan Veritabanı</h3>
+                <div class="bg-white p-4 rounded-xl shadow h-96 overflow-y-auto">
+                    <h3 class="font-bold border-b pb-2 mb-2">İlan Yönetimi</h3>
                     <table class="w-full text-xs text-left">
                         <thead class="bg-gray-100"><tr><th class="p-2">ID</th><th class="p-2">Başlık</th><th class="p-2">İşlem</th></tr></thead>
-                        <tbody id="admin-ads-list"></tbody>
+                        <tbody id="admin-ads-table"></tbody>
                     </table>
                 </div>
             </div>
@@ -338,653 +245,479 @@
 
     </div>
 
-    <div class="md:hidden fixed bottom-0 w-full bg-white border-t shadow-[0_-5px_15px_rgba(0,0,0,0.05)] flex justify-around py-3 z-50 text-xs font-medium text-gray-500">
-        <button onclick="showPage('home')" class="flex flex-col items-center gap-1 focus:text-yellow-600"><i class="fa-solid fa-home text-lg"></i> Ana Sayfa</button>
-        <button onclick="showPage('messages')" class="flex flex-col items-center gap-1 focus:text-yellow-600"><i class="fa-solid fa-comment text-lg"></i> Mesajlar</button>
-        <button onclick="checkLoginForAd()" class="flex flex-col items-center -mt-8"><div class="bg-bi-yellow w-14 h-14 rounded-full flex items-center justify-center border-4 border-white shadow-lg text-black"><i class="fa-solid fa-plus text-2xl"></i></div> İlan Ver</button>
-        <button onclick="Swal.fire('Favoriler','Henüz boş.','info')" class="flex flex-col items-center gap-1 focus:text-yellow-600"><i class="fa-solid fa-heart text-lg"></i> Favoriler</button>
-        <button onclick="showPage('profile')" class="flex flex-col items-center gap-1 focus:text-yellow-600"><i class="fa-solid fa-user text-lg"></i> Profil</button>
-    </div>
+    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t flex justify-around py-2 z-50 text-[10px] text-gray-500 font-bold shadow-[0_-5px_10px_rgba(0,0,0,0.05)]">
+        <button onclick="app.router('home')" class="flex flex-col items-center gap-1 focus:text-yellow-600"><i class="fa-solid fa-store text-lg"></i> Vitrin</button>
+        <button onclick="app.checkLoginForAd()" class="flex flex-col items-center -mt-6"><div class="bg-yellow-400 w-14 h-14 rounded-full flex items-center justify-center border-4 border-white shadow-lg text-black"><i class="fa-solid fa-plus text-2xl"></i></div> İlan Ver</button>
+        <button onclick="app.router('profile')" class="flex flex-col items-center gap-1 focus:text-yellow-600"><i class="fa-solid fa-user text-lg"></i> Profil</button>
+    </nav>
 
-    <div id="login-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60] backdrop-blur-sm">
-        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative">
-            <button onclick="toggleModal('login-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="fa-solid fa-times text-xl"></i></button>
+    <div id="modal-login" class="section-hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60] backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-sm relative shadow-2xl">
+            <button onclick="app.closeAllModals()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="fa-solid fa-times text-xl"></i></button>
             <h2 class="text-3xl font-bold mb-6 text-center">Giriş Yap</h2>
-            <form onsubmit="event.preventDefault(); handleLogin();">
-                <div class="mb-4">
-                    <label class="block text-sm font-bold text-gray-700 mb-1">E-Posta</label>
-                    <input id="login-email" type="email" class="w-full border p-3 rounded-lg focus:border-yellow-400 outline-none" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Şifre</label>
-                    <input id="login-pass" type="password" class="w-full border p-3 rounded-lg focus:border-yellow-400 outline-none" required>
-                </div>
-                <div onclick="openForgotPass()" class="text-right text-sm text-blue-600 hover:underline cursor-pointer mb-6">Şifremi Unuttum?</div>
-                <button class="w-full bg-bi-yellow text-black font-bold py-3 rounded-lg hover:bg-yellow-400 transition">Giriş Yap</button>
+            <form onsubmit="event.preventDefault(); app.login()">
+                <input id="in-email" type="email" placeholder="E-posta" class="w-full border p-3 rounded-lg mb-4 bg-gray-50 focus:bg-white focus:border-yellow-400 outline-none" required>
+                <input id="in-pass" type="password" placeholder="Şifre" class="w-full border p-3 rounded-lg mb-2 bg-gray-50 focus:bg-white focus:border-yellow-400 outline-none" required>
+                <div onclick="app.modal('forgot')" class="text-right text-xs text-blue-600 cursor-pointer hover:underline mb-6">Şifremi Unuttum?</div>
+                <button class="w-full bk-yellow p-3 rounded-lg font-bold hover:bg-yellow-400">Giriş Yap</button>
             </form>
-            <div class="mt-4 text-center text-xs text-gray-400">Yönetici Demo: patron@bikirala.com / 1234</div>
+            <div class="mt-4 text-center text-xs text-gray-400">Admin Demo: patron@bikirala.com / 1234</div>
         </div>
     </div>
 
-    <div id="forgot-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[65]">
-        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm text-center">
+    <div id="modal-forgot" class="section-hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[65]">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center">
             <i class="fa-solid fa-lock text-4xl text-yellow-400 mb-4"></i>
-            <h3 class="text-xl font-bold mb-2">Şifre Sıfırlama</h3>
-            <p class="text-sm text-gray-500 mb-4">E-posta adresini gir, sana doğrulama kodu gönderelim.</p>
-            <input id="forgot-email" type="email" placeholder="ornek@email.com" class="w-full border p-3 rounded-lg mb-4">
+            <h3 class="text-xl font-bold mb-2">Şifreni Sıfırla</h3>
+            <p class="text-sm text-gray-500 mb-4">E-posta adresini gir, bağlantı gönderelim.</p>
+            <input id="forgot-email" type="email" placeholder="E-posta" class="w-full border p-3 rounded-lg mb-4 outline-none">
             <div class="flex gap-2">
-                <button onclick="toggleModal('forgot-modal')" class="flex-1 bg-gray-200 py-2 rounded font-bold">İptal</button>
-                <button onclick="handleForgotSubmit()" class="flex-1 bg-black text-white py-2 rounded font-bold">Gönder</button>
+                <button onclick="app.closeAllModals()" class="flex-1 bg-gray-200 py-2 rounded-lg font-bold">İptal</button>
+                <button onclick="app.sendResetLink()" class="flex-1 bg-black text-white py-2 rounded-lg font-bold">Gönder</button>
             </div>
         </div>
     </div>
 
-    <div id="register-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60] backdrop-blur-sm">
-        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative">
-            <button onclick="toggleModal('register-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="fa-solid fa-times text-xl"></i></button>
-            <h2 class="text-3xl font-bold mb-6 text-center">Hesap Oluştur</h2>
-            <form onsubmit="event.preventDefault(); handleRegister();">
-                <div class="flex gap-4 mb-4">
-                    <input id="reg-name" type="text" placeholder="Ad" class="w-full border p-3 rounded-lg" required>
-                    <input id="reg-surname" type="text" placeholder="Soyad" class="w-full border p-3 rounded-lg" required>
+    <div id="modal-register" class="section-hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60] backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-sm relative shadow-2xl">
+            <button onclick="app.closeAllModals()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="fa-solid fa-times text-xl"></i></button>
+            <h2 class="text-3xl font-bold mb-6 text-center">Kayıt Ol</h2>
+            <form onsubmit="event.preventDefault(); app.register()">
+                <div class="flex gap-2 mb-4">
+                    <input id="reg-name" type="text" placeholder="Ad" class="w-full border p-3 rounded-lg bg-gray-50" required>
+                    <input id="reg-surname" type="text" placeholder="Soyad" class="w-full border p-3 rounded-lg bg-gray-50" required>
                 </div>
-                <input id="reg-email" type="email" placeholder="E-posta" class="w-full border p-3 rounded-lg mb-4" required>
-                <input id="reg-phone" type="tel" placeholder="Telefon" class="w-full border p-3 rounded-lg mb-4" required>
-                <input type="password" placeholder="Şifre" class="w-full border p-3 rounded-lg mb-6" required>
-                <button class="w-full bg-gray-900 text-white font-bold py-3 rounded-lg hover:bg-black transition">Kayıt Ol</button>
+                <input id="reg-email" type="email" placeholder="E-posta" class="w-full border p-3 rounded-lg mb-4 bg-gray-50" required>
+                <input id="reg-phone" type="tel" placeholder="Telefon" class="w-full border p-3 rounded-lg mb-4 bg-gray-50" required>
+                <input type="password" placeholder="Şifre" class="w-full border p-3 rounded-lg mb-6 bg-gray-50" required>
+                <button class="w-full bg-gray-900 text-white p-3 rounded-lg font-bold hover:bg-black">Hesap Oluştur</button>
             </form>
         </div>
     </div>
 
-    <div id="ad-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60] overflow-y-auto py-10">
-        <div class="bg-white rounded-xl shadow-2xl w-11/12 max-w-4xl relative overflow-hidden">
+    <div id="modal-create-ad" class="section-hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[60] overflow-y-auto py-10">
+        <div class="bg-white rounded-2xl w-11/12 max-w-4xl relative overflow-hidden shadow-2xl">
             <div class="bg-gray-100 px-6 py-4 border-b flex justify-between items-center">
-                <h3 class="font-bold text-lg"><i class="fa-solid fa-plus-circle text-yellow-500 mr-2"></i> Yeni İlan Oluştur</h3>
-                <button onclick="toggleModal('ad-modal')" class="text-gray-500 hover:text-red-500"><i class="fa-solid fa-times text-xl"></i></button>
+                <h3 class="font-bold text-lg">Yeni İlan Oluştur</h3>
+                <button onclick="app.closeAllModals()" class="text-gray-500 hover:text-red-500"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
-            
-            <form id="ad-form" onsubmit="event.preventDefault(); openPaymentModal();" class="p-6">
+            <form id="form-create-ad" onsubmit="event.preventDefault(); app.initPayment()" class="p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="space-y-4">
-                        <div>
-                            <label class="block font-bold text-sm mb-1">İlan Başlığı</label>
-                            <input id="ad-title" type="text" class="w-full border p-2 rounded focus:border-yellow-400 outline-none" required placeholder="Örn: Temiz Kiralık Çadır">
+                        <input id="ad-title" type="text" placeholder="İlan Başlığı" class="w-full border p-3 rounded-lg focus:border-yellow-400 outline-none" required>
+                        <select id="ad-cat-select" class="w-full border p-3 rounded-lg bg-white" required></select>
+                        <div class="flex gap-2">
+                            <input id="ad-price" type="number" placeholder="Fiyat (TL)" class="w-full border p-3 rounded-lg" required>
+                            <select class="border p-3 rounded-lg bg-white"><option>Günlük</option><option>Aylık</option></select>
                         </div>
-                        <div>
-                            <label class="block font-bold text-sm mb-1">Kategori</label>
-                            <select id="ad-category-select" class="w-full border p-2 rounded bg-white" required>
-                                </select>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block font-bold text-sm mb-1">Fiyat (TL)</label>
-                                <input id="ad-price" type="number" class="w-full border p-2 rounded" required>
-                            </div>
-                            <div>
-                                <label class="block font-bold text-sm mb-1">Periyot</label>
-                                <select class="w-full border p-2 rounded bg-white">
-                                    <option>Günlük</option><option>Haftalık</option><option>Aylık</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block font-bold text-sm mb-1">Açıklama</label>
-                            <textarea id="ad-desc" class="w-full border p-2 rounded h-32 resize-none" placeholder="Ürün detaylarını yaz..." required></textarea>
-                        </div>
-                        <div>
-                            <label class="block font-bold text-sm mb-1">Konum (İl/İlçe)</label>
-                            <input id="ad-loc" type="text" class="w-full border p-2 rounded" required placeholder="Örn: İstanbul, Beşiktaş">
-                        </div>
+                        <input id="ad-loc" type="text" placeholder="Konum (İl/İlçe)" class="w-full border p-3 rounded-lg" required>
+                        <textarea id="ad-desc" placeholder="Açıklama..." class="w-full border p-3 rounded-lg h-32 resize-none" required></textarea>
                     </div>
-
-                    <div class="space-y-6">
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition cursor-pointer">
+                    <div class="space-y-4">
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
                             <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-2"></i>
-                            <p class="font-bold text-gray-600">Fotoğrafları Yükle</p>
-                            <p class="text-xs text-gray-400">(Maksimum 10 Fotoğraf)</p>
-                            <input type="file" multiple class="hidden"> 
+                            <p class="text-sm font-bold text-gray-500">Fotoğrafları Sürükle (Max 10)</p>
+                            <input type="file" multiple class="hidden">
                         </div>
-
                         <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                            <h4 class="font-bold mb-3 flex items-center gap-2"><i class="fa-solid fa-rocket"></i> Öne Çıkarma (Doping)</h4>
-                            
-                            <label class="flex items-center p-3 bg-white border rounded mb-2 cursor-pointer hover:shadow-sm">
-                                <input type="radio" name="doping" value="none" checked class="mr-3">
-                                <div><div class="font-bold text-sm">Standart İlan</div><div class="text-xs text-gray-500">Ücretsiz yayınla.</div></div>
-                                <div class="ml-auto font-bold text-gray-400">0 TL</div>
-                            </label>
-
-                            <label class="flex items-center p-3 bg-white border border-yellow-400 rounded mb-2 cursor-pointer shadow-sm relative overflow-hidden">
-                                <div class="absolute top-0 right-0 bg-yellow-400 text-[10px] px-2 font-bold">POPÜLER</div>
-                                <input type="radio" name="doping" value="vitrin" class="mr-3">
-                                <div><div class="font-bold text-sm">Ana Sayfa Vitrin</div><div class="text-xs text-gray-500">10x Daha fazla görüntülenme.</div></div>
-                                <div class="ml-auto font-bold text-red-600">150 TL</div>
-                            </label>
-
-                            <label class="flex items-center p-3 bg-white border border-red-500 rounded cursor-pointer shadow-sm">
-                                <input type="radio" name="doping" value="acil" class="mr-3">
-                                <div><div class="font-bold text-sm text-red-600">ACİL İlanı</div><div class="text-xs text-gray-500">Kırmızı çerçeve ile dikkat çek.</div></div>
-                                <div class="ml-auto font-bold text-red-600">75 TL</div>
-                            </label>
+                            <h4 class="font-bold mb-3 text-sm">Vitrin Seçenekleri</h4>
+                            <label class="flex items-center p-3 bg-white border rounded mb-2 cursor-pointer"><input type="radio" name="doping" value="none" checked class="mr-2"> <span class="text-sm">Standart (Ücretsiz)</span></label>
+                            <label class="flex items-center p-3 bg-white border border-yellow-400 rounded mb-2 cursor-pointer shadow-sm"><input type="radio" name="doping" value="vitrin" class="mr-2"> <span class="text-sm font-bold">Vitrin (150 TL)</span></label>
+                            <label class="flex items-center p-3 bg-white border border-red-500 rounded cursor-pointer shadow-sm"><input type="radio" name="doping" value="acil" class="mr-2"> <span class="text-sm font-bold text-red-600">ACİL (75 TL)</span></label>
                         </div>
                     </div>
                 </div>
-                <button class="w-full bg-black text-white font-bold py-4 rounded-lg mt-6 hover:bg-gray-800 shadow-lg text-lg">
-                    Devam Et & Yayınla <i class="fa-solid fa-arrow-right ml-2"></i>
-                </button>
+                <button class="w-full bg-black text-white font-bold py-4 rounded-lg mt-6 text-lg hover:bg-gray-800">Devam Et</button>
             </form>
         </div>
     </div>
 
-    <div id="payment-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[70] backdrop-blur-sm">
+    <div id="modal-payment" class="section-hidden fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[70] backdrop-blur-md">
         
-        <div id="pay-step-1" class="bg-white p-6 rounded-xl w-96 relative shadow-2xl">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 border-b pb-2">
-                <i class="fa-solid fa-credit-card text-blue-600"></i> Güvenli Ödeme
-            </h3>
-            <div class="bg-blue-50 text-blue-800 p-3 rounded mb-4 text-sm flex justify-between">
-                <span>Ödenecek Tutar:</span>
-                <span id="pay-amount" class="font-bold text-lg">0 TL</span>
-            </div>
-            <input type="text" placeholder="Kart Üzerindeki İsim" class="w-full border p-2.5 rounded mb-3 bg-gray-50">
-            <div class="relative mb-3">
-                <input id="card-no" type="text" placeholder="Kart Numarası" class="w-full border p-2.5 rounded bg-gray-50" maxlength="19">
-                <i class="fa-brands fa-cc-visa absolute right-3 top-3 text-gray-400 text-xl"></i>
-            </div>
-            <div class="flex gap-3 mb-6">
-                <input type="text" placeholder="AA/YY" class="w-1/2 border p-2.5 rounded bg-gray-50">
-                <input type="text" placeholder="CVC" class="w-1/2 border p-2.5 rounded bg-gray-50" maxlength="3">
-            </div>
+        <div id="pay-step-1" class="bg-white p-6 rounded-2xl w-96 relative shadow-2xl">
+            <h3 class="font-bold text-lg mb-4 border-b pb-2 flex gap-2 items-center"><i class="fa-solid fa-credit-card text-blue-600"></i> Güvenli Ödeme</h3>
+            <div class="bg-blue-50 text-blue-800 p-3 rounded mb-4 flex justify-between font-bold"><span>Tutar:</span><span id="pay-amount">0 TL</span></div>
+            <input type="text" placeholder="Kart Sahibi" class="w-full border p-3 rounded-lg mb-3 bg-gray-50">
+            <input id="card-no" type="text" placeholder="Kart No (16 Hane)" class="w-full border p-3 rounded-lg mb-3 bg-gray-50" maxlength="16">
+            <div class="flex gap-3 mb-4"><input type="text" placeholder="AA/YY" class="w-1/2 border p-3 rounded-lg bg-gray-50"><input type="text" placeholder="CVC" class="w-1/2 border p-3 rounded-lg bg-gray-50"></div>
             <div class="flex gap-2">
-                <button onclick="toggleModal('payment-modal')" class="flex-1 border py-2 rounded text-gray-500 hover:bg-gray-100">İptal</button>
-                <button onclick="start3DSecure()" class="flex-1 bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700 shadow">Öde</button>
+                <button onclick="app.closeAllModals()" class="flex-1 border py-2 rounded-lg font-bold text-gray-500">İptal</button>
+                <button onclick="app.start3D()" class="flex-1 bg-green-600 text-white py-2 rounded-lg font-bold">Öde</button>
             </div>
         </div>
 
-        <div id="pay-step-2" class="hidden bg-white p-8 rounded-xl w-80 text-center shadow-2xl">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" class="h-10 mx-auto mb-4">
-            <h3 class="font-bold text-lg">3D Secure Doğrulama</h3>
-            <p class="text-xs text-gray-500 mb-6">Bankanız tarafından cep telefonunuza gönderilen kodu giriniz.</p>
-            <input type="text" placeholder="SMS Kodu" class="w-full border-b-2 border-gray-300 text-center text-2xl tracking-[0.5em] mb-6 focus:border-black outline-none pb-2" maxlength="6">
-            <button onclick="finishPayment()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700">Onayla</button>
+        <div id="pay-step-2" class="hidden bg-white p-8 rounded-2xl w-80 text-center shadow-2xl">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" class="h-8 mx-auto mb-4">
+            <h3 class="font-bold text-lg">3D Secure</h3>
+            <p class="text-xs text-gray-500 mb-6">SMS Kodunu Giriniz</p>
+            <input type="text" placeholder="SMS Kodu" class="w-full border-b-2 border-gray-300 text-center text-2xl tracking-[0.5em] mb-6 focus:border-black outline-none pb-2">
+            <button onclick="app.finalizePayment()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold">Onayla</button>
         </div>
     </div>
 
     <script>
-        // --- KONFİGÜRASYON ---
-        const ADMIN_EMAIL = "patron@bikirala.com";
-        const ADMIN_PASS = "1234";
+        // Global Uygulama Nesnesi (Her şeyi bunun içine koyduk, çakışma olmaz)
+        const app = {
+            // --- VERİLER ---
+            user: null,
+            isAdmin: false,
+            balance: 0,
+            logs: [],
+            favorites: [],
+            pendingAd: {},
+            categories: ["Emlak", "Vasıta", "Yedek Parça", "Telefon", "Bilgisayar", "Tablet", "Müzik Aleti", "Teknolojik Aletler", "Spor", "Kamp", "Diğer"],
+            ads: [
+                { id: 101, title: "Lüks Villa Kiralık", cat: "Emlak", price: 5000, loc: "İstanbul", img: "https://images.unsplash.com/photo-1600596542815-60c375043302?w=500&q=80", owner: "Ali V.", ownerImg: "https://i.pravatar.cc/150?img=3", vitrin: true, acil: false, desc: "Deniz manzaralı." },
+                { id: 102, title: "1967 Mustang", cat: "Vasıta", price: 2500, loc: "Ankara", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=500&q=80", owner: "Mehmet", ownerImg: "https://i.pravatar.cc/150?img=12", vitrin: true, acil: true, desc: "Klip çekimi için." },
+                { id: 103, title: "Sony Kamera Seti", cat: "Teknolojik Aletler", price: 800, loc: "İzmir", img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80", owner: "Canan", ownerImg: "https://i.pravatar.cc/150?img=5", vitrin: false, acil: false, desc: "Lensler dahil." },
+                { id: 104, title: "iPhone 14 Pro Max", cat: "Telefon", price: 600, loc: "Bursa", img: "https://images.unsplash.com/photo-1678652197831-2d1807413863?w=500&q=80", owner: "Emre", ownerImg: "https://i.pravatar.cc/150?img=60", vitrin: false, acil: false, desc: "Temiz." }
+            ],
 
-        // --- VERİ TABANI (State) ---
-        let currentUser = null;
-        let isAdmin = false;
-        let adminBalance = 0;
-        let systemLogs = [];
-        let favorites = [];
+            // --- BAŞLATMA ---
+            init: function() {
+                this.renderCategories();
+                this.renderAds();
+                this.log("Sistem Başlatıldı.");
+            },
 
-        // KATEGORİLER (İstediğin liste)
-        const categories = [
-            "Emlak", "Vasıta", "Yedek Parça", "Telefon", "Bilgisayar", 
-            "Tablet", "Müzik Aleti", "Teknolojik Aletler", "Spor Ekipmanı", 
-            "Kamp Malzemeleri", "Diğer"
-        ];
+            // --- ROUTER (SAYFA GEÇİŞ) ---
+            router: function(pageId) {
+                // Yetki Kontrolü
+                if ((pageId === 'profile' || pageId === 'messages') && !this.user) {
+                    Swal.fire('Giriş Yapmalısın', 'Bu alan üyelere özeldir.', 'warning');
+                    this.modal('login');
+                    return;
+                }
+                if (pageId === 'admin' && !this.isAdmin) {
+                    Swal.fire('Hata', 'Yetkisiz Giriş!', 'error');
+                    return;
+                }
 
-        // ÖRNEK İLANLAR
-        let ads = [
-            { id: 101, title: "Sahibinden Lüks Villa", category: "Emlak", price: 5000, loc: "İstanbul, Sarıyer", date: "Bugün", img: "https://images.unsplash.com/photo-1600596542815-60c375043302?w=500&q=80", owner: "Ali V.", ownerImg: "https://i.pravatar.cc/150?img=11", isVitrin: true, isAcil: false, desc: "Deniz manzaralı, havuzlu." },
-            { id: 102, title: "1967 Mustang Klasik", category: "Vasıta", price: 2500, loc: "Ankara", date: "Dün", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=500&q=80", owner: "Mehmet Y.", ownerImg: "https://i.pravatar.cc/150?img=12", isVitrin: true, isAcil: true, desc: "Düğün ve klip çekimleri için." },
-            { id: 103, title: "Sony A7 III + Lens", category: "Teknolojik Aletler", price: 800, loc: "İzmir", date: "2 gün önce", img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80", owner: "Canan S.", ownerImg: "https://i.pravatar.cc/150?img=5", isVitrin: false, isAcil: false, desc: "Profesyonel set." },
-            { id: 104, title: "Fender Stratocaster", category: "Müzik Aleti", price: 400, loc: "Bursa", date: "Bugün", img: "https://images.unsplash.com/photo-1550291652-6ea9114a47b1?w=500&q=80", owner: "Rock Shop", ownerImg: "https://i.pravatar.cc/150?img=60", isVitrin: false, isAcil: false, desc: "Sahne için ideal." },
-            { id: 105, title: "iPhone 14 Pro Max", category: "Telefon", price: 600, loc: "Antalya", date: "3 gün önce", img: "https://images.unsplash.com/photo-1678652197831-2d1807413863?w=500&q=80", owner: "Tech Kiralama", ownerImg: "https://i.pravatar.cc/150?img=33", isVitrin: false, isAcil: false, desc: "İçerik üreticileri için." }
-        ];
-
-        // --- SAYFA YÖNETİMİ ---
-        function showPage(pageId) {
-            // Yetki Kontrolleri
-            if((pageId === 'profile' || pageId === 'messages') && !currentUser) {
-                Swal.fire('Giriş Yapmalısınız', 'Bu sayfayı görmek için lütfen giriş yapın.', 'warning');
-                toggleModal('login-modal');
-                return;
-            }
-            if(pageId === 'admin-panel' && !isAdmin) {
-                Swal.fire('Hata', 'Yetkisiz Giriş Denemesi!', 'error');
-                return;
-            }
-
-            // Sayfa Değişimi
-            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active-section'));
-            document.getElementById(pageId).classList.add('active-section');
-            window.scrollTo(0,0);
-
-            // Sayfa Özel Yüklemeleri
-            if(pageId === 'home') renderAds();
-            if(pageId === 'admin-panel') renderAdminStats();
-        }
-
-        function toggleModal(id) {
-            const el = document.getElementById(id);
-            if(el.classList.contains('hidden')) el.classList.remove('hidden');
-            else el.classList.add('hidden');
-        }
-
-        // --- AUTH (Giriş/Kayıt/Şifre) ---
-        function handleLogin() {
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-pass').value;
-
-            // Admin Kontrolü
-            if(email === emeebabaoglu61@gmail.com&& pass === babaemre61) {
-                currentUser = { name: "Yönetici", surname: "Patron", email: email, avatar: "https://cdn-icons-png.flaticon.com/512/295/295128.png", phone: "0850 000 00 00" };
-                isAdmin = true;
-                document.getElementById('admin-panel-btn').classList.remove('hidden');
-                Swal.fire({
-                    title: 'Yönetici Girişi',
-                    text: 'Panele hoşgeldiniz efendim.',
-                    icon: 'success',
-                    confirmButtonColor: '#d33'
+                // Sayfaları Gizle/Göster
+                document.querySelectorAll('[id^="page-"]').forEach(el => {
+                    el.classList.add('section-hidden');
+                    el.classList.remove('section-visible');
                 });
-                addLog('ADMIN sisteme giriş yaptı.');
-            } else {
-                // Normal Kullanıcı Simülasyonu
-                isAdmin = false;
-                document.getElementById('admin-panel-btn').classList.add('hidden');
-                if(!currentUser) {
-                    currentUser = { name: "Ahmet", surname: "Yılmaz", email: email, phone: "0532 123 45 67", avatar: "https://i.pravatar.cc/150?img=68" };
+                
+                const target = document.getElementById('page-' + pageId);
+                if (target) {
+                    target.classList.remove('section-hidden');
+                    target.classList.add('section-visible');
+                    window.scrollTo(0, 0);
                 }
-                Swal.fire('Başarılı', 'Giriş yapıldı.', 'success');
-                addLog(`Kullanıcı giriş yaptı: ${currentUser.name} (${email})`);
-            }
-            updateAuthUI();
-        }
 
-        function handleRegister() {
-            const name = document.getElementById('reg-name').value;
-            const surname = document.getElementById('reg-surname').value;
-            const email = document.getElementById('reg-email').value;
-            const phone = document.getElementById('reg-phone').value;
+                if (pageId === 'home') this.renderAds();
+                if (pageId === 'admin') this.renderAdmin();
+            },
 
-            currentUser = { name, surname, email, phone, avatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png" };
-            toggleModal('register-modal');
-            Swal.fire('Kayıt Başarılı', 'Aramıza hoşgeldin!', 'success');
-            addLog(`Yeni üye kaydı: ${name} ${surname}`);
-            updateAuthUI();
-        }
+            // --- MODAL YÖNETİMİ ---
+            modal: function(name) {
+                this.closeAllModals();
+                const el = document.getElementById('modal-' + name);
+                if (el) el.classList.remove('section-hidden');
+            },
+            closeAllModals: function() {
+                document.querySelectorAll('[id^="modal-"]').forEach(el => el.classList.add('section-hidden'));
+            },
 
-        function updateAuthUI() {
-            if(currentUser) {
-                document.getElementById('guest-menu').classList.add('hidden');
-                document.getElementById('user-menu').classList.remove('hidden');
-                document.getElementById('user-menu').classList.add('flex');
-                document.getElementById('nav-username').innerText = currentUser.name;
-                document.getElementById('nav-avatar').src = currentUser.avatar;
-                
-                // Profil sayfasını doldur
-                document.getElementById('p-name').value = currentUser.name;
-                document.getElementById('p-surname').value = currentUser.surname;
-                document.getElementById('p-email').value = currentUser.email;
-                document.getElementById('p-phone').value = currentUser.phone;
-                document.getElementById('profile-img').src = currentUser.avatar;
-                
-                toggleModal('login-modal');
-            } else {
-                document.getElementById('guest-menu').classList.remove('hidden');
-                document.getElementById('user-menu').classList.add('hidden');
-                document.getElementById('user-menu').classList.remove('flex');
-                document.getElementById('admin-panel-btn').classList.add('hidden');
-            }
-        }
+            // --- ÜYELİK İŞLEMLERİ ---
+            login: function() {
+                const em = document.getElementById('in-email').value;
+                const ps = document.getElementById('in-pass').value;
 
-        function logout() {
-            addLog(`Çıkış yapıldı: ${currentUser.email}`);
-            currentUser = null;
-            isAdmin = false;
-            updateAuthUI();
-            showPage('home');
-            Swal.fire('Çıkış Yapıldı', 'Yine bekleriz.', 'info');
-        }
-
-        // --- ŞİFRE UNUTTUM ---
-        function openForgotPass() {
-            toggleModal('login-modal');
-            toggleModal('forgot-modal');
-        }
-        function handleForgotSubmit() {
-            const email = document.getElementById('forgot-email').value;
-            toggleModal('forgot-modal');
-            Swal.fire({
-                title: 'İşleniyor...',
-                timer: 1500,
-                didOpen: () => { Swal.showLoading() }
-            }).then(() => {
-                Swal.fire('Bağlantı Gönderildi', `${email} adresine sıfırlama linki gönderildi.`, 'success');
-                addLog(`Şifre sıfırlama isteği: ${email}`);
-            });
-        }
-
-        // --- İLAN LİSTELEME & ARAMA ---
-        function renderAds(filterCat = null, searchQuery = null) {
-            const vitrin = document.getElementById('vitrin-container');
-            const list = document.getElementById('ads-table-body');
-            vitrin.innerHTML = '';
-            list.innerHTML = '';
-
-            let filteredAds = ads;
-
-            // Kategori Filtresi
-            if (filterCat) {
-                filteredAds = filteredAds.filter(ad => ad.category === filterCat);
-                document.getElementById('ad-count-label').innerText = `${filterCat} ilanları gösteriliyor`;
-            }
-
-            // Kelime Araması
-            if (searchQuery) {
-                const q = searchQuery.toLowerCase();
-                filteredAds = filteredAds.filter(ad => 
-                    ad.title.toLowerCase().includes(q) || 
-                    ad.category.toLowerCase().includes(q)
-                );
-                document.getElementById('ad-count-label').innerText = `"${searchQuery}" için sonuçlar`;
-            }
+                if (em === "emeebabaoglu61@gmail.com" && ps === "babaemre61") {
+                    this.user = { name: "Patron", surname: "Yönetici", email: em, avatar: "https://cdn-icons-png.flaticon.com/512/295/295128.png", phone: "0000" };
+                    this.isAdmin = true;
+                    document.getElementById('btn-admin').classList.remove('hidden');
+                    Swal.fire({ icon: 'success', title: 'Yönetici Girişi', confirmButtonColor: '#d33' });
+                    this.log("ADMIN giriş yaptı.");
+                } else {
+                    this.isAdmin = false;
+                    document.getElementById('btn-admin').classList.add('hidden');
+                    if (!this.user) this.user = { name: "Ahmet", surname: "Yılmaz", email: em, avatar: "https://i.pravatar.cc/150?img=68", phone: "0532 000 00 00" };
+                    Swal.fire({ icon: 'success', title: 'Hoşgeldin ' + this.user.name, confirmButtonColor: '#FFD000' });
+                    this.log(`Kullanıcı girişi: ${this.user.name}`);
+                }
+                this.updateUI();
+                this.closeAllModals();
+            },
             
-            if(!filterCat && !searchQuery) document.getElementById('ad-count-label').innerText = `${filteredAds.length} ilan listeleniyor`;
+            register: function() {
+                const n = document.getElementById('reg-name').value;
+                const s = document.getElementById('reg-surname').value;
+                const e = document.getElementById('reg-email').value;
+                const p = document.getElementById('reg-phone').value;
+                this.user = { name: n, surname: s, email: e, phone: p, avatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png" };
+                this.closeAllModals();
+                Swal.fire('Kayıt Başarılı', 'Aramıza hoşgeldin!', 'success');
+                this.log(`Yeni üye: ${n} ${s}`);
+                this.updateUI();
+            },
 
-            if(filteredAds.length === 0) {
-                document.getElementById('no-result-msg').classList.remove('hidden');
-            } else {
-                document.getElementById('no-result-msg').classList.add('hidden');
-            }
+            sendResetLink: function() {
+                const e = document.getElementById('forgot-email').value;
+                this.closeAllModals();
+                Swal.fire({ title: 'Gönderiliyor...', timer: 1500, didOpen: () => Swal.showLoading() }).then(() => {
+                    Swal.fire('Başarılı', `${e} adresine link gönderildi.`, 'success');
+                    this.log(`Şifre sıfırlama isteği: ${e}`);
+                });
+            },
 
-            filteredAds.forEach(ad => {
-                // Vitrin Kartı (Sadece Vitrin Olanlar)
-                if(ad.isVitrin) {
-                    vitrin.innerHTML += `
-                    <div onclick="openAdDetail(${ad.id})" class="bg-white rounded-lg shadow-sm border hover:shadow-xl transition cursor-pointer group relative overflow-hidden">
-                        ${ad.isAcil ? '<div class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow z-10 animate-pulse">ACİL</div>' : ''}
-                        <div class="h-40 overflow-hidden">
-                            <img src="${ad.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
-                        </div>
-                        <div class="p-3">
-                            <h3 class="font-bold text-gray-800 truncate mb-1">${ad.title}</h3>
-                            <div class="flex justify-between items-center">
-                                <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">${ad.category}</span>
-                                <span class="text-red-600 font-bold">${ad.price} TL</span>
+            logout: function() {
+                this.log(`Çıkış: ${this.user.name}`);
+                this.user = null;
+                this.isAdmin = false;
+                this.updateUI();
+                this.router('home');
+                Swal.fire('Çıkış Yapıldı', '', 'info');
+            },
+
+            updateUI: function() {
+                if (this.user) {
+                    document.getElementById('nav-guest').classList.add('hidden');
+                    document.getElementById('nav-user').classList.remove('hidden');
+                    document.getElementById('nav-user').classList.add('flex');
+                    document.getElementById('user-display-name').innerText = this.user.name;
+                    document.getElementById('user-display-img').src = this.user.avatar;
+                    
+                    // Profil sayfasını doldur
+                    document.getElementById('p-name').value = this.user.name;
+                    document.getElementById('p-surname').value = this.user.surname;
+                    document.getElementById('p-email').value = this.user.email;
+                    document.getElementById('p-phone').value = this.user.phone;
+                    document.getElementById('p-img').src = this.user.avatar;
+                } else {
+                    document.getElementById('nav-guest').classList.remove('hidden');
+                    document.getElementById('nav-user').classList.add('hidden');
+                    document.getElementById('btn-admin').classList.add('hidden');
+                }
+            },
+            
+            saveProfile: function() {
+                this.user.name = document.getElementById('p-name').value;
+                this.user.surname = document.getElementById('p-surname').value;
+                this.user.phone = document.getElementById('p-phone').value;
+                this.updateUI();
+                Swal.fire('Kaydedildi', '', 'success');
+                this.log(`Profil güncellendi: ${this.user.email}`);
+            },
+            
+            changeProfilePic: function(input) {
+                if (input.files && input.files[0]) {
+                    var r = new FileReader();
+                    r.onload = (e) => {
+                        this.user.avatar = e.target.result;
+                        this.updateUI();
+                    }
+                    r.readAsDataURL(input.files[0]);
+                }
+            },
+
+            // --- İLAN FONKSİYONLARI ---
+            renderCategories: function() {
+                const list = document.getElementById('category-list');
+                const select = document.getElementById('ad-cat-select');
+                list.innerHTML = '';
+                select.innerHTML = '';
+                this.categories.forEach(c => {
+                    list.innerHTML += `<li onclick="app.renderAds('${c}')" class="p-3 border-b hover:bg-yellow-50 cursor-pointer flex justify-between items-center group transition"><span class="group-hover:font-bold">${c}</span><i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i></li>`;
+                    select.innerHTML += `<option value="${c}">${c}</option>`;
+                });
+            },
+
+            renderAds: function(filterCat = null, query = null) {
+                const vitrin = document.getElementById('vitrin-container');
+                const list = document.getElementById('ads-list-body');
+                vitrin.innerHTML = ''; list.innerHTML = '';
+                
+                let data = this.ads;
+                if (filterCat) {
+                    data = data.filter(x => x.cat === filterCat);
+                    document.getElementById('result-text').innerText = filterCat + " ilanları";
+                }
+                if (query) {
+                    const q = query.toLowerCase();
+                    data = data.filter(x => x.title.toLowerCase().includes(q) || x.cat.toLowerCase().includes(q));
+                    document.getElementById('result-text').innerText = "Arama sonuçları";
+                }
+
+                if(data.length === 0) document.getElementById('no-data').classList.remove('hidden');
+                else document.getElementById('no-data').classList.add('hidden');
+
+                data.forEach(ad => {
+                    // Vitrin
+                    if (ad.vitrin) {
+                        vitrin.innerHTML += `
+                        <div onclick="app.detail(${ad.id})" class="bg-white border rounded-xl shadow-sm hover:shadow-xl transition cursor-pointer overflow-hidden relative group">
+                            ${ad.acil ? '<div class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded z-10 animate-pulse">ACİL</div>' : ''}
+                            <img src="${ad.img}" class="w-full h-40 object-cover group-hover:scale-105 transition duration-500">
+                            <div class="p-3">
+                                <h3 class="font-bold text-gray-800 truncate">${ad.title}</h3>
+                                <div class="flex justify-between mt-2 items-center">
+                                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">${ad.cat}</span>
+                                    <span class="font-bold text-blue-600">${ad.price} TL</span>
+                                </div>
                             </div>
-                        </div>
-                    </div>`;
-                }
-
-                // Liste Satırı (Hepsi)
-                list.innerHTML += `
-                <tr onclick="openAdDetail(${ad.id})" class="border-b hover:bg-yellow-50 cursor-pointer transition ${ad.isAcil ? 'bg-red-50' : ''}">
-                    <td class="p-3 w-24">
-                        <img src="${ad.img}" class="w-16 h-12 object-cover rounded border">
-                    </td>
-                    <td class="p-3">
-                        <div class="font-bold text-gray-900">${ad.title}</div>
-                        <div class="md:hidden text-xs text-gray-500">${ad.loc}</div>
-                    </td>
-                    <td class="p-3 text-xs text-gray-500 font-medium">${ad.category}</td>
-                    <td class="p-3 font-bold text-gray-800">${ad.price} TL</td>
-                    <td class="p-3 hidden md:table-cell text-xs text-gray-500"><i class="fa-solid fa-location-dot mr-1"></i> ${ad.loc}</td>
-                </tr>`;
-            });
-            
-            // Yönetici panelindeki sayıyı güncelle
-            if(document.getElementById('admin-ad-count')) document.getElementById('admin-ad-count').innerText = ads.length;
-        }
-
-        function searchAds(query) {
-            if(query.length === 0) renderAds();
-            else renderAds(null, query);
-        }
-
-        function openAdDetail(id) {
-            const ad = ads.find(x => x.id === id);
-            showPage('detail');
-            
-            // Verileri Yerleştir
-            document.getElementById('detail-img').src = ad.img;
-            document.getElementById('detail-title').innerText = ad.title;
-            document.getElementById('detail-price').innerText = ad.price + " TL";
-            document.getElementById('detail-desc').innerText = ad.desc;
-            document.getElementById('detail-loc').innerText = ad.loc + " • " + ad.date;
-            document.getElementById('detail-cat').innerText = ad.category;
-            
-            document.getElementById('detail-owner').innerText = ad.owner;
-            document.getElementById('detail-owner-img').src = ad.ownerImg;
-
-            // Thumbnail Oluştur
-            const thumbs = document.getElementById('detail-thumbs');
-            thumbs.innerHTML = '';
-            for(let i=0; i<5; i++) {
-                thumbs.innerHTML += `<img src="${ad.img}" class="w-full h-14 object-cover rounded border hover:opacity-75 cursor-pointer">`;
-            }
-
-            // Silme Yetkisi (Kendi ilanı veya Admin)
-            const delBtn = document.getElementById('delete-ad-btn');
-            if(currentUser && (ad.owner === currentUser.name || isAdmin)) {
-                delBtn.classList.remove('hidden');
-                delBtn.onclick = function() { deleteAd(ad.id); };
-            } else {
-                delBtn.classList.add('hidden');
-            }
-
-            // Favori Butonu
-            const favBtn = document.getElementById('fav-btn');
-            if(favorites.includes(ad.id)) {
-                favBtn.innerHTML = '<i class="fa-solid fa-heart text-red-500 mr-2"></i> Favorilerden Çıkar';
-            } else {
-                favBtn.innerHTML = '<i class="fa-regular fa-heart mr-2"></i> Favorilere Ekle';
-            }
-            favBtn.setAttribute('data-id', ad.id);
-        }
-
-        // --- İLAN YÖNETİMİ ---
-        function checkLoginForAd() {
-            if(!currentUser) {
-                Swal.fire('Giriş Yap', 'İlan vermek için lütfen giriş yapın.', 'info');
-                toggleModal('login-modal');
-            } else {
-                toggleModal('ad-modal');
-            }
-        }
-
-        let pendingAdData = {};
-
-        function openPaymentModal() {
-            const title = document.getElementById('ad-title').value;
-            if(!title) return; // Basit validasyon
-            
-            const doping = document.querySelector('input[name="doping"]:checked').value;
-            
-            pendingAdData = {
-                doping: doping,
-                title: title,
-                cat: document.getElementById('ad-category-select').value,
-                price: document.getElementById('ad-price').value,
-                desc: document.getElementById('ad-desc').value,
-                loc: document.getElementById('ad-loc').value
-            };
-
-            if(doping === 'none') {
-                finalizeAdCreation(false);
-            } else {
-                const amount = (doping === 'vitrin') ? 150 : 75;
-                document.getElementById('pay-amount').innerText = amount + " TL";
-                toggleModal('ad-modal');
-                toggleModal('payment-modal');
-                document.getElementById('pay-step-1').classList.remove('hidden');
-                document.getElementById('pay-step-2').classList.add('hidden');
-            }
-        }
-
-        function start3DSecure() {
-            const cardNo = document.getElementById('card-no').value;
-            if(cardNo.length < 5) { Swal.fire('Hata','Kart numarası giriniz.','error'); return; }
-
-            Swal.showLoading();
-            setTimeout(() => {
-                Swal.close();
-                document.getElementById('pay-step-1').classList.add('hidden');
-                document.getElementById('pay-step-2').classList.remove('hidden');
-            }, 1500);
-        }
-
-        function finishPayment() {
-            toggleModal('payment-modal');
-            const amount = (pendingAdData.doping === 'vitrin') ? 150 : 75;
-            adminBalance += amount;
-            document.getElementById('admin-balance').innerText = adminBalance.toFixed(2) + " TL";
-            finalizeAdCreation(true);
-        }
-
-        function finalizeAdCreation(isPaid) {
-            const newAd = {
-                id: Date.now(),
-                title: pendingAdData.title,
-                category: pendingAdData.cat,
-                price: pendingAdData.price,
-                loc: pendingAdData.loc,
-                date: "Yeni",
-                desc: pendingAdData.desc,
-                img: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=500&q=80", // Placeholder resim
-                owner: currentUser.name,
-                ownerImg: currentUser.avatar,
-                isVitrin: (pendingAdData.doping === 'vitrin'),
-                isAcil: (pendingAdData.doping === 'acil')
-            };
-
-            ads.unshift(newAd);
-            renderAds();
-            showPage('home');
-            addLog(`Yeni İlan: ${newAd.title} (${newAd.category}) - ${isPaid ? 'Ödemeli' : 'Ücretsiz'}`);
-            Swal.fire('Tebrikler!', isPaid ? 'Ödeme alındı ve ilanınız yayında!' : 'İlanınız yayına alındı.', 'success');
-            
-            document.getElementById('ad-form').reset();
-        }
-
-        function deleteAd(id) {
-            Swal.fire({
-                title: 'Emin misiniz?',
-                text: "İlan kalıcı olarak silinecek!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Evet, Sil'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    ads = ads.filter(x => x.id !== id);
-                    renderAds();
-                    showPage('home');
-                    addLog(`İlan silindi ID: ${id}`);
-                    Swal.fire('Silindi!', '', 'success');
-                }
-            });
-        }
-
-        // --- PROFİL & FAVORİ & CHAT ---
-        function saveProfile() {
-            currentUser.name = document.getElementById('p-name').value;
-            currentUser.surname = document.getElementById('p-surname').value;
-            currentUser.phone = document.getElementById('p-phone').value;
-            document.getElementById('nav-username').innerText = currentUser.name;
-            Swal.fire('Başarılı', 'Profil güncellendi.', 'success');
-            addLog(`Profil güncelleme: ${currentUser.email}`);
-        }
-        
-        function changeProfilePic(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('profile-img').src = e.target.result;
-                    document.getElementById('nav-avatar').src = e.target.result;
-                    currentUser.avatar = e.target.result;
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function toggleFav() {
-            if(!currentUser) { toggleModal('login-modal'); return; }
-            const btn = document.getElementById('fav-btn');
-            const id = parseInt(btn.getAttribute('data-id'));
-            
-            if(favorites.includes(id)) {
-                favorites = favorites.filter(x => x !== id);
-                btn.innerHTML = '<i class="fa-regular fa-heart mr-2"></i> Favorilere Ekle';
-            } else {
-                favorites.push(id);
-                btn.innerHTML = '<i class="fa-solid fa-heart text-red-500 mr-2"></i> Favorilerden Çıkar';
-                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Favorilere eklendi', timer: 1500, showConfirmButton: false });
-            }
-        }
-
-        function openChat() {
-            if(!currentUser) { toggleModal('login-modal'); return; }
-            showPage('messages');
-            const chatBox = document.getElementById('chat-box');
-            chatBox.innerHTML += `
-            <div class="flex justify-end"><div class="bg-bi-yellow p-3 rounded-l-lg rounded-br-lg text-sm max-w-xs shadow">Merhaba, ilan hakkında bilgi alabilir miyim?</div></div>
-            `;
-        }
-
-        function sendMsg() {
-            const val = document.getElementById('chat-input').value;
-            if(!val) return;
-            const chatBox = document.getElementById('chat-box');
-            chatBox.innerHTML += `<div class="flex justify-end"><div class="bg-bi-yellow p-3 rounded-l-lg rounded-br-lg text-sm max-w-xs shadow">${val}</div></div>`;
-            document.getElementById('chat-input').value = '';
-            
-            // Cevap Simülasyonu
-            setTimeout(() => {
-                 chatBox.innerHTML += `<div class="flex justify-start"><div class="bg-white p-3 rounded-r-lg rounded-bl-lg text-sm max-w-xs shadow border">Tabii, buyurun ne sormak istersiniz?</div></div>`;
-                 chatBox.scrollTop = chatBox.scrollHeight;
-            }, 1000);
-        }
-
-        // --- ADMİN LOG & STATS ---
-        function addLog(msg) {
-            const time = new Date().toLocaleTimeString();
-            systemLogs.unshift(`> [${time}] ${msg}`);
-            if(isAdmin) renderAdminStats();
-        }
-
-        function renderAdminStats() {
-            const logContainer = document.getElementById('system-logs');
-            logContainer.innerHTML = systemLogs.map(l => `<div>${l}</div>`).join('');
-            
-            const tbody = document.getElementById('admin-ads-list');
-            tbody.innerHTML = '';
-            ads.forEach(ad => {
-                tbody.innerHTML += `<tr class="border-b"><td class="p-2">${ad.id}</td><td class="p-2 font-bold">${ad.title}</td><td class="p-2"><button onclick="deleteAd(${ad.id})" class="text-red-600 font-bold hover:underline">Sil</button></td></tr>`;
-            });
-        }
-
-        // --- BAŞLANGIÇ (INIT) ---
-        window.onload = function() {
-            // Kategorileri Menüye ve Select'e doldur
-            const catList = document.getElementById('category-list');
-            const catSelect = document.getElementById('ad-category-select');
-            
-            categories.forEach(cat => {
-                // Sidebar
-                catList.innerHTML += `
-                <li onclick="renderAds('${cat}')" class="p-3 border-b hover:bg-yellow-50 cursor-pointer flex justify-between items-center group transition">
-                    <span class="group-hover:text-black group-hover:font-bold transition">${cat}</span>
-                    <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i>
-                </li>`;
+                        </div>`;
+                    }
+                    // Liste
+                    list.innerHTML += `
+                    <tr onclick="app.detail(${ad.id})" class="border-b hover:bg-yellow-50 cursor-pointer transition ${ad.acil?'bg-red-50':''}">
+                        <td class="p-3 w-24"><img src="${ad.img}" class="w-16 h-12 object-cover rounded border"></td>
+                        <td class="p-3 font-bold text-gray-800">${ad.title}</td>
+                        <td class="p-3 text-xs text-gray-500">${ad.cat}</td>
+                        <td class="p-3 font-bold">${ad.price} TL</td>
+                        <td class="p-3 hidden md:table-cell text-xs text-gray-500"><i class="fa-solid fa-location-dot"></i> ${ad.loc}</td>
+                    </tr>`;
+                });
                 
-                // Select Option
-                catSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
-            });
+                if(this.isAdmin) this.renderAdmin(); // Admin tablosunu da güncelle
+            },
 
-            renderAds();
-            addLog('Sistem Başlatıldı (v2.0 Stable)');
-            
-            // Enter tuşu ile mesaj gönderme
-            document.getElementById('chat-input').addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') sendMsg();
-            });
+            search: function(val) {
+                if(!val) this.renderAds();
+                else this.renderAds(null, val);
+            },
+
+            detail: function(id) {
+                const ad = this.ads.find(x => x.id === id);
+                this.router('detail');
+                document.getElementById('d-img').src = ad.img;
+                document.getElementById('d-title').innerText = ad.title;
+                document.getElementById('d-price').innerText = ad.price + " TL";
+                document.getElementById('d-desc').innerText = ad.desc;
+                document.getElementById('d-loc').innerText = ad.loc;
+                document.getElementById('d-cat').innerText = ad.cat;
+                document.getElementById('d-owner').innerText = ad.owner;
+                document.getElementById('d-owner-img').src = ad.ownerImg;
+                
+                // Thumbs
+                const th = document.getElementById('d-thumbs'); th.innerHTML = '';
+                for(let i=0; i<4; i++) th.innerHTML += `<img src="${ad.img}" class="w-20 h-14 object-cover rounded border hover:opacity-75 cursor-pointer">`;
+
+                // Sil Butonu
+                const del = document.getElementById('btn-delete-ad');
+                if(this.user && (this.isAdmin || ad.owner === this.user.name)) {
+                    del.classList.remove('hidden');
+                    del.onclick = () => this.deleteAd(ad.id);
+                } else del.classList.add('hidden');
+
+                // Favori
+                const fav = document.getElementById('d-fav-btn');
+                if(this.favorites.includes(id)) fav.innerHTML = '<i class="fa-solid fa-heart text-red-500"></i> Favorilerden Çıkar';
+                else fav.innerHTML = '<i class="fa-regular fa-heart"></i> Favorile';
+                fav.onclick = () => this.toggleFav(id);
+            },
+
+            deleteAd: function(id) {
+                Swal.fire({title:'Emin misin?', text:'İlan silinecek.', icon:'warning', showCancelButton:true}).then(r=>{
+                    if(r.isConfirmed) {
+                        this.ads = this.ads.filter(x => x.id !== id);
+                        this.renderAds();
+                        this.router('home');
+                        this.log(`İlan silindi ID: ${id}`);
+                        Swal.fire('Silindi','','success');
+                    }
+                });
+            },
+
+            toggleFav: function(id) {
+                if(!this.user) { this.modal('login'); return; }
+                if(!id) return; // Detay sayfasından değilse
+                if(this.favorites.includes(id)) this.favorites = this.favorites.filter(x => x !== id);
+                else this.favorites.push(id);
+                this.detail(id); // Butonu güncelle
+            },
+
+            checkLoginForAd: function() {
+                if(!this.user) { Swal.fire('Giriş Yapmalısın','İlan vermek için üye girişi yap.','info'); this.modal('login'); }
+                else this.modal('create-ad');
+            },
+
+            // --- ÖDEME ---
+            initPayment: function() {
+                const title = document.getElementById('ad-title').value;
+                const doping = document.querySelector('input[name="doping"]:checked').value;
+                
+                this.pendingAd = {
+                    id: Date.now(),
+                    title: title,
+                    cat: document.getElementById('ad-cat-select').value,
+                    price: document.getElementById('ad-price').value,
+                    loc: document.getElementById('ad-loc').value,
+                    desc: document.getElementById('ad-desc').value,
+                    img: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=500&q=80",
+                    owner: this.user.name,
+                    ownerImg: this.user.avatar,
+                    vitrin: (doping === 'vitrin'),
+                    acil: (doping === 'acil')
+                };
+
+                if(doping === 'none') {
+                    this.finishAd(false);
+                } else {
+                    const amt = (doping === 'vitrin') ? 150 : 75;
+                    document.getElementById('pay-amount').innerText = amt + " TL";
+                    this.modal('payment');
+                    document.getElementById('pay-step-1').classList.remove('hidden');
+                    document.getElementById('pay-step-2').classList.add('hidden');
+                }
+            },
+
+            start3D: function() {
+                if(document.getElementById('card-no').value.length < 16) { Swal.fire('Hata','Kart numarası 16 hane olmalı','error'); return; }
+                Swal.showLoading();
+                setTimeout(() => {
+                    Swal.close();
+                    document.getElementById('pay-step-1').classList.add('hidden');
+                    document.getElementById('pay-step-2').classList.remove('hidden');
+                }, 1500);
+            },
+
+            finalizePayment: function() {
+                const amt = this.pendingAd.vitrin ? 150 : 75;
+                this.balance += amt;
+                document.getElementById('admin-kasa').innerText = this.balance + " TL";
+                this.modal('create-ad'); // Modalı kapatmak için trick
+                this.closeAllModals();
+                this.finishAd(true);
+            },
+
+            finishAd: function(paid) {
+                this.ads.unshift(this.pendingAd);
+                this.renderAds();
+                this.router('home');
+                document.getElementById('form-create-ad').reset();
+                this.closeAllModals();
+                this.log(`Yeni İlan: ${this.pendingAd.title} (${paid ? 'Ödemeli' : 'Ücretsiz'})`);
+                Swal.fire('Tebrikler!', 'İlanınız yayına alındı.', 'success');
+            },
+
+            // --- ADMIN & LOGS ---
+            log: function(msg) {
+                const time = new Date().toLocaleTimeString();
+                this.logs.unshift(`[${time}] ${msg}`);
+                if(this.isAdmin) this.renderAdmin();
+            },
+
+            renderAdmin: function() {
+                const logBox = document.getElementById('admin-logs');
+                logBox.innerHTML = this.logs.map(l => `<div class="mb-1 border-b border-gray-800 pb-1">${l}</div>`).join('');
+                
+                const table = document.getElementById('admin-ads-table');
+                table.innerHTML = '';
+                this.ads.forEach(ad => {
+                    table.innerHTML += `<tr class="border-b"><td class="p-2">${ad.id}</td><td class="p-2 font-bold">${ad.title}</td><td class="p-2"><button onclick="app.deleteAd(${ad.id})" class="text-red-600 font-bold hover:underline">Sil</button></td></tr>`;
+                });
+                document.getElementById('admin-ilan-sayisi').innerText = this.ads.length;
+            },
+
+            showPhone: function() { Swal.fire('İletişim', 'Tel: 0532 555 44 33', 'info'); },
+            openChat: function() { Swal.fire('Mesaj', 'Mesajlaşma paneline yönlendiriliyorsunuz (Demo)', 'info'); }
         };
+
+        // Başlat
+        window.onload = () => app.init();
     </script>
 </body>
 </html>
