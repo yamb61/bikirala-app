@@ -11,16 +11,13 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
         
-        /* Renkler */
-        :root { --primary: #FFD000; --bg-light: #f8f9fa; --bg-dark: #111827; --text-light: #1f2937; --text-dark: #f3f4f6; }
-        
+        :root { --primary: #FFD000; --bg-dark: #111827; }
         .bk-yellow { background-color: var(--primary); color: #000; }
         
-        /* Dark Mode Ayarları */
-        body.dark-mode { background-color: var(--bg-dark); color: var(--text-dark); }
+        /* Dark Mode */
+        body.dark-mode { background-color: var(--bg-dark); color: #f3f4f6; }
         .dark-mode .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; color: white !important; }
         .dark-mode .bg-gray-50 { background-color: #374151 !important; color: #e5e7eb !important; }
-        .dark-mode .bg-gray-100 { background-color: #374151 !important; border-color: #4b5563; color: white; }
         .dark-mode .text-gray-500, .dark-mode .text-gray-600 { color: #9ca3af !important; }
         .dark-mode .text-gray-800, .dark-mode .text-gray-900 { color: #f3f4f6 !important; }
         .dark-mode input, .dark-mode select, .dark-mode textarea { background-color: #374151; border-color: #4b5563; color: white; }
@@ -29,9 +26,6 @@
         .section-hidden { display: none !important; }
         .section-visible { display: block !important; animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Bildirim Balonu */
-        .notif-badge { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; bg-red-500; border-radius: 50%; border: 2px solid white; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 pb-20 md:pb-0">
@@ -51,10 +45,8 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <button onclick="app.toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-200 transition" title="Karanlık Mod">
-                    <i class="fa-solid fa-moon text-xl" id="dark-icon"></i>
-                </button>
-
+                <button onclick="app.toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-200 transition" title="Karanlık Mod"><i class="fa-solid fa-moon text-xl" id="dark-icon"></i></button>
+                
                 <div class="relative">
                     <button onclick="app.toggleNotif()" class="p-2 rounded-full hover:bg-gray-200 transition relative">
                         <i class="fa-regular fa-bell text-xl"></i>
@@ -62,15 +54,11 @@
                     </button>
                     <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border z-50 overflow-hidden">
                         <div class="p-3 border-b font-bold text-sm bg-gray-50">Bildirimler</div>
-                        <div id="notif-list" class="max-h-64 overflow-y-auto">
-                            <div class="p-4 text-center text-gray-400 text-xs">Henüz bildirim yok.</div>
-                        </div>
+                        <div id="notif-list" class="max-h-64 overflow-y-auto"><div class="p-4 text-center text-gray-400 text-xs">Henüz bildirim yok.</div></div>
                     </div>
                 </div>
 
-                <button id="btn-admin" onclick="app.router('admin')" class="hidden bg-red-600 text-white px-3 py-2 rounded-lg font-bold shadow-lg animate-pulse text-sm">
-                    <i class="fa-solid fa-shield-halved"></i> Panel
-                </button>
+                <button id="btn-admin" onclick="app.router('admin')" class="hidden bg-red-600 text-white px-3 py-2 rounded-lg font-bold shadow-lg animate-pulse text-sm"><i class="fa-solid fa-shield-halved"></i> Panel</button>
 
                 <div id="nav-guest" class="flex items-center gap-3 text-sm font-bold">
                     <button onclick="app.modal('login')" class="hover:text-yellow-600">Giriş</button>
@@ -87,9 +75,7 @@
                     <button onclick="app.logout()" class="text-red-500 hover:bg-gray-100 p-2 rounded-full"><i class="fa-solid fa-power-off"></i></button>
                 </div>
 
-                <button onclick="app.checkLoginForAd()" class="bk-yellow text-black px-4 py-2 rounded-lg font-bold shadow hover:bg-yellow-400 transition hidden md:flex items-center gap-2 text-sm">
-                    <i class="fa-solid fa-plus"></i> İlan Ver
-                </button>
+                <button onclick="app.checkLoginForAd()" class="bk-yellow text-black px-4 py-2 rounded-lg font-bold shadow hover:bg-yellow-400 transition hidden md:flex items-center gap-2 text-sm"><i class="fa-solid fa-plus"></i> İlan Ver</button>
             </div>
         </div>
     </header>
@@ -103,7 +89,6 @@
                         <div class="p-3 bg-gray-50 border-b font-bold text-gray-700">Kategoriler</div>
                         <ul id="category-list" class="text-sm"></ul>
                     </div>
-                    
                     <div class="bg-white rounded-xl shadow-sm border p-4">
                         <h3 class="font-bold text-gray-700 mb-3 text-sm">Fiyat Aralığı</h3>
                         <div class="flex gap-2 mb-3">
@@ -112,12 +97,6 @@
                         </div>
                         <button onclick="app.applyFilter()" class="w-full bg-gray-900 text-white py-2 rounded text-sm font-bold hover:bg-black">Filtrele</button>
                     </div>
-
-                    <div onclick="app.checkLoginForAd()" class="bg-gradient-to-br from-yellow-400 to-orange-500 text-white p-6 rounded-xl text-center cursor-pointer shadow-lg transform hover:scale-105 transition">
-                        <i class="fa-solid fa-camera text-4xl mb-2"></i>
-                        <h3 class="font-bold">Kiralamaya Başla</h3>
-                        <p class="text-xs opacity-90 mt-1">Eşyaların para kazansın.</p>
-                    </div>
                 </aside>
 
                 <main class="flex-1">
@@ -125,7 +104,6 @@
                         <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-fire text-red-500"></i> Vitrin İlanları</h2>
                         <div id="vitrin-container" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
                     </div>
-
                     <div>
                         <div class="flex justify-between items-end mb-3 border-b pb-2">
                             <h2 class="text-xl font-bold">Son İlanlar</h2>
@@ -147,75 +125,28 @@
             <button onclick="app.router('home')" class="mb-4 text-gray-500 hover:text-black font-medium flex items-center gap-2"><i class="fa-solid fa-arrow-left"></i> Geri</button>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white rounded-xl p-6 shadow-lg border relative">
                 <button id="btn-delete-ad" class="hidden absolute top-4 right-4 bg-red-100 text-red-600 px-3 py-1 rounded text-sm font-bold z-10"><i class="fa-solid fa-trash"></i> Sil</button>
-
                 <div class="md:col-span-2 space-y-6">
                     <div>
                         <div class="h-[400px] bg-gray-200 rounded-lg overflow-hidden mb-2 border"><img id="d-img" class="w-full h-full object-cover"></div>
                         <div class="flex gap-2" id="d-thumbs"></div>
                     </div>
-                    
-                    <div>
-                        <h3 class="font-bold text-lg border-b pb-2 mb-2">Açıklama</h3>
-                        <p id="d-desc" class="text-gray-600 whitespace-pre-wrap leading-relaxed"></p>
-                    </div>
-
+                    <div><h3 class="font-bold text-lg border-b pb-2 mb-2">Açıklama</h3><p id="d-desc" class="text-gray-600 whitespace-pre-wrap leading-relaxed"></p></div>
                     <div class="bg-gray-100 rounded-lg p-4 border">
                         <h3 class="font-bold text-sm mb-2 text-gray-700">Konum</h3>
                         <div class="h-48 bg-gray-300 rounded overflow-hidden relative group cursor-pointer">
                             <img src="https://static.mapquest.com/mqmaps/3.0.4/images/unavailable_map.png" class="w-full h-full object-cover opacity-60">
-                            <div class="absolute inset-0 flex items-center justify-center font-bold text-gray-600 group-hover:text-black">
-                                <i class="fa-solid fa-map-location-dot mr-2"></i> Haritada Göster (Temsili)
-                            </div>
+                            <div class="absolute inset-0 flex items-center justify-center font-bold text-gray-600 group-hover:text-black"><i class="fa-solid fa-map-location-dot mr-2"></i> Harita (Temsili)</div>
                         </div>
                         <div id="d-loc-text" class="text-xs text-gray-500 mt-2 font-bold"></div>
                     </div>
-
-                    <div>
-                        <h3 class="font-bold text-lg border-b pb-2 mb-4">Değerlendirmeler</h3>
-                        <div class="space-y-4">
-                            <div class="bg-gray-50 p-3 rounded-lg border">
-                                <div class="flex justify-between mb-1">
-                                    <span class="font-bold text-sm">Burak K.</span>
-                                    <span class="text-yellow-500 text-xs"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span>
-                                </div>
-                                <p class="text-xs text-gray-600">Ürün çok temizdi ve tam zamanında teslim edildi. Teşekkürler!</p>
-                            </div>
-                            <div class="bg-gray-50 p-3 rounded-lg border">
-                                <div class="flex justify-between mb-1">
-                                    <span class="font-bold text-sm">Ayşe Y.</span>
-                                    <span class="text-yellow-500 text-xs"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i></span>
-                                </div>
-                                <p class="text-xs text-gray-600">İletişim iyiydi ama trafikten dolayı biraz geç ulaştım.</p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-
                 <div class="md:col-span-1 space-y-6">
-                    <div>
-                        <h1 id="d-title" class="text-2xl font-bold leading-tight"></h1>
-                        <p class="text-gray-500 text-sm mt-1"><i class="fa-solid fa-layer-group"></i> <span id="d-cat"></span></p>
-                    </div>
-                    
-                    <div class="bg-gray-50 p-4 rounded-lg border">
-                        <span class="block text-xs text-gray-500 font-bold uppercase">Kiralama Bedeli</span>
-                        <span id="d-price" class="text-3xl font-black text-blue-600"></span>
-                    </div>
-
+                    <div><h1 id="d-title" class="text-2xl font-bold leading-tight"></h1><p class="text-gray-500 text-sm mt-1"><i class="fa-solid fa-layer-group"></i> <span id="d-cat"></span></p></div>
+                    <div class="bg-gray-50 p-4 rounded-lg border"><span class="block text-xs text-gray-500 font-bold uppercase">Kiralama Bedeli</span><span id="d-price" class="text-3xl font-black text-blue-600"></span></div>
                     <div class="border rounded-lg p-4 bg-white shadow-sm">
-                        <div class="flex items-center gap-3 mb-3">
-                            <img id="d-owner-img" class="w-12 h-12 rounded-full border">
-                            <div>
-                                <div id="d-owner" class="font-bold"></div>
-                                <div class="text-xs text-green-600 font-bold"><i class="fa-solid fa-check-circle"></i> Doğrulanmış</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between bg-yellow-50 p-2 rounded border border-yellow-100">
-                            <span class="text-xs font-bold text-yellow-800">Satıcı Puanı</span>
-                            <span class="font-bold text-yellow-600 flex items-center gap-1"><i class="fa-solid fa-star"></i> 4.8</span>
-                        </div>
+                        <div class="flex items-center gap-3 mb-3"><img id="d-owner-img" class="w-12 h-12 rounded-full border"><div><div id="d-owner" class="font-bold"></div><div class="text-xs text-green-600 font-bold"><i class="fa-solid fa-check-circle"></i> Doğrulanmış</div></div></div>
+                        <div class="flex items-center justify-between bg-yellow-50 p-2 rounded border border-yellow-100"><span class="text-xs font-bold text-yellow-800">Satıcı Puanı</span><span class="font-bold text-yellow-600 flex items-center gap-1"><i class="fa-solid fa-star"></i> 4.8</span></div>
                     </div>
-
                     <div class="space-y-2">
                         <button onclick="app.showPhone()" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 shadow"><i class="fa-solid fa-phone"></i> Ara</button>
                         <button onclick="app.openChat()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 shadow"><i class="fa-solid fa-comment"></i> Mesaj At</button>
@@ -226,31 +157,36 @@
         </div>
 
         <div id="page-profile" class="section-hidden">
-            <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden border">
-                <div class="bg-gray-800 h-32 relative">
-                    <div class="absolute -bottom-10 left-8">
-                        <img id="p-img" src="" class="w-24 h-24 rounded-full border-4 border-white bg-white object-cover">
-                        <label class="absolute bottom-0 right-0 bg-yellow-400 p-1 rounded-full cursor-pointer hover:bg-yellow-500 border border-white"><i class="fa-solid fa-pencil text-xs"></i><input type="file" class="hidden" onchange="app.changeProfilePic(this)"></label>
+            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden border">
+                    <div class="bg-gray-800 h-24 relative">
+                        <div class="absolute -bottom-10 left-6">
+                            <img id="p-img" src="" class="w-20 h-20 rounded-full border-4 border-white bg-white object-cover">
+                            <label class="absolute bottom-0 right-0 bg-yellow-400 p-1 rounded-full cursor-pointer hover:bg-yellow-500 border border-white"><i class="fa-solid fa-camera text-xs"></i><input type="file" class="hidden" onchange="app.changeProfilePic(this)"></label>
+                        </div>
+                    </div>
+                    <div class="pt-12 px-6 pb-6">
+                        <h2 class="text-xl font-bold mb-4">Bilgilerim</h2>
+                        <form onsubmit="event.preventDefault(); app.saveProfile()">
+                            <div class="grid grid-cols-2 gap-2 mb-3"><input id="p-name" type="text" class="border p-2 rounded text-sm" placeholder="Ad"><input id="p-surname" type="text" class="border p-2 rounded text-sm" placeholder="Soyad"></div>
+                            <input id="p-email" type="email" class="w-full border p-2 rounded mb-3 bg-gray-100 text-sm" readonly><input id="p-phone" type="tel" class="w-full border p-2 rounded mb-4 text-sm" placeholder="Telefon">
+                            <button class="w-full bg-gray-900 text-white font-bold py-2 rounded hover:bg-black text-sm">Güncelle</button>
+                        </form>
                     </div>
                 </div>
-                <div class="pt-14 px-8 pb-8">
-                    <h2 class="text-2xl font-bold mb-4">Profil Ayarları</h2>
-                    <form onsubmit="event.preventDefault(); app.saveProfile()">
-                        <div class="grid grid-cols-2 gap-4 mb-4"><input id="p-name" type="text" class="border p-2 rounded" placeholder="Ad"><input id="p-surname" type="text" class="border p-2 rounded" placeholder="Soyad"></div>
-                        <input id="p-email" type="email" class="w-full border p-2 rounded mb-4 bg-gray-100" readonly>
-                        <input id="p-phone" type="tel" class="w-full border p-2 rounded mb-6" placeholder="Telefon">
-                        <button class="w-full bg-gray-900 text-white font-bold py-3 rounded hover:bg-black">Kaydet</button>
-                    </form>
+                <div class="bg-white rounded-xl shadow-lg border p-6 flex flex-col h-full">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-list-check text-yellow-500"></i> İlanlarım</h2>
+                    <div class="flex-1 overflow-y-auto max-h-80 pr-2">
+                        <div id="my-ads-list" class="space-y-3"><div class="text-center text-gray-400 text-sm mt-10">Yükleniyor...</div></div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t text-xs text-gray-400 text-center">Toplam <span id="my-ads-count" class="font-bold text-black">0</span> ilanınız var.</div>
                 </div>
             </div>
         </div>
 
         <div id="page-admin" class="section-hidden">
             <div class="bg-gray-900 text-white p-6 rounded-xl mb-6 shadow-xl">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-3xl font-bold text-red-500 flex items-center gap-2"><i class="fa-solid fa-user-secret"></i> Admin Paneli</h2>
-                    <button onclick="app.router('home')" class="text-sm underline">Çıkış</button>
-                </div>
+                <div class="flex justify-between items-center mb-6"><h2 class="text-3xl font-bold text-red-500 flex items-center gap-2"><i class="fa-solid fa-user-secret"></i> Yönetici Paneli</h2><button onclick="app.router('home')" class="text-sm underline">Çıkış</button></div>
                 <div class="grid grid-cols-3 gap-4 text-center">
                     <div class="bg-gray-800 p-4 rounded-lg"><div class="text-gray-400 text-xs uppercase">Kasa</div><div id="admin-kasa" class="text-3xl font-black text-green-400">0 TL</div></div>
                     <div class="bg-gray-800 p-4 rounded-lg"><div class="text-gray-400 text-xs uppercase">İlan</div><div id="admin-ilan-sayisi" class="text-3xl font-bold text-yellow-400">0</div></div>
@@ -259,7 +195,7 @@
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="bg-black text-green-400 p-4 rounded-xl h-96 overflow-y-auto font-mono text-xs border border-gray-700"><h3 class="text-white border-b border-gray-700 pb-2 mb-2">LOGLAR</h3><div id="admin-logs"></div></div>
-                <div class="bg-white p-4 rounded-xl shadow h-96 overflow-y-auto"><h3 class="font-bold border-b pb-2 mb-2">İlanlar</h3><table class="w-full text-xs text-left"><thead class="bg-gray-100"><tr><th class="p-2">ID</th><th class="p-2">Başlık</th><th class="p-2">İşlem</th></tr></thead><tbody id="admin-ads-table"></tbody></table></div>
+                <div class="bg-white p-4 rounded-xl shadow h-96 overflow-y-auto"><h3 class="font-bold border-b pb-2 mb-2">Tüm İlanlar</h3><table class="w-full text-xs text-left"><thead class="bg-gray-100"><tr><th class="p-2">ID</th><th class="p-2">Başlık</th><th class="p-2">İşlem</th></tr></thead><tbody id="admin-ads-table"></tbody></table></div>
             </div>
         </div>
     </div>
@@ -287,7 +223,6 @@
         <div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center">
             <i class="fa-solid fa-lock text-4xl text-yellow-400 mb-4"></i>
             <h3 class="text-xl font-bold mb-2">Şifre Sıfırlama</h3>
-            <p class="text-sm text-gray-500 mb-4">E-posta adresini gir, doğrulama kodu gönderelim.</p>
             <input id="forgot-email" type="email" placeholder="E-posta" class="w-full border p-3 rounded-lg mb-4 outline-none">
             <div class="flex gap-2"><button onclick="app.closeAllModals()" class="flex-1 bg-gray-200 py-2 rounded-lg font-bold">İptal</button><button onclick="app.sendResetLink()" class="flex-1 bg-black text-white py-2 rounded-lg font-bold">Gönder</button></div>
         </div>
@@ -323,7 +258,6 @@
                             <p class="text-sm font-bold text-gray-500 group-hover:text-gray-800">Dokun ve Fotoğraf Seç</p>
                             <input id="ad-file-input" type="file" multiple class="hidden" onchange="if(this.files.length>0)Swal.fire({toast:true,position:'top-end',icon:'success',title:this.files.length+' foto seçildi',timer:1500,showConfirmButton:false})">
                         </div>
-                        
                         <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                             <h4 class="font-bold mb-3 text-sm">Vitrin Seçenekleri</h4>
                             <label class="flex items-center p-3 bg-white border rounded mb-2 cursor-pointer"><input type="radio" name="doping" value="none" checked class="mr-2"> <span class="text-sm">Standart</span></label>
@@ -370,45 +304,21 @@
                 if(pid==='admin'&&!this.isAdmin){Swal.fire('Hata','Yetkisiz','error');return;}
                 document.querySelectorAll('[id^="page-"]').forEach(el=>{el.classList.add('section-hidden');el.classList.remove('section-visible');});
                 const t=document.getElementById('page-'+pid); if(t){t.classList.remove('section-hidden');t.classList.add('section-visible');window.scrollTo(0,0);}
-                if(pid==='home')this.renderAds(); if(pid==='admin')this.renderAdmin();
+                if(pid==='home')this.renderAds(); if(pid==='admin')this.renderAdmin(); if(pid==='profile')this.renderMyAds();
             },
             modal: function(n){this.closeAllModals();const e=document.getElementById('modal-'+n);if(e)e.classList.remove('section-hidden');},
             closeAllModals: function(){document.querySelectorAll('[id^="modal-"]').forEach(el=>el.classList.add('section-hidden'));},
             
-            // --- DARK MODE ---
-            toggleDarkMode: function() {
-                document.body.classList.toggle('dark-mode');
-                const ic = document.getElementById('dark-icon');
-                if(document.body.classList.contains('dark-mode')) ic.classList.replace('fa-moon', 'fa-sun');
-                else ic.classList.replace('fa-sun', 'fa-moon');
-            },
-
-            // --- BİLDİRİMLER ---
-            toggleNotif: function() {
-                const el = document.getElementById('notif-dropdown');
-                el.classList.toggle('hidden');
-                document.getElementById('notif-badge').classList.add('hidden'); // Okundu say
-            },
-            sendNotif: function(msg) {
-                const list = document.getElementById('notif-list');
-                const badge = document.getElementById('notif-badge');
-                if(list.innerText.includes('yok')) list.innerHTML = '';
-                list.innerHTML = `<div class="p-3 border-b text-xs hover:bg-gray-50">${msg}</div>` + list.innerHTML;
-                badge.classList.remove('hidden');
-            },
-
-            // --- FİLTRELEME ---
-            applyFilter: function() {
-                const min = document.getElementById('filter-min').value;
-                const max = document.getElementById('filter-max').value;
-                this.renderAds(null, null, min, max);
-            },
+            toggleDarkMode: function() {document.body.classList.toggle('dark-mode');const ic=document.getElementById('dark-icon');if(document.body.classList.contains('dark-mode'))ic.classList.replace('fa-moon','fa-sun');else ic.classList.replace('fa-sun','fa-moon');},
+            toggleNotif: function() {const el=document.getElementById('notif-dropdown');el.classList.toggle('hidden');document.getElementById('notif-badge').classList.add('hidden');},
+            sendNotif: function(msg) {const l=document.getElementById('notif-list');const b=document.getElementById('notif-badge');if(l.innerText.includes('yok'))l.innerHTML='';l.innerHTML=`<div class="p-3 border-b text-xs hover:bg-gray-50">${msg}</div>`+l.innerHTML;b.classList.remove('hidden');},
+            applyFilter: function() {const min=document.getElementById('filter-min').value;const max=document.getElementById('filter-max').value;this.renderAds(null,null,min,max);},
 
             login: function(){
                 const e=document.getElementById('in-email').value; const p=document.getElementById('in-pass').value;
                 if(e==="emeebabaoglu61@gmail.com"&&p==="babaemre61"){this.user={name:"Patron",surname:"Yönetici",email:e,avatar:"https://cdn-icons-png.flaticon.com/512/295/295128.png"};this.isAdmin=true;document.getElementById('btn-admin').classList.remove('hidden');Swal.fire({icon:'success',title:'Yönetici Girişi'});this.log("ADMIN giriş.");}
                 else{this.isAdmin=false;document.getElementById('btn-admin').classList.add('hidden');if(!this.user)this.user={name:"Ahmet",surname:"Yılmaz",email:e,avatar:"https://i.pravatar.cc/150?img=68",phone:"0532 000"};Swal.fire({icon:'success',title:'Hoşgeldin '+this.user.name});this.log(`Giriş: ${this.user.name}`);}
-                this.updateUI(); this.closeAllModals(); this.sendNotif("Giriş yapıldı. Hoşgeldiniz!");
+                this.updateUI(); this.closeAllModals(); this.sendNotif("Giriş yapıldı.");
             },
             register: function(){const n=document.getElementById('reg-name').value;this.user={name:n,surname:document.getElementById('reg-surname').value,email:document.getElementById('reg-email').value,avatar:"https://cdn-icons-png.flaticon.com/512/149/149071.png"};this.closeAllModals();Swal.fire('Kayıt Başarılı','','success');this.updateUI();},
             logout: function(){this.user=null;this.isAdmin=false;this.updateUI();this.router('home');Swal.fire('Çıkış','','info');},
@@ -434,16 +344,28 @@
                 });
                 if(this.isAdmin)this.renderAdmin();
             },
+            renderMyAds: function() {
+                const c = document.getElementById('my-ads-list');
+                const cnt = document.getElementById('my-ads-count');
+                if(!c || !this.user) return;
+                c.innerHTML = '';
+                const my = this.ads.filter(a => a.owner === this.user.name);
+                if(cnt) cnt.innerText = my.length;
+                if(my.length === 0) { c.innerHTML = '<div class="text-center text-gray-400 text-sm mt-4">İlanınız yok.</div>'; return; }
+                my.forEach(ad => {
+                    c.innerHTML += `<div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border hover:border-yellow-400 transition"><div class="flex items-center gap-3"><img src="${ad.img}" class="w-12 h-12 rounded object-cover border"><div><div class="font-bold text-sm text-gray-800 cursor-pointer" onclick="app.detail(${ad.id})">${ad.title}</div><div class="text-xs text-gray-500">${ad.price} TL</div></div></div><button onclick="app.deleteAd(${ad.id})" class="text-red-500 hover:bg-red-100 p-2 rounded-full transition"><i class="fa-solid fa-trash"></i></button></div>`;
+                });
+            },
             search: function(v){if(!v)this.renderAds();else this.renderAds(null,v);},
             detail: function(id){
                 const ad=this.ads.find(x=>x.id===id);this.router('detail');
-                document.getElementById('d-img').src=ad.img;document.getElementById('d-title').innerText=ad.title;document.getElementById('d-price').innerText=ad.price+" TL";document.getElementById('d-desc').innerText=ad.desc;document.getElementById('d-loc').innerText=ad.loc;document.getElementById('d-loc-text').innerText=ad.loc;document.getElementById('d-cat').innerText=ad.cat;document.getElementById('d-owner').innerText=ad.owner;document.getElementById('d-owner-img').src=ad.ownerImg;
+                document.getElementById('d-img').src=ad.img;document.getElementById('d-title').innerText=ad.title;document.getElementById('d-price').innerText=ad.price+" TL";document.getElementById('d-desc').innerText=ad.desc;document.getElementById('d-loc-text').innerText=ad.loc;document.getElementById('d-cat').innerText=ad.cat;document.getElementById('d-owner').innerText=ad.owner;document.getElementById('d-owner-img').src=ad.ownerImg;
                 const th=document.getElementById('d-thumbs');th.innerHTML='';for(let i=0;i<4;i++)th.innerHTML+=`<img src="${ad.img}" class="w-20 h-14 object-cover rounded border hover:opacity-75 cursor-pointer">`;
                 const del=document.getElementById('btn-delete-ad');if(this.user&&(this.isAdmin||ad.owner===this.user.name)){del.classList.remove('hidden');del.onclick=()=>this.deleteAd(ad.id);}else del.classList.add('hidden');
                 const fav=document.getElementById('d-fav-btn');if(this.favorites.includes(id))fav.innerHTML='<i class="fa-solid fa-heart text-red-500"></i> Favorilerden Çıkar';else fav.innerHTML='<i class="fa-regular fa-heart"></i> Favorile';fav.onclick=()=>this.toggleFav(id);
             },
-            deleteAd: function(id){Swal.fire({title:'Silinsin mi?',icon:'warning',showCancelButton:true}).then(r=>{if(r.isConfirmed){this.ads=this.ads.filter(x=>x.id!==id);this.renderAds();this.router('home');this.log(`İlan silindi ID: ${id}`);Swal.fire('Silindi','','success');}});},
-            toggleFav: function(id){if(!this.user){this.modal('login');return;}if(this.favorites.includes(id))this.favorites=this.favorites.filter(x=>x!==id);else{this.favorites.push(id);this.sendNotif("İlan favorilere eklendi.");}this.detail(id);},
+            deleteAd: function(id){Swal.fire({title:'Silinsin mi?',icon:'warning',showCancelButton:true}).then(r=>{if(r.isConfirmed){this.ads=this.ads.filter(x=>x.id!==id);this.renderAds();if(document.getElementById('page-profile').classList.contains('section-visible')) this.renderMyAds(); else this.router('home');this.log(`İlan silindi ID: ${id}`);Swal.fire('Silindi','','success');}});},
+            toggleFav: function(id){if(!this.user){this.modal('login');return;}if(this.favorites.includes(id))this.favorites=this.favorites.filter(x=>x!==id);else{this.favorites.push(id);this.sendNotif("Favorilere eklendi.");}this.detail(id);},
             checkLoginForAd: function(){if(!this.user){Swal.fire('Giriş Yapmalısın','','info');this.modal('login');}else this.modal('create-ad');},
             initPayment: function(){
                 const t=document.getElementById('ad-title').value;const d=document.querySelector('input[name="doping"]:checked').value;
@@ -452,7 +374,7 @@
             },
             start3D: function(){if(document.getElementById('card-no').value.length<16){Swal.fire('Hata','Kart No Eksik','error');return;}Swal.showLoading();setTimeout(()=>{Swal.close();document.getElementById('pay-step-1').classList.add('hidden');document.getElementById('pay-step-2').classList.remove('hidden');},1500);},
             finalizePayment: function(){const a=this.pendingAd.vitrin?150:75;this.balance+=a;document.getElementById('admin-kasa').innerText=this.balance+" TL";this.modal('create-ad');this.closeAllModals();this.finishAd(true);},
-            finishAd: function(p){this.ads.unshift(this.pendingAd);this.renderAds();this.router('home');document.getElementById('form-create-ad').reset();this.closeAllModals();this.log(`Yeni İlan: ${this.pendingAd.title}`);Swal.fire('Tebrikler!','İlan yayında.','success');this.sendNotif("İlanınız başarıyla yayınlandı.");},
+            finishAd: function(p){this.ads.unshift(this.pendingAd);this.renderAds();this.router('home');document.getElementById('form-create-ad').reset();this.closeAllModals();this.log(`Yeni İlan: ${this.pendingAd.title}`);Swal.fire('Tebrikler!','İlan yayında.','success');this.sendNotif("İlanınız yayınlandı.");},
             log: function(m){const t=new Date().toLocaleTimeString();this.logs.unshift(`[${t}] ${m}`);if(this.isAdmin)this.renderAdmin();},
             renderAdmin: function(){document.getElementById('admin-logs').innerHTML=this.logs.map(l=>`<div class="mb-1 border-b border-gray-800 pb-1">${l}</div>`).join('');const t=document.getElementById('admin-ads-table');t.innerHTML='';this.ads.forEach(ad=>{t.innerHTML+=`<tr class="border-b"><td class="p-2">${ad.id}</td><td class="p-2 font-bold">${ad.title}</td><td class="p-2"><button onclick="app.deleteAd(${ad.id})" class="text-red-600 font-bold hover:underline">Sil</button></td></tr>`;});document.getElementById('admin-ilan-sayisi').innerText=this.ads.length;},
             showPhone: function(){Swal.fire('İletişim','Tel: 0532 555 44 33','info');}, openChat: function(){Swal.fire('Mesaj','Panel açılıyor...','info');},
