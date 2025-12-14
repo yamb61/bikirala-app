@@ -3,30 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - Güvenli Kiralama Platformu</title>
+    <title>BiKirala - Gelişmiş Kiralama Platformu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
         body { font-family: 'Roboto', sans-serif; background-color: #f1f1f1; }
         
-        .ticker-wrap {
-            width: 100%; overflow: hidden; background-color: #000;
-            padding-left: 100%; box-sizing: border-box; height: 40px; line-height: 40px;
-        }
-        .ticker {
-            display: inline-block; height: 40px; line-height: 40px; white-space: nowrap; 
-            padding-right: 100%; box-sizing: border-box; animation: ticker 30s linear infinite;
-        }
+        .ticker-wrap { width: 100%; overflow: hidden; background-color: #000; padding-left: 100%; box-sizing: border-box; height: 40px; line-height: 40px; }
+        .ticker { display: inline-block; height: 40px; line-height: 40px; white-space: nowrap; padding-right: 100%; box-sizing: border-box; animation: ticker 30s linear infinite; }
         .ticker__item { display: inline-block; padding: 0 2rem; font-size: 0.9rem; color: #FFD700; font-weight: bold; }
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
         .page-section { display: none; }
         .active-section { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Sidebar Scroll */
+        .sidebar-scroll { max-height: calc(100vh - 100px); overflow-y: auto; }
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: #ccc; }
     </style>
 </head>
 <body class="pb-20 md:pb-0">
@@ -35,20 +33,20 @@
         <div class="ticker">
             <div class="ticker__item">🔥 ACİL: Kadıköy'de Kiralık 3+1 Daire (Günde 1500 TL)</div>
             <div class="ticker__item">🚀 VİTRİN: BMW 5.20d Makam Aracı - Şoförlü</div>
-            <div class="ticker__item">📸 SONY A7III Set - 2 Lens ile birlikte</div>
+            <div class="ticker__item">💻 MacBook Pro M2 - Proje İçin Haftalık Kiralık</div>
         </div>
     </div>
 
     <header class="bg-gray-100 border-b border-gray-300 sticky top-0 z-40">
         <div class="container mx-auto px-4 h-16 flex justify-between items-center">
-            <a href="#" onclick="showPage('home')" class="text-2xl font-bold flex items-center gap-1 group">
+            <a href="#" onclick="showPage('home'); renderAds();" class="text-2xl font-bold flex items-center gap-1 group">
                 <div class="bg-yellow-400 px-2 py-1 rounded text-black font-black transform group-hover:rotate-3 transition">Bi</div>
                 <span class="text-gray-800">Kirala</span>
             </a>
 
             <div class="hidden md:flex flex-1 mx-8 relative">
-                <input type="text" id="searchInput" placeholder="Kelime, ilan no veya mağaza adı ile ara" class="w-full border border-gray-300 rounded-l p-2 focus:outline-none focus:border-yellow-400">
-                <button class="bg-blue-600 text-white px-4 rounded-r font-bold hover:bg-blue-700">Ara</button>
+                <input type="text" id="searchInput" onkeyup="searchAds(this.value)" placeholder="İlan ara: Villa, Telefon, Yedek Parça..." class="w-full border border-gray-300 rounded-l p-2 focus:outline-none focus:border-yellow-400">
+                <button onclick="searchAds(document.getElementById('searchInput').value)" class="bg-blue-600 text-white px-4 rounded-r font-bold hover:bg-blue-700">Ara</button>
             </div>
 
             <div class="flex items-center gap-4 text-sm">
@@ -88,25 +86,32 @@
         <div id="home" class="page-section active-section">
             <div class="flex gap-4">
                 <aside class="hidden md:block w-56 flex-shrink-0">
-                    <div class="bg-white border rounded shadow-sm">
+                    <div class="bg-white border rounded shadow-sm sidebar-scroll">
                         <div class="p-3 font-bold border-b bg-gray-50 text-blue-800">Kategoriler</div>
-                        <ul class="text-sm text-gray-700">
-                            <li class="p-2 border-b hover:bg-yellow-100 cursor-pointer flex justify-between"><span>Emlak</span> <span class="text-gray-400 text-xs">(1204)</span></li>
-                            <li class="p-2 border-b hover:bg-yellow-100 cursor-pointer flex justify-between"><span>Vasıta</span> <span class="text-gray-400 text-xs">(540)</span></li>
-                        </ul>
+                        <ul class="text-sm text-gray-700" id="category-list">
+                            </ul>
+                    </div>
+                    <div class="mt-4 bg-yellow-400 text-black p-4 rounded text-center cursor-pointer hover:bg-yellow-500 transition font-bold shadow">
+                        Hemen İlan Ver
                     </div>
                 </aside>
+                
                 <main class="flex-1">
                     <div class="flex items-center gap-2 mb-3">
                         <h2 class="font-bold text-gray-700">BiKirala Vitrin</h2>
                         <span class="text-xs bg-yellow-400 text-black px-2 py-0.5 rounded font-bold">Öne Çıkanlar</span>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="vitrin-container"></div>
-                    <h2 class="font-bold text-gray-700 mb-3 border-b pb-2">Kiralık İlanlar</h2>
+                    
+                    <div class="flex justify-between items-end mb-2 border-b pb-2">
+                        <h2 class="font-bold text-gray-700">İlan Listesi</h2>
+                        <span class="text-xs text-gray-400" id="result-count">Tüm ilanlar gösteriliyor</span>
+                    </div>
+                    
                     <div class="bg-white border rounded shadow-sm overflow-hidden">
                          <table class="w-full text-sm text-left">
                              <thead class="bg-gray-100 text-gray-600 border-b">
-                                 <tr><th class="p-3"></th><th class="p-3">İlan Başlığı</th><th class="p-3">Fiyat</th><th class="p-3 hidden md:table-cell">Tarih</th><th class="p-3 hidden md:table-cell">Konum</th></tr>
+                                 <tr><th class="p-3"></th><th class="p-3">İlan Başlığı</th><th class="p-3">Kategori</th><th class="p-3">Fiyat</th><th class="p-3 hidden md:table-cell">Konum</th></tr>
                              </thead>
                              <tbody id="ads-table-body" class="divide-y"></tbody>
                          </table>
@@ -128,6 +133,7 @@
                     <h1 id="detail-title" class="text-2xl font-bold"></h1>
                     <div class="text-gray-500 text-sm" id="detail-location"></div>
                     <div class="text-3xl font-bold text-blue-600" id="detail-price"></div>
+                    <span id="detail-category" class="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded"></span>
                     <div class="border p-4 rounded bg-gray-50 mt-4">
                         <div class="font-bold text-sm text-gray-500 mb-2">İlan Sahibi</div>
                         <div class="flex items-center gap-3 mb-3">
@@ -143,9 +149,9 @@
                 </div>
             </div>
         </div>
-
+        
         <div id="profile" class="page-section">
-            <div class="max-w-2xl mx-auto bg-white rounded shadow border p-6">
+             <div class="max-w-2xl mx-auto bg-white rounded shadow border p-6">
                 <h2 class="text-2xl font-bold mb-6 border-b pb-2">Profil Bilgilerim</h2>
                 <form onsubmit="event.preventDefault(); updateProfile();">
                     <div class="flex items-center gap-4 mb-6">
@@ -176,7 +182,7 @@
                 </div>
             </div>
         </div>
-
+        
         <div id="favorites" class="page-section">
              <h2 class="text-2xl font-bold mb-4">Favorilerim</h2>
              <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="favorites-container"></div>
@@ -185,26 +191,40 @@
         <div id="admin-panel" class="page-section">
             <div class="bg-gray-900 text-white p-6 rounded mb-6">
                 <div class="flex justify-between items-center mb-4">
-                     <h2 class="text-3xl font-bold text-red-500"><i class="fa-solid fa-user-secret"></i> GİZLİ YÖNETİCİ PANELİ</h2>
+                     <h2 class="text-3xl font-bold text-red-500"><i class="fa-solid fa-user-secret"></i> YÖNETİCİ KOKPİTİ</h2>
                      <button onclick="showPage('home')" class="text-sm underline">Çıkış</button>
                 </div>
-                <div class="grid grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-gray-800 p-4 rounded text-center border border-gray-700">
-                        <div class="text-gray-400 text-sm">KASA</div>
+                        <div class="text-gray-400 text-sm">TOPLAM KASA</div>
                         <div class="text-4xl font-black text-green-500" id="admin-balance">0 TL</div>
                     </div>
                     <div class="bg-gray-800 p-4 rounded text-center border border-gray-700">
-                        <div class="text-gray-400 text-sm">İLAN SAYISI</div>
+                        <div class="text-gray-400 text-sm">TOPLAM İLAN</div>
                         <div class="text-3xl font-bold text-yellow-400" id="admin-ad-count">0</div>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded text-center border border-gray-700">
+                        <div class="text-gray-400 text-sm">AKTİF KULLANICI</div>
+                        <div class="text-3xl font-bold text-blue-400" id="admin-active-users">142</div>
                     </div>
                 </div>
             </div>
-            <h3 class="font-bold text-xl mb-4">Tüm İlan Veritabanı</h3>
-            <div class="bg-white rounded shadow overflow-x-auto">
-                <table class="w-full text-sm text-left">
-                    <thead class="bg-gray-200 uppercase"><tr><th class="p-3">ID</th><th class="p-3">Başlık</th><th class="p-3">Sahibi</th><th class="p-3">İşlem</th></tr></thead>
-                    <tbody id="admin-ads-body"></tbody>
-                </table>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold text-xl mb-4">Tüm İlanlar</h3>
+                    <div class="bg-white rounded shadow overflow-x-auto h-96 overflow-y-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-200 uppercase sticky top-0"><tr><th class="p-3">ID</th><th class="p-3">Başlık</th><th class="p-3">İşlem</th></tr></thead>
+                            <tbody id="admin-ads-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-xl mb-4">Sistem Logları (Canlı)</h3>
+                    <div class="bg-black text-green-400 rounded shadow p-4 h-96 overflow-y-auto font-mono text-xs" id="admin-logs">
+                        </div>
+                </div>
             </div>
         </div>
     </div>
@@ -251,6 +271,11 @@
                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                      <div class="space-y-4">
                          <input id="ad-title" type="text" placeholder="İlan Başlığı" class="w-full border p-2 rounded" required>
+                         
+                         <select id="ad-category" class="w-full border p-2 rounded bg-white">
+                             <option value="Diğer">Kategori Seçiniz</option>
+                             </select>
+
                          <div class="flex gap-2"><input id="ad-price" type="number" placeholder="Fiyat (TL)" class="w-full border p-2 rounded" required><select class="border p-2 rounded bg-white"><option>Günlük</option><option>Aylık</option></select></div>
                          <textarea id="ad-desc" placeholder="Detaylı Açıklama..." class="w-full border p-2 rounded h-32" required></textarea>
                          <input id="ad-loc" type="text" placeholder="İl / İlçe" class="w-full border p-2 rounded" required>
@@ -288,24 +313,33 @@
     </div>
 
     <script>
-        // --------------- BURADAKİ BİLGİLERİ KENDİNE GÖRE DÜZENLE ---------------
-        const ADMIN_EMAIL = "emeebabaoglu61@gmail.com"; // BURAYA KENDİ E-POSTANI YAZ!
-        const ADMIN_PASS = "babaemre61"; // BURAYA İSTEDİĞİN ŞİFREYİ YAZ!
-        // -----------------------------------------------------------------------
+        // --- AYARLAR ---
+        const ADMIN_EMAIL = "emeebabaoglu61@gmail.com";
+        const ADMIN_PASS = "babaemre61";
 
+        // --- VERİLER ---
         let currentUser = null;
         let adminBalance = 0;
         let isAdmin = false;
+        let systemLogs = []; // Log kayıtları için array
+
+        // Kategori Listesi
+        const categories = [
+            "Emlak", "Vasıta", "Telefon", "Bilgisayar", "Tablet", 
+            "Teknolojik Aletler", "Yedek Parça", "Müzik Aleti", "Diğer"
+        ];
 
         let ads = [
-            { id: 1, title: "Sahibinden Kiralık Lüks Villa", price: 5000, date: "15 Ara", loc: "İstanbul", img: "https://images.unsplash.com/photo-1600596542815-60c375043302?w=400&q=80", owner: "Ali V.", ownerImg: "https://i.pravatar.cc/150?img=3", isVitrin: true, isAcil: false, desc: "Harika villa." },
-            { id: 2, title: "Düğün İçin Kiralık Klasik Araç", price: 2000, date: "14 Ara", loc: "Ankara", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&q=80", owner: "Mehmet Y.", ownerImg: "https://i.pravatar.cc/150?img=12", isVitrin: true, isAcil: true, desc: "Mustang." },
-            { id: 3, title: "Sony Kamera Seti", price: 800, date: "13 Ara", loc: "İzmir", img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80", owner: "Canan S.", ownerImg: "https://i.pravatar.cc/150?img=5", isVitrin: false, isAcil: false, desc: "Temiz." }
+            { id: 1, title: "Sahibinden Kiralık Lüks Villa", category: "Emlak", price: 5000, date: "15 Ara", loc: "İstanbul", img: "https://images.unsplash.com/photo-1600596542815-60c375043302?w=400&q=80", owner: "Ali V.", ownerImg: "https://i.pravatar.cc/150?img=3", isVitrin: true, isAcil: false, desc: "Harika villa." },
+            { id: 2, title: "Düğün İçin Kiralık Klasik Araç", category: "Vasıta", price: 2000, date: "14 Ara", loc: "Ankara", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&q=80", owner: "Mehmet Y.", ownerImg: "https://i.pravatar.cc/150?img=12", isVitrin: true, isAcil: true, desc: "Mustang." },
+            { id: 3, title: "Sony Kamera Seti", category: "Teknolojik Aletler", price: 800, date: "13 Ara", loc: "İzmir", img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80", owner: "Canan S.", ownerImg: "https://i.pravatar.cc/150?img=5", isVitrin: false, isAcil: false, desc: "Temiz." },
+            { id: 4, title: "iPhone 14 Pro Max (Günlük)", category: "Telefon", price: 500, date: "13 Ara", loc: "Bursa", img: "https://images.unsplash.com/photo-1678652197831-2d1807413863?w=400&q=80", owner: "Emre T.", ownerImg: "https://i.pravatar.cc/150?img=60", isVitrin: false, isAcil: false, desc: "Çekim için uygun." }
         ];
         let favorites = [];
         let pendingAdAmount = 0;
         let pendingDopingType = 'none';
 
+        // --- SAYFA YÖNETİMİ ---
         function showPage(pid) {
             if((pid==='profile'||pid==='messages'||pid==='favorites')&&!currentUser){ Swal.fire('Giriş Yapmalısın','','warning'); toggleModal('login-modal'); return;}
             if(pid==='admin-panel'&&!isAdmin){ Swal.fire('Hata','Yetkisiz Alan!','error'); return; }
@@ -317,88 +351,151 @@
             if(pid==='admin-panel') renderAdmin();
         }
         function toggleModal(id){ document.getElementById(id).classList.toggle('hidden'); }
-        
-        // GİRİŞ YAPMA FONKSİYONU (ÖZELLEŞTİRİLMİŞ)
+
+        // --- LOG SİSTEMİ ---
+        function addLog(msg) {
+            const time = new Date().toLocaleTimeString();
+            systemLogs.unshift(`[${time}] ${msg}`);
+            if(isAdmin) renderAdmin(); // Eğer admin panelindeyse anlık yenile
+        }
+
+        // --- AUTH ---
         function login(){
             const em = document.getElementById('login-email').value;
             const ps = document.getElementById('login-password').value;
-
-            // KONTROL BURADA YAPILIYOR
             if(em === ADMIN_EMAIL && ps === ADMIN_PASS) {
                 currentUser = { name: "Yönetici", surname: "Patron", email: em, avatar: "https://cdn-icons-png.flaticon.com/512/295/295128.png", phone: "0850 000 00 00" };
                 isAdmin = true;
-                document.getElementById('admin-btn').classList.remove('hidden'); // Admin butonunu aç
+                document.getElementById('admin-btn').classList.remove('hidden');
                 Swal.fire({title:'Yönetici Modu', text:'Hoşgeldin Patron!', icon:'success', confirmButtonColor:'#d33'});
+                addLog('ADMIN sisteme giriş yaptı.');
             } else {
                 isAdmin = false;
-                document.getElementById('admin-btn').classList.add('hidden'); // Gizle
+                document.getElementById('admin-btn').classList.add('hidden');
                 if(!currentUser) currentUser = { name: "Emre", surname: "Yılmaz", email: em, phone: "0532 000 00 00", avatar: "https://i.pravatar.cc/150?img=68" };
                 Swal.fire('Başarılı','Giriş yapıldı.','success');
+                addLog(`Kullanıcı giriş yaptı: ${currentUser.name} (${em})`);
             }
             compLogin();
         }
         function register(){
-            const n=document.getElementById('reg-name').value;
-            currentUser={name:n, surname:document.getElementById('reg-surname').value, email:document.getElementById('reg-email').value, phone:"05XX", avatar:"https://cdn-icons-png.flaticon.com/512/149/149071.png"};
-            toggleModal('register-modal'); Swal.fire('Kayıt Başarılı','','success'); compLogin();
+            const n=document.getElementById('reg-name').value; const s=document.getElementById('reg-surname').value; const e=document.getElementById('reg-email').value;
+            currentUser={name:n, surname:s, email:e, phone:"05XX", avatar:"https://cdn-icons-png.flaticon.com/512/149/149071.png"};
+            toggleModal('register-modal'); Swal.fire('Kayıt Başarılı','','success'); 
+            addLog(`Yeni üye kayıt oldu: ${n} ${s}`);
+            compLogin();
         }
         function compLogin(){
-            document.getElementById('guest-nav').classList.add('hidden');
-            document.getElementById('user-nav').classList.remove('hidden');
-            document.getElementById('user-nav').classList.add('flex');
-            document.getElementById('header-username').innerText = currentUser.name;
-            document.getElementById('header-avatar').src = currentUser.avatar;
-            document.getElementById('profile-name').value = currentUser.name;
-            document.getElementById('profile-surname').value = currentUser.surname;
-            document.getElementById('profile-email').value = currentUser.email;
+            document.getElementById('guest-nav').classList.add('hidden'); document.getElementById('user-nav').classList.remove('hidden'); document.getElementById('user-nav').classList.add('flex');
+            document.getElementById('header-username').innerText = currentUser.name; document.getElementById('header-avatar').src = currentUser.avatar;
+            document.getElementById('profile-name').value = currentUser.name; document.getElementById('profile-surname').value = currentUser.surname; document.getElementById('profile-email').value = currentUser.email;
             toggleModal('login-modal');
         }
         function logout(){
+            addLog(`Çıkış yapıldı: ${currentUser ? currentUser.name : 'Misafir'}`);
             currentUser=null; isAdmin=false;
-            document.getElementById('guest-nav').classList.remove('hidden');
-            document.getElementById('user-nav').classList.add('hidden');
-            document.getElementById('user-nav').classList.remove('flex');
-            document.getElementById('admin-btn').classList.add('hidden');
+            document.getElementById('guest-nav').classList.remove('hidden'); document.getElementById('user-nav').classList.add('hidden'); document.getElementById('user-nav').classList.remove('flex'); document.getElementById('admin-btn').classList.add('hidden');
             showPage('home'); Swal.fire('Çıkış Yapıldı','','info');
         }
-        function updateProfile(){ currentUser.name=document.getElementById('profile-name').value; document.getElementById('header-username').innerText=currentUser.name; Swal.fire('Güncellendi','','success'); }
+        function updateProfile(){ 
+            currentUser.name=document.getElementById('profile-name').value; document.getElementById('header-username').innerText=currentUser.name; 
+            Swal.fire('Güncellendi','','success'); 
+            addLog(`Profil güncellendi: ${currentUser.name}`);
+        }
         function previewProfileImage(inp){ if(inp.files[0]){var r=new FileReader(); r.onload=function(e){document.getElementById('profile-edit-img').src=e.target.result; document.getElementById('header-avatar').src=e.target.result; currentUser.avatar=e.target.result;}; r.readAsDataURL(inp.files[0]);}}
-        
-        function renderAds(){
+
+        // --- İLAN LİSTELEME & ARAMA ---
+        function renderAds(filterCat = null) {
             const vc=document.getElementById('vitrin-container'); const tb=document.getElementById('ads-table-body');
             vc.innerHTML=''; tb.innerHTML='';
-            ads.forEach(ad=>{
-                if(ad.isVitrin) vc.innerHTML+=`<div onclick="openAd(${ad.id})" class="bg-white border rounded shadow p-2 cursor-pointer relative"><img src="${ad.img}" class="w-full h-32 object-cover mb-2"><h3 class="font-bold text-sm truncate">${ad.title}</h3><div class="text-red-600 font-bold">${ad.price} TL</div></div>`;
-                tb.innerHTML+=`<tr onclick="openAd(${ad.id})" class="border-b hover:bg-yellow-50 cursor-pointer"><td class="p-2"><img src="${ad.img}" class="w-16 h-12 object-cover rounded"></td><td class="p-2 font-bold text-blue-900">${ad.title}</td><td class="p-2 font-bold">${ad.price} TL</td><td class="p-2 hidden md:table-cell text-gray-500">${ad.date}</td><td class="p-2 hidden md:table-cell text-gray-500">${ad.loc}</td></tr>`;
+            
+            // Filtreleme Logic
+            let displayAds = ads;
+            if (filterCat) {
+                displayAds = ads.filter(ad => ad.category === filterCat);
+                document.getElementById('result-count').innerText = `${filterCat} kategorisindeki ilanlar`;
+            } else {
+                document.getElementById('result-count').innerText = "Tüm ilanlar gösteriliyor";
+            }
+
+            displayAds.forEach(ad=>{
+                if(ad.isVitrin) vc.innerHTML+=`<div onclick="openAd(${ad.id})" class="bg-white border rounded shadow p-2 cursor-pointer relative"><img src="${ad.img}" class="w-full h-32 object-cover mb-2"><h3 class="font-bold text-sm truncate">${ad.title}</h3><div class="text-xs text-gray-500">${ad.category}</div><div class="text-red-600 font-bold">${ad.price} TL</div></div>`;
+                tb.innerHTML+=`<tr onclick="openAd(${ad.id})" class="border-b hover:bg-yellow-50 cursor-pointer"><td class="p-2"><img src="${ad.img}" class="w-16 h-12 object-cover rounded"></td><td class="p-2 font-bold text-blue-900">${ad.title}</td><td class="p-2 text-xs text-gray-500">${ad.category}</td><td class="p-2 font-bold">${ad.price} TL</td><td class="p-2 hidden md:table-cell text-gray-500">${ad.loc}</td></tr>`;
             });
             document.getElementById('admin-ad-count').innerText=ads.length;
         }
+
+        function searchAds(query) {
+            query = query.toLowerCase();
+            const filtered = ads.filter(ad => ad.title.toLowerCase().includes(query) || ad.category.toLowerCase().includes(query));
+            
+            const tb=document.getElementById('ads-table-body'); tb.innerHTML='';
+            if(filtered.length === 0) tb.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">Sonuç bulunamadı.</td></tr>';
+            
+            filtered.forEach(ad=>{
+                tb.innerHTML+=`<tr onclick="openAd(${ad.id})" class="border-b hover:bg-yellow-50 cursor-pointer"><td class="p-2"><img src="${ad.img}" class="w-16 h-12 object-cover rounded"></td><td class="p-2 font-bold text-blue-900">${ad.title}</td><td class="p-2 text-xs text-gray-500">${ad.category}</td><td class="p-2 font-bold">${ad.price} TL</td><td class="p-2 hidden md:table-cell text-gray-500">${ad.loc}</td></tr>`;
+            });
+            document.getElementById('result-count').innerText = `"${query}" için ${filtered.length} sonuç bulundu`;
+        }
+
         function openAd(id){
             const ad=ads.find(x=>x.id===id); showPage('detail');
             document.getElementById('detail-image').src=ad.img; document.getElementById('detail-title').innerText=ad.title; document.getElementById('detail-price').innerText=ad.price+" TL"; document.getElementById('detail-desc').innerText=ad.desc;
             document.getElementById('detail-owner-name').innerText=ad.owner; document.getElementById('detail-owner-img').src=ad.ownerImg;
+            document.getElementById('detail-category').innerText = "Kategori: " + ad.category;
+            
+            const thumbContainer = document.getElementById('detail-thumbnails'); thumbContainer.innerHTML = '';
+            for(let i=0; i<5; i++) thumbContainer.innerHTML += `<img src="${ad.img}" class="w-full h-16 object-cover rounded border hover:opacity-75 cursor-pointer">`;
+
             const delBtn=document.getElementById('delete-ad-btn');
             if(currentUser&&(ad.owner===currentUser.name+" "+currentUser.surname||isAdmin)){ delBtn.classList.remove('hidden'); delBtn.onclick=()=>delAd(ad.id); } else { delBtn.classList.add('hidden'); }
             const fb=document.getElementById('fav-btn'); fb.innerText=favorites.includes(ad.id)?'Favorilerden Çıkar':'Favorile'; fb.onclick=()=>togFav(ad.id);
         }
-        function delAd(id){ Swal.fire({title:'Sil?',showCancelButton:true}).then(r=>{if(r.isConfirmed){ads=ads.filter(x=>x.id!==id); renderAds(); showPage('home');}});}
+
+        function delAd(id){ Swal.fire({title:'Sil?',showCancelButton:true}).then(r=>{if(r.isConfirmed){ads=ads.filter(x=>x.id!==id); addLog('İlan silindi ID:'+id); renderAds(); showPage('home');}});}
         function togFav(id){ if(!currentUser)return; if(favorites.includes(id))favorites=favorites.filter(x=>x!==id); else favorites.push(id); openAd(id); }
         function renderFavs(){ const c=document.getElementById('favorites-container'); c.innerHTML=''; const f=ads.filter(x=>favorites.includes(x.id)); f.forEach(ad=>{c.innerHTML+=`<div onclick="openAd(${ad.id})" class="bg-white border rounded p-2"><img src="${ad.img}" class="w-full h-32 object-cover"><h3 class="font-bold text-sm">${ad.title}</h3></div>`;}); }
         function openChat(){ if(!currentUser){toggleModal('login-modal');return;} showPage('messages'); document.getElementById('chat-box').innerHTML+=`<div class="flex justify-end"><div class="bg-blue-100 p-2 rounded text-sm">Merhaba ilanınızla ilgileniyorum.</div></div>`; }
         function sendMessage(){ const t=document.getElementById('chat-input'); if(t.value){document.getElementById('chat-box').innerHTML+=`<div class="flex justify-end"><div class="bg-blue-100 p-2 rounded text-sm">${t.value}</div></div>`; t.value=''; setTimeout(()=>{document.getElementById('chat-box').innerHTML+=`<div class="flex justify-start"><div class="bg-white p-2 rounded text-sm border">Teşekkürler, dönüş yapacağım.</div></div>`;},1000);} }
+        
+        // --- İLAN OLUŞTURMA & ÖDEME ---
         function checkLoginForAd(){ if(!currentUser){Swal.fire('Giriş Yap','','warning'); toggleModal('login-modal');}else toggleModal('ad-modal'); }
         function startPaymentProcess(){ const d=document.querySelector('input[name="doping"]:checked').value; pendingDopingType=d; if(d==='none'){finAd();return;} pendingAdAmount=(d==='vitrin')?150:75; toggleModal('ad-modal'); toggleModal('payment-modal'); document.getElementById('step-card').classList.remove('hidden'); document.getElementById('step-3d').classList.add('hidden'); document.getElementById('payment-amount').innerText=pendingAdAmount+" TL"; }
         function goTo3D(){ if(document.getElementById('card-number').value.length<5)return; Swal.showLoading(); setTimeout(()=>{Swal.close();document.getElementById('step-card').classList.add('hidden');document.getElementById('step-3d').classList.remove('hidden');},1000); }
         function finalizePayment(){ toggleModal('payment-modal'); adminBalance+=pendingAdAmount; document.getElementById('admin-balance').innerText=adminBalance+" TL"; finAd(true); }
         function finAd(paid=false){ 
-            const newAd={id:Date.now(), title:document.getElementById('ad-title').value, price:document.getElementById('ad-price').value, date:"Bugün", loc:document.getElementById('ad-loc').value, img:"https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&q=80", owner:currentUser.name+" "+currentUser.surname, ownerImg:currentUser.avatar, isVitrin:(pendingDopingType==='vitrin'), isAcil:(pendingDopingType==='acil'), desc:document.getElementById('ad-desc').value};
-            ads.unshift(newAd); renderAds(); showPage('home'); Swal.fire('İlan Yayında!',paid?'Ödeme Alındı.':'','success');
+            const cat = document.getElementById('ad-category').value;
+            const newAd={id:Date.now(), title:document.getElementById('ad-title').value, category: cat, price:document.getElementById('ad-price').value, date:"Bugün", loc:document.getElementById('ad-loc').value, img:"https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&q=80", owner:currentUser.name+" "+currentUser.surname, ownerImg:currentUser.avatar, isVitrin:(pendingDopingType==='vitrin'), isAcil:(pendingDopingType==='acil'), desc:document.getElementById('ad-desc').value};
+            ads.unshift(newAd); renderAds(); showPage('home'); 
+            addLog(`Yeni ilan eklendi: ${newAd.title} (${cat})`);
+            Swal.fire('İlan Yayında!',paid?'Ödeme Alındı.':'','success');
         }
+
+        // --- ADMİN PANELİ ---
         function renderAdmin(){
             const bd=document.getElementById('admin-ads-body'); bd.innerHTML='';
-            ads.forEach(ad=>{bd.innerHTML+=`<tr class="border-b"><td class="p-3">#${ad.id}</td><td class="p-3 font-bold">${ad.title}</td><td class="p-3">${ad.owner}</td><td class="p-3"><button onclick="delAd(${ad.id})" class="text-red-600 font-bold">Sil</button></td></tr>`;});
+            ads.forEach(ad=>{bd.innerHTML+=`<tr class="border-b"><td class="p-3">#${ad.id}</td><td class="p-3 font-bold">${ad.title}</td><td class="p-3"><button onclick="delAd(${ad.id})" class="text-red-600 font-bold">Sil</button></td></tr>`;});
+            
+            // Logları Yazdır
+            const logsDiv = document.getElementById('admin-logs');
+            logsDiv.innerHTML = systemLogs.map(log => `<div class="mb-1 border-b border-gray-800 pb-1">${log}</div>`).join('');
+            
+            // Aktif Kullanıcı Simülasyonu
+            document.getElementById('admin-active-users').innerText = Math.floor(Math.random() * 50) + 120; // 120-170 arası salla
         }
-        window.onload=renderAds;
+
+        // --- BAŞLAT ---
+        window.onload=function() {
+            // Kategorileri Doldur
+            const catList = document.getElementById('category-list');
+            const catSelect = document.getElementById('ad-category');
+            categories.forEach(c => {
+                catList.innerHTML += `<li onclick="renderAds('${c}')" class="p-2 border-b hover:bg-yellow-100 cursor-pointer flex justify-between"><span>${c}</span> <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>`;
+                catSelect.innerHTML += `<option value="${c}">${c}</option>`;
+            });
+            renderAds();
+            addLog('Sistem başlatıldı.');
+        };
     </script>
 </body>
 </html>
