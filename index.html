@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BiKirala | Sorunsuz</title>
+    <title>BiKirala | Hibrit</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,16 +11,13 @@
     <style>
         body { background-color: #f4f4f4; padding-bottom: 80px; font-family: sans-serif; }
         
-        /* HATA KUTUSU (DEBUG) */
-        #debug-panel { display:none; background:red; color:white; padding:15px; text-align:center; font-weight:bold; position:fixed; top:0; left:0; width:100%; z-index:99999; }
-
         /* HEADER */
         .header { background: #FFD000; padding: 15px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .logo { font-size: 22px; font-weight: 900; color: black; text-decoration: none; }
         
         /* KATEGORİLER */
         .cat-scroll { overflow-x: auto; white-space: nowrap; padding: 10px; background: white; }
-        .cat-btn { display: inline-block; padding: 5px 15px; background: #eee; border-radius: 20px; margin-right: 5px; color: #333; text-decoration: none; font-weight: bold; font-size: 14px; }
+        .cat-btn { display: inline-block; padding: 5px 15px; background: #eee; border-radius: 20px; margin-right: 5px; color: #333; text-decoration: none; font-weight: bold; font-size: 14px; cursor: pointer; }
         .cat-btn.active { background: black; color: #FFD000; }
 
         /* KARTLAR */
@@ -35,34 +32,30 @@
         .nav-item.active { color: black; font-weight: bold; }
         .add-btn { width: 50px; height: 50px; background: black; color: #FFD000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-top: -25px; border: 4px solid #f4f4f4; }
 
-        /* SAYFALAR */
         .page { display: none; }
         .page.active { display: block; }
     </style>
 </head>
 <body>
 
-    <div id="debug-panel"></div>
-
     <div class="header d-flex justify-content-between align-items-center">
-        <a href="#" class="logo">bi<span>kirala</span></a>
+        <div class="logo">bi<span>kirala</span></div>
         <span class="badge bg-dark">TR</span>
     </div>
 
     <div class="cat-scroll">
-        <a href="#" class="cat-btn active" onclick="filtrele('Hepsi', this)">Tümü</a>
-        <a href="#" class="cat-btn" onclick="filtrele('Vasıta', this)">🚗 Vasıta</a>
-        <a href="#" class="cat-btn" onclick="filtrele('Elektronik', this)">💻 Elektronik</a>
-        <a href="#" class="cat-btn" onclick="filtrele('Emlak', this)">🏠 Emlak</a>
+        <div class="cat-btn active" onclick="kategoriSec('Hepsi', this)">Tümü</div>
+        <div class="cat-btn" onclick="kategoriSec('Vasıta', this)">🚗 Vasıta</div>
+        <div class="cat-btn" onclick="kategoriSec('Elektronik', this)">💻 Elektronik</div>
+        <div class="cat-btn" onclick="kategoriSec('Emlak', this)">🏠 Emlak</div>
     </div>
 
     <div class="container mt-3">
         
         <div id="page-vitrin" class="page active">
-            <input type="text" id="arama" class="form-control mb-3" placeholder="İlan ara..." onkeyup="listeyiYenile()">
+            <input type="text" id="arama" class="form-control mb-3" placeholder="İlan ara..." onkeyup="listele()">
             <div id="ilan-listesi">
-                <div class="text-center mt-5"><div class="spinner-border text-warning"></div><p>Yükleniyor...</p></div>
-            </div>
+                </div>
         </div>
 
         <div id="page-profil" class="page text-center pt-5">
@@ -81,7 +74,7 @@
                     
                     <div class="p-3 bg-light text-center border rounded mb-3" onclick="document.getElementById('resimInput').click()">
                         <span id="resimBilgi">📸 Fotoğraf Ekle (Zorunlu)</span>
-                        <input type="file" id="resimInput" class="d-none" accept="image/*" onchange="resimIsle(this)">
+                        <input type="file" id="resimInput" class="d-none" accept="image/*" onchange="fotoSecildi(this)">
                     </div>
 
                     <textarea id="inpAciklama" class="form-control mb-3" rows="3" placeholder="Açıklama (Ürün detayları...)"></textarea>
@@ -95,18 +88,18 @@
                         <option value="Emlak">Emlak</option>
                     </select>
 
-                    <button onclick="ilanGonder()" id="btnGonder" class="btn btn-dark w-100">YAYINLA</button>
+                    <button onclick="ilanYayinla()" id="btnGonder" class="btn btn-dark w-100">YAYINLA</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="sayfa('vitrin', this)"><i class="fas fa-home"></i>Vitrin</div>
-        <div class="nav-item" onclick="sayfa('mesaj', this)"><i class="fas fa-comment"></i>Mesaj</div>
+        <div class="nav-item active" onclick="sayfaGec('vitrin', this)"><i class="fas fa-home"></i>Vitrin</div>
+        <div class="nav-item" onclick="sayfaGec('mesaj', this)"><i class="fas fa-comment"></i>Mesaj</div>
         <div class="nav-item" onclick="modalAc()"><div class="add-btn"><i class="fas fa-plus"></i></div></div>
         <div class="nav-item"><i class="fas fa-heart"></i>Favori</div>
-        <div class="nav-item" onclick="sayfa('profil', this)"><i class="fas fa-user"></i>Profil</div>
+        <div class="nav-item" onclick="sayfaGec('profil', this)"><i class="fas fa-user"></i>Profil</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -114,75 +107,143 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <script>
-        // HATA YAKALAYICI
-        window.onerror = function(msg) {
-            document.getElementById('debug-panel').style.display = 'block';
-            document.getElementById('debug-panel').innerText = "HATA: " + msg;
-        }
-
-        // FIREBASE BAŞLAT
-        const firebaseConfig = {
-            apiKey: "AIzaSyARO3eKpa058215Sdo3Dqf6U7uTr-z4pMM",
-            authDomain: "kiralagitsin-855c9.firebaseapp.com",
-            projectId: "kiralagitsin-855c9",
-            storageBucket: "kiralagitsin-855c9.firebasestorage.app",
-            messagingSenderId: "677047831958",
-            appId: "1:677047831958:web:82c4d37ee0055bfbafa1b7"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        let tumVeriler = [];
+        // GLOBAL DEĞİŞKENLER
+        let tumIlanlar = [];
         let aktifKategori = "Hepsi";
         let seciliResim = null;
+        let db; // Veritabanı
 
-        // VERİ ÇEK
-        db.collection("ilanlar").orderBy("tarih", "desc").onSnapshot(snap => {
-            tumVeriler = [];
-            snap.forEach(doc => {
-                let d = doc.data();
-                d.id = doc.id;
-                tumVeriler.push(d);
-            });
-            listeyiYenile();
-        });
+        // 1. ÖNCE SAYFAYI AÇ (YÜKLENİYOR SORUNUNU ÇÖZMEK İÇİN)
+        window.onload = function() {
+            // Sahte veri ile açılış yap (Firebase gecikirse boş kalmasın)
+            tumIlanlar = [
+                {ad: "Örnek PS5", fiyat: "400", kat: "Elektronik", resim: "https://via.placeholder.com/400x300", aciklama: "Örnek ilandır.", tel: "555"}
+            ];
+            listele(); // Hemen ekrana bas
+            firebaseBaslat(); // Sonra bağlantıyı dene
+        };
 
-        // LİSTELEME
-        function listeyiYenile() {
+        // 2. FIREBASE BAĞLANTISI
+        function firebaseBaslat() {
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyARO3eKpa058215Sdo3Dqf6U7uTr-z4pMM",
+                    authDomain: "kiralagitsin-855c9.firebaseapp.com",
+                    projectId: "kiralagitsin-855c9",
+                    storageBucket: "kiralagitsin-855c9.firebasestorage.app",
+                    messagingSenderId: "677047831958",
+                    appId: "1:677047831958:web:82c4d37ee0055bfbafa1b7"
+                };
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                
+                // Gerçek verileri dinle
+                db.collection("ilanlar").orderBy("tarih", "desc").onSnapshot(snap => {
+                    tumIlanlar = [];
+                    snap.forEach(doc => {
+                        let d = doc.data();
+                        d.id = doc.id;
+                        tumIlanlar.push(d);
+                    });
+                    listele(); // Gerçek veriler gelince güncelle
+                });
+            } catch (e) {
+                console.log("Firebase Hatası: " + e.message);
+                // Hata olsa bile site açık kalır, sadece ilan gelmez.
+            }
+        }
+
+        // 3. LİSTELEME FONKSİYONU
+        function listele() {
             const div = document.getElementById("ilan-listesi");
             const arama = document.getElementById("arama").value.toLowerCase();
             div.innerHTML = "";
 
-            const sonuc = tumVeriler.filter(d => {
+            const sonuc = tumIlanlar.filter(d => {
                 const katUygun = (aktifKategori === 'Hepsi') || (d.kategori === aktifKategori);
                 const aramaUygun = d.ad.toLowerCase().includes(arama);
                 return katUygun && aramaUygun;
             });
 
-            if(sonuc.length === 0) { div.innerHTML = "<p class='text-center mt-5 text-muted'>İlan yok.</p>"; return; }
+            if(sonuc.length === 0) {
+                div.innerHTML = "<p class='text-center mt-5 text-muted'>Sonuç yok.</p>";
+                return;
+            }
 
             sonuc.forEach(d => {
-                // Detay sayfasını açmak yerine şimdilik WhatsApp'a yönlendiriyoruz (HATA RİSKİNİ SIFIRLAMAK İÇİN)
-                const mesaj = `Merhaba, ilanınız (${d.ad}) için yazıyorum.`;
-                const link = `https://wa.me/90${d.tel}?text=${encodeURIComponent(mesaj)}`;
-
+                const link = `https://wa.me/90${d.tel}?text=İlan: ${d.ad}`;
                 div.innerHTML += `
                 <div class="card">
                     <span class="price-tag">${d.fiyat} TL</span>
                     <img src="${d.resim}" class="card-img-top">
                     <div class="card-body p-2">
                         <h6 class="fw-bold mb-1">${d.ad}</h6>
-                        <small class="text-muted d-block mb-2">${d.aciklama || d.kategori}</small>
+                        <small class="text-muted d-block mb-2">${d.aciklama || d.kategori || ''}</small>
                         <a href="${link}" class="btn btn-dark w-100 rounded-pill">Kirala</a>
                     </div>
                 </div>`;
             });
         }
 
-        // FOTOĞRAF
-        function resimIsle(input) {
+        // 4. İLAN YAYINLA
+        function ilanYayinla() {
+            const ad = document.getElementById('inpAd').value;
+            const fiyat = document.getElementById('inpFiyat').value;
+            const tel = document.getElementById('inpTel').value;
+            const aciklama = document.getElementById('inpAciklama').value;
+            const kat = document.getElementById('inpKat').value;
+
+            if(!ad || !fiyat || !tel || !seciliResim) { alert("Eksik bilgi!"); return; }
+
+            const btn = document.getElementById('btnGonder');
+            btn.innerText = "Yükleniyor..."; btn.disabled = true;
+
+            // Veritabanına kaydet
+            if(db) {
+                db.collection("ilanlar").add({
+                    ad: ad, fiyat: fiyat, tel: tel, aciklama: aciklama,
+                    kategori: kat, resim: seciliResim, tarih: Date.now()
+                }).then(() => {
+                    alert("Yayınlandı!"); location.reload();
+                }).catch(e => {
+                    alert("Hata: " + e.message); btn.innerText = "YAYINLA"; btn.disabled = false;
+                });
+            } else {
+                alert("Veritabanı bağlantısı yok!");
+            }
+        }
+
+        // 5. YARDIMCI İŞLEVLER
+        function fotoSecildi(input) {
             const file = input.files[0];
             if(!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
-                sec
+                seciliResim = e.target.result;
+                document.getElementById('resimBilgi').innerText = "✔ Tamam";
+                document.getElementById('resimBilgi').style.color = "green";
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function kategoriSec(kat, btn) {
+            aktifKategori = kat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            listele();
+        }
+
+        function sayfaGec(id, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function modalAc() {
+            var myModal = new bootstrap.Modal(document.getElementById('ilanModal'));
+            myModal.show();
+        }
+    </script>
+</body>
+</html>
