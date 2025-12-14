@@ -222,8 +222,7 @@
                 </div>
                 <div>
                     <h3 class="font-bold text-xl mb-4">Sistem Logları (Canlı)</h3>
-                    <div class="bg-black text-green-400 rounded shadow p-4 h-96 overflow-y-auto font-mono text-xs" id="admin-logs">
-                        </div>
+                    <div class="bg-black text-green-400 rounded shadow p-4 h-96 overflow-y-auto font-mono text-xs" id="admin-logs"></div>
                 </div>
             </div>
         </div>
@@ -244,7 +243,20 @@
             <form onsubmit="event.preventDefault(); login()">
                 <input id="login-email" type="email" placeholder="E-posta" class="w-full border p-3 rounded mb-3" required>
                 <input id="login-password" type="password" placeholder="Şifre" class="w-full border p-3 rounded mb-3" required>
+                <div onclick="openForgot()" class="text-right text-xs text-blue-600 mb-4 cursor-pointer hover:underline">Şifremi Unuttum?</div>
                 <button class="w-full bg-blue-600 text-white font-bold p-3 rounded hover:bg-blue-700">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="forgot-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm relative">
+            <button onclick="toggleModal('forgot-modal')" class="absolute top-3 right-3 text-gray-500"><i class="fa-solid fa-times"></i></button>
+            <h2 class="text-2xl font-bold mb-2 text-center">Şifre Sıfırla</h2>
+            <p class="text-sm text-gray-500 mb-4 text-center">E-posta adresini gir, doğrulama kodu gönderelim.</p>
+            <form onsubmit="event.preventDefault(); sendResetLink()">
+                <input id="forgot-email" type="email" placeholder="E-posta Adresin" class="w-full border p-3 rounded mb-4" required>
+                <button class="w-full bg-yellow-400 text-black font-bold p-3 rounded hover:bg-yellow-500">Sıfırlama Linki Gönder</button>
             </form>
         </div>
     </div>
@@ -271,11 +283,9 @@
                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                      <div class="space-y-4">
                          <input id="ad-title" type="text" placeholder="İlan Başlığı" class="w-full border p-2 rounded" required>
-                         
                          <select id="ad-category" class="w-full border p-2 rounded bg-white">
                              <option value="Diğer">Kategori Seçiniz</option>
-                             </select>
-
+                         </select>
                          <div class="flex gap-2"><input id="ad-price" type="number" placeholder="Fiyat (TL)" class="w-full border p-2 rounded" required><select class="border p-2 rounded bg-white"><option>Günlük</option><option>Aylık</option></select></div>
                          <textarea id="ad-desc" placeholder="Detaylı Açıklama..." class="w-full border p-2 rounded h-32" required></textarea>
                          <input id="ad-loc" type="text" placeholder="İl / İlçe" class="w-full border p-2 rounded" required>
@@ -313,22 +323,15 @@
     </div>
 
     <script>
-        // --- AYARLAR ---
         const ADMIN_EMAIL = "emeebabaoglu61@gmail.com";
-        const ADMIN_PASS = "babaemre61";
+        const ADMIN_PASS = "babaemre61;
 
-        // --- VERİLER ---
         let currentUser = null;
         let adminBalance = 0;
         let isAdmin = false;
-        let systemLogs = []; // Log kayıtları için array
+        let systemLogs = []; 
 
-        // Kategori Listesi
-        const categories = [
-            "Emlak", "Vasıta", "Telefon", "Bilgisayar", "Tablet", 
-            "Teknolojik Aletler", "Yedek Parça", "Müzik Aleti", "Diğer"
-        ];
-
+        const categories = ["Emlak", "Vasıta", "Telefon", "Bilgisayar", "Tablet", "Teknolojik Aletler", "Yedek Parça", "Müzik Aleti", "Diğer"];
         let ads = [
             { id: 1, title: "Sahibinden Kiralık Lüks Villa", category: "Emlak", price: 5000, date: "15 Ara", loc: "İstanbul", img: "https://images.unsplash.com/photo-1600596542815-60c375043302?w=400&q=80", owner: "Ali V.", ownerImg: "https://i.pravatar.cc/150?img=3", isVitrin: true, isAcil: false, desc: "Harika villa." },
             { id: 2, title: "Düğün İçin Kiralık Klasik Araç", category: "Vasıta", price: 2000, date: "14 Ara", loc: "Ankara", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&q=80", owner: "Mehmet Y.", ownerImg: "https://i.pravatar.cc/150?img=12", isVitrin: true, isAcil: true, desc: "Mustang." },
@@ -339,7 +342,6 @@
         let pendingAdAmount = 0;
         let pendingDopingType = 'none';
 
-        // --- SAYFA YÖNETİMİ ---
         function showPage(pid) {
             if((pid==='profile'||pid==='messages'||pid==='favorites')&&!currentUser){ Swal.fire('Giriş Yapmalısın','','warning'); toggleModal('login-modal'); return;}
             if(pid==='admin-panel'&&!isAdmin){ Swal.fire('Hata','Yetkisiz Alan!','error'); return; }
@@ -351,39 +353,25 @@
             if(pid==='admin-panel') renderAdmin();
         }
         function toggleModal(id){ document.getElementById(id).classList.toggle('hidden'); }
+        function addLog(msg) { const time = new Date().toLocaleTimeString(); systemLogs.unshift(`[${time}] ${msg}`); if(isAdmin) renderAdmin(); }
 
-        // --- LOG SİSTEMİ ---
-        function addLog(msg) {
-            const time = new Date().toLocaleTimeString();
-            systemLogs.unshift(`[${time}] ${msg}`);
-            if(isAdmin) renderAdmin(); // Eğer admin panelindeyse anlık yenile
-        }
-
-        // --- AUTH ---
         function login(){
             const em = document.getElementById('login-email').value;
             const ps = document.getElementById('login-password').value;
             if(em === ADMIN_EMAIL && ps === ADMIN_PASS) {
                 currentUser = { name: "Yönetici", surname: "Patron", email: em, avatar: "https://cdn-icons-png.flaticon.com/512/295/295128.png", phone: "0850 000 00 00" };
-                isAdmin = true;
-                document.getElementById('admin-btn').classList.remove('hidden');
-                Swal.fire({title:'Yönetici Modu', text:'Hoşgeldin Patron!', icon:'success', confirmButtonColor:'#d33'});
-                addLog('ADMIN sisteme giriş yaptı.');
+                isAdmin = true; document.getElementById('admin-btn').classList.remove('hidden'); Swal.fire({title:'Yönetici Modu', text:'Hoşgeldin Patron!', icon:'success', confirmButtonColor:'#d33'}); addLog('ADMIN sisteme giriş yaptı.');
             } else {
-                isAdmin = false;
-                document.getElementById('admin-btn').classList.add('hidden');
+                isAdmin = false; document.getElementById('admin-btn').classList.add('hidden');
                 if(!currentUser) currentUser = { name: "Emre", surname: "Yılmaz", email: em, phone: "0532 000 00 00", avatar: "https://i.pravatar.cc/150?img=68" };
-                Swal.fire('Başarılı','Giriş yapıldı.','success');
-                addLog(`Kullanıcı giriş yaptı: ${currentUser.name} (${em})`);
+                Swal.fire('Başarılı','Giriş yapıldı.','success'); addLog(`Kullanıcı giriş yaptı: ${currentUser.name}`);
             }
             compLogin();
         }
         function register(){
             const n=document.getElementById('reg-name').value; const s=document.getElementById('reg-surname').value; const e=document.getElementById('reg-email').value;
             currentUser={name:n, surname:s, email:e, phone:"05XX", avatar:"https://cdn-icons-png.flaticon.com/512/149/149071.png"};
-            toggleModal('register-modal'); Swal.fire('Kayıt Başarılı','','success'); 
-            addLog(`Yeni üye kayıt oldu: ${n} ${s}`);
-            compLogin();
+            toggleModal('register-modal'); Swal.fire('Kayıt Başarılı','','success'); addLog(`Yeni üye: ${n} ${s}`); compLogin();
         }
         function compLogin(){
             document.getElementById('guest-nav').classList.add('hidden'); document.getElementById('user-nav').classList.remove('hidden'); document.getElementById('user-nav').classList.add('flex');
@@ -391,74 +379,47 @@
             document.getElementById('profile-name').value = currentUser.name; document.getElementById('profile-surname').value = currentUser.surname; document.getElementById('profile-email').value = currentUser.email;
             toggleModal('login-modal');
         }
-        function logout(){
-            addLog(`Çıkış yapıldı: ${currentUser ? currentUser.name : 'Misafir'}`);
-            currentUser=null; isAdmin=false;
-            document.getElementById('guest-nav').classList.remove('hidden'); document.getElementById('user-nav').classList.add('hidden'); document.getElementById('user-nav').classList.remove('flex'); document.getElementById('admin-btn').classList.add('hidden');
-            showPage('home'); Swal.fire('Çıkış Yapıldı','','info');
-        }
-        function updateProfile(){ 
-            currentUser.name=document.getElementById('profile-name').value; document.getElementById('header-username').innerText=currentUser.name; 
-            Swal.fire('Güncellendi','','success'); 
-            addLog(`Profil güncellendi: ${currentUser.name}`);
-        }
+        function logout(){ addLog(`Çıkış: ${currentUser ? currentUser.name : 'Misafir'}`); currentUser=null; isAdmin=false; document.getElementById('guest-nav').classList.remove('hidden'); document.getElementById('user-nav').classList.add('hidden'); document.getElementById('user-nav').classList.remove('flex'); document.getElementById('admin-btn').classList.add('hidden'); showPage('home'); Swal.fire('Çıkış Yapıldı','','info'); }
+        function updateProfile(){ currentUser.name=document.getElementById('profile-name').value; document.getElementById('header-username').innerText=currentUser.name; Swal.fire('Güncellendi','','success'); addLog(`Profil güncellendi: ${currentUser.name}`); }
         function previewProfileImage(inp){ if(inp.files[0]){var r=new FileReader(); r.onload=function(e){document.getElementById('profile-edit-img').src=e.target.result; document.getElementById('header-avatar').src=e.target.result; currentUser.avatar=e.target.result;}; r.readAsDataURL(inp.files[0]);}}
 
-        // --- İLAN LİSTELEME & ARAMA ---
-        function renderAds(filterCat = null) {
-            const vc=document.getElementById('vitrin-container'); const tb=document.getElementById('ads-table-body');
-            vc.innerHTML=''; tb.innerHTML='';
-            
-            // Filtreleme Logic
-            let displayAds = ads;
-            if (filterCat) {
-                displayAds = ads.filter(ad => ad.category === filterCat);
-                document.getElementById('result-count').innerText = `${filterCat} kategorisindeki ilanlar`;
-            } else {
-                document.getElementById('result-count').innerText = "Tüm ilanlar gösteriliyor";
-            }
+        // --- ŞİFREMİ UNUTTUM FONKSİYONLARI ---
+        function openForgot() { toggleModal('login-modal'); toggleModal('forgot-modal'); }
+        function sendResetLink() {
+            const email = document.getElementById('forgot-email').value; toggleModal('forgot-modal');
+            Swal.fire({title: 'Gönderiliyor...', timer: 1500, didOpen: () => { Swal.showLoading() }}).then(() => {
+                Swal.fire('Başarılı', email + ' adresine sıfırlama bağlantısı gönderildi.', 'success'); addLog('Şifre sıfırlama: ' + email);
+            });
+        }
 
+        function renderAds(filterCat = null) {
+            const vc=document.getElementById('vitrin-container'); const tb=document.getElementById('ads-table-body'); vc.innerHTML=''; tb.innerHTML='';
+            let displayAds = ads; if (filterCat) { displayAds = ads.filter(ad => ad.category === filterCat); document.getElementById('result-count').innerText = `${filterCat} kategorisindeki ilanlar`; } else { document.getElementById('result-count').innerText = "Tüm ilanlar gösteriliyor"; }
             displayAds.forEach(ad=>{
                 if(ad.isVitrin) vc.innerHTML+=`<div onclick="openAd(${ad.id})" class="bg-white border rounded shadow p-2 cursor-pointer relative"><img src="${ad.img}" class="w-full h-32 object-cover mb-2"><h3 class="font-bold text-sm truncate">${ad.title}</h3><div class="text-xs text-gray-500">${ad.category}</div><div class="text-red-600 font-bold">${ad.price} TL</div></div>`;
                 tb.innerHTML+=`<tr onclick="openAd(${ad.id})" class="border-b hover:bg-yellow-50 cursor-pointer"><td class="p-2"><img src="${ad.img}" class="w-16 h-12 object-cover rounded"></td><td class="p-2 font-bold text-blue-900">${ad.title}</td><td class="p-2 text-xs text-gray-500">${ad.category}</td><td class="p-2 font-bold">${ad.price} TL</td><td class="p-2 hidden md:table-cell text-gray-500">${ad.loc}</td></tr>`;
             });
             document.getElementById('admin-ad-count').innerText=ads.length;
         }
-
         function searchAds(query) {
-            query = query.toLowerCase();
-            const filtered = ads.filter(ad => ad.title.toLowerCase().includes(query) || ad.category.toLowerCase().includes(query));
-            
-            const tb=document.getElementById('ads-table-body'); tb.innerHTML='';
-            if(filtered.length === 0) tb.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">Sonuç bulunamadı.</td></tr>';
-            
-            filtered.forEach(ad=>{
-                tb.innerHTML+=`<tr onclick="openAd(${ad.id})" class="border-b hover:bg-yellow-50 cursor-pointer"><td class="p-2"><img src="${ad.img}" class="w-16 h-12 object-cover rounded"></td><td class="p-2 font-bold text-blue-900">${ad.title}</td><td class="p-2 text-xs text-gray-500">${ad.category}</td><td class="p-2 font-bold">${ad.price} TL</td><td class="p-2 hidden md:table-cell text-gray-500">${ad.loc}</td></tr>`;
-            });
+            query = query.toLowerCase(); const filtered = ads.filter(ad => ad.title.toLowerCase().includes(query) || ad.category.toLowerCase().includes(query));
+            const tb=document.getElementById('ads-table-body'); tb.innerHTML=''; if(filtered.length === 0) tb.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">Sonuç bulunamadı.</td></tr>';
+            filtered.forEach(ad=>{ tb.innerHTML+=`<tr onclick="openAd(${ad.id})" class="border-b hover:bg-yellow-50 cursor-pointer"><td class="p-2"><img src="${ad.img}" class="w-16 h-12 object-cover rounded"></td><td class="p-2 font-bold text-blue-900">${ad.title}</td><td class="p-2 text-xs text-gray-500">${ad.category}</td><td class="p-2 font-bold">${ad.price} TL</td><td class="p-2 hidden md:table-cell text-gray-500">${ad.loc}</td></tr>`; });
             document.getElementById('result-count').innerText = `"${query}" için ${filtered.length} sonuç bulundu`;
         }
-
         function openAd(id){
             const ad=ads.find(x=>x.id===id); showPage('detail');
             document.getElementById('detail-image').src=ad.img; document.getElementById('detail-title').innerText=ad.title; document.getElementById('detail-price').innerText=ad.price+" TL"; document.getElementById('detail-desc').innerText=ad.desc;
-            document.getElementById('detail-owner-name').innerText=ad.owner; document.getElementById('detail-owner-img').src=ad.ownerImg;
-            document.getElementById('detail-category').innerText = "Kategori: " + ad.category;
-            
-            const thumbContainer = document.getElementById('detail-thumbnails'); thumbContainer.innerHTML = '';
-            for(let i=0; i<5; i++) thumbContainer.innerHTML += `<img src="${ad.img}" class="w-full h-16 object-cover rounded border hover:opacity-75 cursor-pointer">`;
-
-            const delBtn=document.getElementById('delete-ad-btn');
-            if(currentUser&&(ad.owner===currentUser.name+" "+currentUser.surname||isAdmin)){ delBtn.classList.remove('hidden'); delBtn.onclick=()=>delAd(ad.id); } else { delBtn.classList.add('hidden'); }
+            document.getElementById('detail-owner-name').innerText=ad.owner; document.getElementById('detail-owner-img').src=ad.ownerImg; document.getElementById('detail-category').innerText = "Kategori: " + ad.category;
+            const tc = document.getElementById('detail-thumbnails'); tc.innerHTML = ''; for(let i=0; i<5; i++) tc.innerHTML += `<img src="${ad.img}" class="w-full h-16 object-cover rounded border hover:opacity-75 cursor-pointer">`;
+            const delBtn=document.getElementById('delete-ad-btn'); if(currentUser&&(ad.owner===currentUser.name+" "+currentUser.surname||isAdmin)){ delBtn.classList.remove('hidden'); delBtn.onclick=()=>delAd(ad.id); } else { delBtn.classList.add('hidden'); }
             const fb=document.getElementById('fav-btn'); fb.innerText=favorites.includes(ad.id)?'Favorilerden Çıkar':'Favorile'; fb.onclick=()=>togFav(ad.id);
         }
-
         function delAd(id){ Swal.fire({title:'Sil?',showCancelButton:true}).then(r=>{if(r.isConfirmed){ads=ads.filter(x=>x.id!==id); addLog('İlan silindi ID:'+id); renderAds(); showPage('home');}});}
         function togFav(id){ if(!currentUser)return; if(favorites.includes(id))favorites=favorites.filter(x=>x!==id); else favorites.push(id); openAd(id); }
         function renderFavs(){ const c=document.getElementById('favorites-container'); c.innerHTML=''; const f=ads.filter(x=>favorites.includes(x.id)); f.forEach(ad=>{c.innerHTML+=`<div onclick="openAd(${ad.id})" class="bg-white border rounded p-2"><img src="${ad.img}" class="w-full h-32 object-cover"><h3 class="font-bold text-sm">${ad.title}</h3></div>`;}); }
         function openChat(){ if(!currentUser){toggleModal('login-modal');return;} showPage('messages'); document.getElementById('chat-box').innerHTML+=`<div class="flex justify-end"><div class="bg-blue-100 p-2 rounded text-sm">Merhaba ilanınızla ilgileniyorum.</div></div>`; }
         function sendMessage(){ const t=document.getElementById('chat-input'); if(t.value){document.getElementById('chat-box').innerHTML+=`<div class="flex justify-end"><div class="bg-blue-100 p-2 rounded text-sm">${t.value}</div></div>`; t.value=''; setTimeout(()=>{document.getElementById('chat-box').innerHTML+=`<div class="flex justify-start"><div class="bg-white p-2 rounded text-sm border">Teşekkürler, dönüş yapacağım.</div></div>`;},1000);} }
-        
-        // --- İLAN OLUŞTURMA & ÖDEME ---
         function checkLoginForAd(){ if(!currentUser){Swal.fire('Giriş Yap','','warning'); toggleModal('login-modal');}else toggleModal('ad-modal'); }
         function startPaymentProcess(){ const d=document.querySelector('input[name="doping"]:checked').value; pendingDopingType=d; if(d==='none'){finAd();return;} pendingAdAmount=(d==='vitrin')?150:75; toggleModal('ad-modal'); toggleModal('payment-modal'); document.getElementById('step-card').classList.remove('hidden'); document.getElementById('step-3d').classList.add('hidden'); document.getElementById('payment-amount').innerText=pendingAdAmount+" TL"; }
         function goTo3D(){ if(document.getElementById('card-number').value.length<5)return; Swal.showLoading(); setTimeout(()=>{Swal.close();document.getElementById('step-card').classList.add('hidden');document.getElementById('step-3d').classList.remove('hidden');},1000); }
@@ -466,35 +427,22 @@
         function finAd(paid=false){ 
             const cat = document.getElementById('ad-category').value;
             const newAd={id:Date.now(), title:document.getElementById('ad-title').value, category: cat, price:document.getElementById('ad-price').value, date:"Bugün", loc:document.getElementById('ad-loc').value, img:"https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&q=80", owner:currentUser.name+" "+currentUser.surname, ownerImg:currentUser.avatar, isVitrin:(pendingDopingType==='vitrin'), isAcil:(pendingDopingType==='acil'), desc:document.getElementById('ad-desc').value};
-            ads.unshift(newAd); renderAds(); showPage('home'); 
-            addLog(`Yeni ilan eklendi: ${newAd.title} (${cat})`);
-            Swal.fire('İlan Yayında!',paid?'Ödeme Alındı.':'','success');
+            ads.unshift(newAd); renderAds(); showPage('home'); addLog(`Yeni ilan: ${newAd.title} (${cat})`); Swal.fire('İlan Yayında!',paid?'Ödeme Alındı.':'','success');
         }
-
-        // --- ADMİN PANELİ ---
         function renderAdmin(){
             const bd=document.getElementById('admin-ads-body'); bd.innerHTML='';
             ads.forEach(ad=>{bd.innerHTML+=`<tr class="border-b"><td class="p-3">#${ad.id}</td><td class="p-3 font-bold">${ad.title}</td><td class="p-3"><button onclick="delAd(${ad.id})" class="text-red-600 font-bold">Sil</button></td></tr>`;});
-            
-            // Logları Yazdır
-            const logsDiv = document.getElementById('admin-logs');
-            logsDiv.innerHTML = systemLogs.map(log => `<div class="mb-1 border-b border-gray-800 pb-1">${log}</div>`).join('');
-            
-            // Aktif Kullanıcı Simülasyonu
-            document.getElementById('admin-active-users').innerText = Math.floor(Math.random() * 50) + 120; // 120-170 arası salla
+            document.getElementById('admin-logs').innerHTML = systemLogs.map(log => `<div class="mb-1 border-b border-gray-800 pb-1">${log}</div>`).join('');
+            document.getElementById('admin-active-users').innerText = Math.floor(Math.random() * 50) + 120;
         }
 
-        // --- BAŞLAT ---
         window.onload=function() {
-            // Kategorileri Doldur
-            const catList = document.getElementById('category-list');
-            const catSelect = document.getElementById('ad-category');
+            const catList = document.getElementById('category-list'); const catSelect = document.getElementById('ad-category');
             categories.forEach(c => {
                 catList.innerHTML += `<li onclick="renderAds('${c}')" class="p-2 border-b hover:bg-yellow-100 cursor-pointer flex justify-between"><span>${c}</span> <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>`;
                 catSelect.innerHTML += `<option value="${c}">${c}</option>`;
             });
-            renderAds();
-            addLog('Sistem başlatıldı.');
+            renderAds(); addLog('Sistem başlatıldı.');
         };
     </script>
 </body>
