@@ -3,24 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala | Güvenli Mod</title>
+    <title>BiKirala | Yönetici Modu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         body { background-color: #f8f9fa; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
         
-        /* HATA KUTUSU (Gizli) */
-        #hataPaneli { display: none; background: #ffebee; border-bottom: 2px solid #ef5350; color: #c62828; padding: 15px; font-weight: bold; text-align: center; }
-
         .navbar { background: #FFD000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .navbar-brand { font-weight: 900; color: #000; font-size: 24px; }
+        .navbar-brand { font-weight: 900; color: #000; font-size: 24px; cursor: pointer; user-select: none; }
         
-        .card { border: none; border-radius: 10px; transition: 0.2s; background: white; height: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .card { border: none; border-radius: 10px; transition: 0.2s; background: white; height: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
         .card-img-top { height: 200px; object-fit: cover; border-top-left-radius: 10px; border-top-right-radius: 10px; }
         
         .btn-ilan { background: #000; color: #FFD000; font-weight: bold; border-radius: 50px; padding: 8px 20px; border: none; }
         .btn-ilan:hover { background: #333; color: #fff; }
+
+        /* SİLME BUTONU (Sadece Admin Görür) */
+        .btn-sil {
+            display: none; /* Gizli başlar */
+            position: absolute; top: 10px; left: 10px;
+            background: red; color: white; border: none;
+            width: 35px; height: 35px; border-radius: 50%;
+            font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            z-index: 10; cursor: pointer;
+        }
+        .btn-sil:hover { background: darkred; transform: scale(1.1); }
 
         .price-badge {
             position: absolute; top: 10px; right: 10px;
@@ -39,16 +47,19 @@
 </head>
 <body>
 
-    <div id="hataPaneli"></div>
-
     <nav class="navbar sticky-top">
         <div class="container d-flex justify-content-between">
-            <a class="navbar-brand" href="#"><i class="fas fa-cube"></i> bi<span style="background:#000; color:#fff; padding:0 3px; border-radius:3px;">kirala</span></a>
+            <a class="navbar-brand" onclick="adminGirisKontrol()"><i class="fas fa-cube"></i> bi<span style="background:#000; color:#fff; padding:0 3px; border-radius:3px;">kirala</span></a>
+            
             <button class="btn btn-ilan" data-bs-toggle="modal" data-bs-target="#ilanModal">
                 <i class="fas fa-plus"></i> İlan Ver
             </button>
         </div>
     </nav>
+
+    <div id="adminPanelUyari" class="bg-danger text-white text-center p-2 fw-bold" style="display:none;">
+        ⚠️ YÖNETİCİ MODU AKTİF - DİKKATLİ SİLİN!
+    </div>
 
     <div class="kategori-wrapper shadow-sm">
         <div class="container">
@@ -65,7 +76,7 @@
         <div class="row row-cols-1 row-cols-md-3 g-4" id="ilan-listesi">
             <div class="text-center w-100 py-5">
                 <div class="spinner-border text-warning"></div>
-                <p class="mt-2 text-muted" id="durumMesaji">Sistem Başlatılıyor...</p>
+                <p class="mt-2 text-muted">Yükleniyor...</p>
             </div>
         </div>
     </div>
@@ -107,15 +118,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script type="module">
-        // Global Hata Yakalayıcı
-        window.onerror = function(msg, url, line) {
-            document.getElementById('hataPaneli').style.display = 'block';
-            document.getElementById('hataPaneli').innerHTML = "⚠️ HATA OLUŞTU: " + msg;
-            return false;
-        };
-
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyARO3eKpa058215Sdo3Dqf6U7uTr-z4pMM",
@@ -126,123 +130,133 @@
             appId: "1:677047831958:web:82c4d37ee0055bfbafa1b7"
         };
 
-        // Sistemi Başlat
-        try {
-            const app = initializeApp(firebaseConfig);
-            const db = getFirestore(app);
-            
-            let seciliResimData = "https://via.placeholder.com/400x300?text=Resim+Yok";
-            let aktifKategori = "Hepsi";
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        let seciliResimData = "https://via.placeholder.com/400x300?text=Resim+Yok";
+        let aktifKategori = "Hepsi";
+        let isAdmin = false; // Yönetici mi?
+        let clickSayisi = 0; // Şifre için tıklama sayacı
 
-            // FOTOĞRAF İŞLEME
-            document.getElementById('fotoInput').addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        const maxWidth = 500;
-                        const scale = maxWidth / img.width;
-                        canvas.width = maxWidth;
-                        canvas.height = img.height * scale;
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        seciliResimData = canvas.toDataURL('image/jpeg', 0.6);
-                        document.getElementById('fotoBilgi').innerText = "✔ Fotoğraf Hazır";
-                        document.getElementById('fotoBilgi').classList.add('text-success');
-                    }
-                    img.src = evt.target.result;
+        // --- YÖNETİCİ GİRİŞİ (Gizli Özellik) ---
+        window.adminGirisKontrol = function() {
+            clickSayisi++;
+            if(clickSayisi >= 3) { // 3 kere tıklayınca sor
+                let sifre = prompt("Patron Şifresi Nedir?");
+                if(sifre === "1234") { // Şifreyi buradan değiştirebilirsin
+                    isAdmin = true;
+                    alert("Hoşgeldin Patron! Silme yetkisi açıldı.");
+                    document.getElementById('adminPanelUyari').style.display = 'block';
+                    verileriCek(); // Listeyi yenile (Sil butonları gelsin)
+                } else {
+                    alert("Yanlış şifre!");
                 }
-                reader.readAsDataURL(file);
-            });
-
-            // İLAN GÖNDER
-            window.ilanGonder = async function() {
-                const btn = document.getElementById("gonderBtn");
-                btn.innerText = "Yükleniyor..."; btn.disabled = true;
-
-                try {
-                    await addDoc(collection(db, "ilanlar"), {
-                        ad: document.getElementById("urunAdi").value,
-                        fiyat: document.getElementById("fiyat").value,
-                        konum: document.getElementById("konum").value,
-                        telefon: document.getElementById("telefon").value,
-                        kategori: document.getElementById("kategori").value,
-                        resim: seciliResimData,
-                        tarih: Date.now()
-                    });
-                    
-                    document.querySelector('.btn-close').click(); // Modalı kapat
-                    
-                    // Temizle
-                    document.getElementById("urunAdi").value = "";
-                    seciliResimData = "https://via.placeholder.com/400x300?text=Resim+Yok";
-                    document.getElementById('fotoBilgi').innerText = "📸 Fotoğraf Ekle";
-                    document.getElementById('fotoBilgi').classList.remove('text-success');
-                    
-                } catch (e) {
-                    alert("Gönderim Hatası: " + e.message);
-                } finally {
-                    btn.innerText = "Yayınla"; btn.disabled = false;
-                }
+                clickSayisi = 0;
             }
-
-            // KATEGORİ FİLTRELEME
-            window.filtrele = function(kat, el) {
-                aktifKategori = kat;
-                document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-                if(el) el.classList.add('active');
-                verileriCek();
-            }
-
-            // VERİLERİ ÇEK
-            function verileriCek() {
-                const liste = document.getElementById("ilan-listesi");
-                let q = query(collection(db, "ilanlar"), orderBy("tarih", "desc"));
-                
-                if (aktifKategori !== 'Hepsi') {
-                    q = query(collection(db, "ilanlar"), where("kategori", "==", aktifKategori));
-                }
-
-                onSnapshot(q, (snapshot) => {
-                    liste.innerHTML = "";
-                    if(snapshot.empty) {
-                        liste.innerHTML = "<p class='text-center w-100 text-muted'>İlan bulunamadı.</p>";
-                        return;
-                    }
-                    
-                    snapshot.forEach((doc) => {
-                        const data = doc.data();
-                        const waLink = `https://wa.me/90${data.telefon}`;
-                        
-                        liste.innerHTML += `
-                        <div class="col">
-                            <div class="card h-100">
-                                <span class="price-badge">${data.fiyat} TL</span>
-                                <img src="${data.resim}" class="card-img-top">
-                                <div class="card-body">
-                                    <h6 class="card-title fw-bold text-truncate">${data.ad}</h6>
-                                    <p class="small text-muted mb-2">📍 ${data.konum || 'Türkiye'}</p>
-                                    <a href="${waLink}" target="_blank" class="btn btn-outline-dark btn-sm w-100">Kirala</a>
-                                </div>
-                            </div>
-                        </div>`;
-                    });
-                }, (error) => {
-                     document.getElementById('hataPaneli').style.display = 'block';
-                     document.getElementById('hataPaneli').innerHTML = "VERİTABANI HATASI: " + error.message;
-                });
-            }
-            
-            verileriCek(); // İlk başta çalıştır
-
-        } catch (globalHata) {
-            document.getElementById('hataPaneli').style.display = 'block';
-            document.getElementById('hataPaneli').innerHTML = "KRİTİK HATA: " + globalHata.message;
         }
+
+        // --- İLAN SİLME ---
+        window.ilanSil = async function(id) {
+            if(confirm("Bu ilanı gerçekten silmek istiyor musun?")) {
+                try {
+                    await deleteDoc(doc(db, "ilanlar", id));
+                    // Veritabanından silinince otomatik olarak ekrandan da gidecek (onSnapshot sayesinde)
+                } catch (e) {
+                    alert("Silme hatası: " + e.message);
+                }
+            }
+        }
+
+        // --- FOTOĞRAF İŞLEME ---
+        document.getElementById('fotoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const maxWidth = 500;
+                    const scale = maxWidth / img.width;
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * scale;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    seciliResimData = canvas.toDataURL('image/jpeg', 0.6);
+                    document.getElementById('fotoBilgi').innerText = "✔ Fotoğraf Hazır";
+                    document.getElementById('fotoBilgi').classList.add('text-success');
+                }
+                img.src = evt.target.result;
+            }
+            reader.readAsDataURL(file);
+        });
+
+        // --- İLAN GÖNDERME ---
+        window.ilanGonder = async function() {
+            const btn = document.getElementById("gonderBtn");
+            btn.innerText = "Yükleniyor..."; btn.disabled = true;
+            try {
+                await addDoc(collection(db, "ilanlar"), {
+                    ad: document.getElementById("urunAdi").value,
+                    fiyat: document.getElementById("fiyat").value,
+                    konum: document.getElementById("konum").value,
+                    telefon: document.getElementById("telefon").value,
+                    kategori: document.getElementById("kategori").value,
+                    resim: seciliResimData,
+                    tarih: Date.now()
+                });
+                document.querySelector('.btn-close').click();
+                document.getElementById("urunAdi").value = "";
+                seciliResimData = "https://via.placeholder.com/400x300?text=Resim+Yok";
+            } catch (e) { alert("Hata: " + e.message); } 
+            finally { btn.innerText = "Yayınla"; btn.disabled = false; }
+        }
+
+        window.filtrele = function(kat, el) {
+            aktifKategori = kat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            if(el) el.classList.add('active');
+            verileriCek();
+        }
+
+        function verileriCek() {
+            const liste = document.getElementById("ilan-listesi");
+            let q = query(collection(db, "ilanlar"), orderBy("tarih", "desc"));
+            if (aktifKategori !== 'Hepsi') q = query(collection(db, "ilanlar"), where("kategori", "==", aktifKategori));
+
+            onSnapshot(q, (snapshot) => {
+                liste.innerHTML = "";
+                if(snapshot.empty) { liste.innerHTML = "<p class='text-center w-100 text-muted'>İlan yok.</p>"; return; }
+                
+                snapshot.forEach((belge) => {
+                    const data = belge.data();
+                    const id = belge.id; // Silmek için ID lazım
+                    const waLink = `https://wa.me/90${data.telefon}`;
+                    
+                    // Eğer Adminsen sil butonunu göster (style="display:block") yoksa gizle
+                    const silButonuStili = isAdmin ? "display:block;" : "";
+
+                    liste.innerHTML += `
+                    <div class="col">
+                        <div class="card h-100">
+                            <button class="btn-sil" style="${silButonuStili}" onclick="ilanSil('${id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+
+                            <span class="price-badge">${data.fiyat} TL</span>
+                            <img src="${data.resim}" class="card-img-top">
+                            <div class="card-body">
+                                <h6 class="card-title fw-bold text-truncate">${data.ad}</h6>
+                                <p class="small text-muted mb-2">📍 ${data.konum || 'Türkiye'}</p>
+                                <a href="${waLink}" target="_blank" class="btn btn-outline-dark btn-sm w-100">Kirala</a>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+            });
+        }
+        
+        verileriCek();
     </script>
 </body>
 </html>
