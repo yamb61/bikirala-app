@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BiKirala | Hibrit</title>
+    <title>BiKirala | Sağlam</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -74,7 +74,7 @@
                     
                     <div class="p-3 bg-light text-center border rounded mb-3" onclick="document.getElementById('resimInput').click()">
                         <span id="resimBilgi">📸 Fotoğraf Ekle (Zorunlu)</span>
-                        <input type="file" id="resimInput" class="d-none" accept="image/*" onchange="fotoSecildi(this)">
+                        <input type="file" id="resimInput" class="d-none" accept="image/*" onchange="fotoPresle(this)">
                     </div>
 
                     <textarea id="inpAciklama" class="form-control mb-3" rows="3" placeholder="Açıklama (Ürün detayları...)"></textarea>
@@ -111,19 +111,17 @@
         let tumIlanlar = [];
         let aktifKategori = "Hepsi";
         let seciliResim = null;
-        let db; // Veritabanı
+        let db; 
 
-        // 1. ÖNCE SAYFAYI AÇ (YÜKLENİYOR SORUNUNU ÇÖZMEK İÇİN)
+        // 1. BAŞLANGIÇ
         window.onload = function() {
-            // Sahte veri ile açılış yap (Firebase gecikirse boş kalmasın)
-            tumIlanlar = [
-                {ad: "Örnek PS5", fiyat: "400", kat: "Elektronik", resim: "https://via.placeholder.com/400x300", aciklama: "Örnek ilandır.", tel: "555"}
-            ];
-            listele(); // Hemen ekrana bas
-            firebaseBaslat(); // Sonra bağlantıyı dene
+            // Örnek ilan ile açılış yap (Site boş görünmesin)
+            tumIlanlar = [{ad: "Örnek İlan", fiyat: "100", kat: "Elektronik", resim: "https://via.placeholder.com/400x300", aciklama: "Sistem çalışıyor.", tel: "555"}];
+            listele();
+            firebaseBaslat();
         };
 
-        // 2. FIREBASE BAĞLANTISI
+        // 2. FIREBASE BAĞLAN
         function firebaseBaslat() {
             try {
                 const firebaseConfig = {
@@ -137,7 +135,6 @@
                 firebase.initializeApp(firebaseConfig);
                 db = firebase.firestore();
                 
-                // Gerçek verileri dinle
                 db.collection("ilanlar").orderBy("tarih", "desc").onSnapshot(snap => {
                     tumIlanlar = [];
                     snap.forEach(doc => {
@@ -145,15 +142,46 @@
                         d.id = doc.id;
                         tumIlanlar.push(d);
                     });
-                    listele(); // Gerçek veriler gelince güncelle
+                    listele(); // Gerçek verileri bas
                 });
             } catch (e) {
-                console.log("Firebase Hatası: " + e.message);
-                // Hata olsa bile site açık kalır, sadece ilan gelmez.
+                console.log("Bağlantı sorunu: " + e.message);
             }
         }
 
-        // 3. LİSTELEME FONKSİYONU
+        // 3. FOTOĞRAF SIKIŞTIRMA (PRESLME)
+        function fotoPresle(input) {
+            const file = input.files[0];
+            if(!file) return;
+            
+            document.getElementById('resimBilgi').innerText = "⏳ İşleniyor...";
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Boyutu Küçült (Max 600px)
+                    const maxWidth = 600;
+                    const scale = maxWidth / img.width;
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * scale;
+                    
+                    // Çiz ve Sıkıştır (Kalite 0.5)
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    seciliResim = canvas.toDataURL('image/jpeg', 0.5);
+                    
+                    document.getElementById('resimBilgi').innerText = "✔ Fotoğraf Hazır";
+                    document.getElementById('resimBilgi').style.color = "green";
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        // 4. LİSTELEME
         function listele() {
             const div = document.getElementById("ilan-listesi");
             const arama = document.getElementById("arama").value.toLowerCase();
@@ -165,85 +193,7 @@
                 return katUygun && aramaUygun;
             });
 
-            if(sonuc.length === 0) {
-                div.innerHTML = "<p class='text-center mt-5 text-muted'>Sonuç yok.</p>";
-                return;
-            }
+            if(sonuc.length === 0) { div.innerHTML = "<p class='text-center mt-5 text-muted'>Sonuç yok.</p>"; return; }
 
             sonuc.forEach(d => {
-                const link = `https://wa.me/90${d.tel}?text=İlan: ${d.ad}`;
-                div.innerHTML += `
-                <div class="card">
-                    <span class="price-tag">${d.fiyat} TL</span>
-                    <img src="${d.resim}" class="card-img-top">
-                    <div class="card-body p-2">
-                        <h6 class="fw-bold mb-1">${d.ad}</h6>
-                        <small class="text-muted d-block mb-2">${d.aciklama || d.kategori || ''}</small>
-                        <a href="${link}" class="btn btn-dark w-100 rounded-pill">Kirala</a>
-                    </div>
-                </div>`;
-            });
-        }
-
-        // 4. İLAN YAYINLA
-        function ilanYayinla() {
-            const ad = document.getElementById('inpAd').value;
-            const fiyat = document.getElementById('inpFiyat').value;
-            const tel = document.getElementById('inpTel').value;
-            const aciklama = document.getElementById('inpAciklama').value;
-            const kat = document.getElementById('inpKat').value;
-
-            if(!ad || !fiyat || !tel || !seciliResim) { alert("Eksik bilgi!"); return; }
-
-            const btn = document.getElementById('btnGonder');
-            btn.innerText = "Yükleniyor..."; btn.disabled = true;
-
-            // Veritabanına kaydet
-            if(db) {
-                db.collection("ilanlar").add({
-                    ad: ad, fiyat: fiyat, tel: tel, aciklama: aciklama,
-                    kategori: kat, resim: seciliResim, tarih: Date.now()
-                }).then(() => {
-                    alert("Yayınlandı!"); location.reload();
-                }).catch(e => {
-                    alert("Hata: " + e.message); btn.innerText = "YAYINLA"; btn.disabled = false;
-                });
-            } else {
-                alert("Veritabanı bağlantısı yok!");
-            }
-        }
-
-        // 5. YARDIMCI İŞLEVLER
-        function fotoSecildi(input) {
-            const file = input.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                seciliResim = e.target.result;
-                document.getElementById('resimBilgi').innerText = "✔ Tamam";
-                document.getElementById('resimBilgi').style.color = "green";
-            }
-            reader.readAsDataURL(file);
-        }
-
-        function kategoriSec(kat, btn) {
-            aktifKategori = kat;
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            listele();
-        }
-
-        function sayfaGec(id, btn) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + id).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            btn.classList.add('active');
-        }
-
-        function modalAc() {
-            var myModal = new bootstrap.Modal(document.getElementById('ilanModal'));
-            myModal.show();
-        }
-    </script>
-</body>
-</html>
+                const link = `https://wa.me/90${d.tel}?text=İlan: ${d.
