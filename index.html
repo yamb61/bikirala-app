@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiKirala | Hızlı Kiralama</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { background: #FFD000; padding: 15px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .navbar-brand { font-weight: 900; color: #222; font-size: 26px; letter-spacing: -1px; }
+        
+        .card { border: none; border-radius: 12px; transition: transform 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; height: 100%; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .card-img-top { height: 220px; object-fit: cover; }
+        
+        .btn-ilan { background: #222; color: #FFD000; border-radius: 50px; padding: 8px 25px; font-weight: bold; border: none; }
+        .btn-ilan:hover { background: #000; color: #fff; }
+
+        .price-badge {
+            position: absolute; top: 15px; right: 15px;
+            background: rgba(0,0,0,0.8); color: #FFD000;
+            padding: 5px 15px; border-radius: 20px; font-weight: bold;
+            backdrop-filter: blur(5px);
+        }
+        
+        /* Kategori Menüsü (Mobil Uyumlu) */
+        .category-scroll {
+            overflow-x: auto; white-space: nowrap; padding: 15px 0; -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+        }
+        .category-scroll::-webkit-scrollbar { display: none; } /* Chrome */
+        
+        .cat-btn {
+            display: inline-block; padding: 8px 20px; margin-right: 10px;
+            background: white; border: 1px solid #ddd; border-radius: 50px;
+            color: #555; text-decoration: none; font-weight: 500; transition: 0.3s;
+        }
+        .cat-btn.active { background: #222; color: #FFD000; border-color: #222; }
+        
+    </style>
+</head>
+<body>
+
+    <nav class="navbar sticky-top">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand" href="#"><i class="fas fa-layer-group"></i> bi<span style="background:#222; color:#fff; padding:0 4px; border-radius:4px; margin:0 2px;">kirala</span></a>
+            <button class="btn btn-ilan" onclick="modalAc()"><i class="fas fa-plus-circle"></i> İlan Ver</button>
+        </div>
+    </nav>
+
+    <div class="container mt-3">
+        <div class="category-scroll">
+            <a href="#" class="cat-btn active" onclick="filtrele('Hepsi', this)">Tümü</a>
+            <a href="#" class="cat-btn" onclick="filtrele('Vasıta', this)">🚗 Vasıta</a>
+            <a href="#" class="cat-btn" onclick="filtrele('Emlak', this)">🏠 Emlak</a>
+            <a href="#" class="cat-btn" onclick="filtrele('Elektronik', this)">💻 Elektronik</a>
+            <a href="#" class="cat-btn" onclick="filtrele('Spor', this)">⛺ Kamp & Spor</a>
+        </div>
+
+        <h5 class="mt-4 mb-3 fw-bold text-secondary" id="listeBaslik">Vitrin</h5>
+        <div class="row row-cols-1 row-cols-md-3 g-4" id="ilan-listesi">
+            <div class="text-center w-100 py-5"><div class="spinner-border text-warning"></div></div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ilanModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">Ücretsiz İlan Oluştur</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="urunAdi" class="form-control mb-3" placeholder="Ürün Başlığı (Örn: PS5 Kiralık)">
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <input type="number" id="fiyat" class="form-control" placeholder="Günlük Fiyat">
+                        </div>
+                        <div class="col-6">
+                            <select id="kategori" class="form-select">
+                                <option value="Elektronik">Elektronik</option>
+                                <option value="Vasıta">Vasıta</option>
+                                <option value="Emlak">Emlak</option>
+                                <option value="Spor">Kamp/Spor</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <input type="text" id="konum" class="form-control mb-3" placeholder="Konum (İlçe/Şehir)">
+                    <input type="text" id="telefon" class="form-control mb-3" placeholder="Telefon (53X...)">
+
+                    <div class="mb-3 p-3 border rounded bg-light text-center" onclick="document.getElementById('fotoInput').click()" style="cursor: pointer;">
+                        <i class="fas fa-camera fa-2x text-muted mb-2"></i>
+                        <p class="m-0 small text-muted" id="fotoBilgi">Fotoğraf Seç veya Çek</p>
+                        <input type="file" id="fotoInput" class="d-none" accept="image/*">
+                    </div>
+
+                    <button onclick="ilanGonder()" id="gonderBtn" class="btn btn-warning w-100 fw-bold py-2">Yayınla 🚀</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyARO3eKpa058215Sdo3Dqf6U7uTr-z4pMM",
+            authDomain: "kiralagitsin-855c9.firebaseapp.com",
+            projectId: "kiralagitsin-855c9",
+            storageBucket: "kiralagitsin-855c9.firebasestorage.app",
+            messagingSenderId: "677047831958",
+            appId: "1:677047831958:web:82c4d37ee0055bfbafa1b7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let seciliResimData = "https://via.placeholder.com/400x300?text=Resim+Yok";
+        let aktifKategori = "Hepsi";
+
+        window.modalAc = () => new bootstrap.Modal(document.getElementById('ilanModal')).show();
+
+        // --- RESİM KÜÇÜLTME VE ÇEVİRME (HİLE BURADA) ---
+        document.getElementById('fotoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('fotoBilgi').innerText = "İşleniyor...";
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    // Resmi küçült (Canvas kullanarak) - Veritabanını şişirmemek için
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Max genişlik 600px olsun
+                    const maxWidth = 600;
+                    const scale = maxWidth / img.width;
+                    const width = maxWidth;
+                    const height = img.height * scale;
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Base64 string'e çevir
+                    seciliResimData = canvas.toDataURL('image/jpeg', 0.6); // %60 kalite
+                    document.getElementById('fotoBilgi').innerText = "✔ Fotoğraf Hazır!";
+                    document.getElementById('fotoBilgi').classList.add('text-success', 'fw-bold');
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        });
+
+        window.ilanGonder = async function() {
+            const btn = document.getElementById("gonderBtn");
+            btn.disabled = true; btn.innerText = "Yükleniyor...";
+
+            const ad = document.getElementById("urunAdi").value;
+            const fiyat = document.getElementById("fiyat").value;
+            const konum = document.getElementById("konum").value;
+            const telefon = document.getElementById("telefon").value;
+            const kategori = document.getElementById("kategori").value;
+
+            if(!ad || !fiyat) { alert("Eksik bilgi!"); btn.disabled = false; return; }
+
+            try {
+                // Resmi direkt veritabanına metin olarak kaydediyoruz (Storage yok!)
+                await addDoc(collection(db, "ilanlar"), {
+                    ad, fiyat, konum, telefon, kategori,
+                    resim: seciliResimData,
+                    tarih: Date.now()
+                });
+                
+                document.querySelector('.btn-close').click();
+                alert("İlan Yayında! 🚀");
+                
+                // Temizlik
+                document.getElementById("urunAdi").value = "";
+                seciliResimData = "https://via.placeholder.com/400x300?text=Resim+Yok";
+                document.getElementById('fotoBilgi').innerText = "Fotoğraf Seç veya Çek";
+                
+            } catch (e) {
+                alert("Hata: " + e.message);
