@@ -289,46 +289,80 @@
     </div>
 
     <script>
+<script>
         const app = {
-            user: null, isAdmin: false, balance: 0, logs: [], favorites: [], pendingAd: {},
+            // --- VERİLER ---
+            user: null, 
+            isAdmin: false, 
+            balance: 0, 
+            logs: [], 
+            favorites: [], 
+            pendingAd: {},
+            
             categories: ["Emlak", "Vasıta", "Yedek Parça", "Telefon", "Bilgisayar", "Tablet", "Müzik Aleti", "Teknolojik Aletler", "Spor", "Kamp", "Diğer"],
+            
+            // BOT İLANLAR (DÜZENLENDİ: ARTIK PUANLARI SABİT DEĞİL)
             ads: [
-                { id: 101, title: "Lüks Villa Kiralık", cat: "Emlak", price: 5000, loc: "İstanbul", img: "https://images.unsplash.com/photo-1600596542815-60c375043302?w=500&q=80", owner: "Ali V.", ownerImg: "https://i.pravatar.cc/150?img=3", vitrin: true, acil: false, desc: "Deniz manzaralı." },
-                { id: 102, title: "1967 Mustang", cat: "Vasıta", price: 2500, loc: "Ankara", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=500&q=80", owner: "Mehmet", ownerImg: "https://i.pravatar.cc/150?img=12", vitrin: true, acil: true, desc: "Klip çekimi için." },
-                { id: 103, title: "Sony Kamera", cat: "Teknolojik Aletler", price: 800, loc: "İzmir", img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80", owner: "Canan", ownerImg: "https://i.pravatar.cc/150?img=5", vitrin: false, acil: false, desc: "Lensler dahil." }
+                { id: 101, title: "Lüks Villa Kiralık", cat: "Emlak", price: 5000, loc: "İstanbul, Sarıyer", img: "https://images.unsplash.com/photo-1600596542815-60c375043302?w=500&q=80", owner: "Ali V.", ownerImg: "https://i.pravatar.cc/150?img=3", vitrin: true, acil: false, desc: "Deniz manzaralı.", verified: true, rating: 4.8, reviewCount: 12 },
+                { id: 102, title: "1967 Mustang", cat: "Vasıta", price: 2500, loc: "Ankara", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=500&q=80", owner: "Mehmet", ownerImg: "https://i.pravatar.cc/150?img=12", vitrin: true, acil: true, desc: "Klip çekimi için.", verified: false, rating: 3.5, reviewCount: 4 },
+                { id: 103, title: "Sony Kamera", cat: "Teknolojik Aletler", price: 800, loc: "İzmir", img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80", owner: "Canan", ownerImg: "https://i.pravatar.cc/150?img=5", vitrin: false, acil: false, desc: "Lensler dahil.", verified: true, rating: 5.0, reviewCount: 28 }
             ],
             
-            init: function() { this.renderCategories(); this.renderAds(); this.log("Sistem Başlatıldı."); },
+            // --- BAŞLATMA ---
+            init: function() { this.renderCategories(); this.renderAds(); this.log("Sistem Başlatıldı v3.1"); },
+
+            // --- SAYFA YÖNETİMİ ---
             router: function(pid) {
                 if((pid==='profile'||pid==='messages')&&!this.user){Swal.fire('Giriş Yap','','warning');this.modal('login');return;}
                 if(pid==='admin'&&!this.isAdmin){Swal.fire('Hata','Yetkisiz','error');return;}
-                document.querySelectorAll('[id^="page-"]').forEach(el=>{el.classList.add('section-hidden');el.classList.remove('section-visible');});
-                const t=document.getElementById('page-'+pid); if(t){t.classList.remove('section-hidden');t.classList.add('section-visible');window.scrollTo(0,0);}
-                if(pid==='home')this.renderAds(); if(pid==='admin')this.renderAdmin(); if(pid==='profile')this.renderMyAds();
+                
+                document.querySelectorAll('[id^="page-"]').forEach(el=>{
+                    el.classList.add('section-hidden');
+                    el.classList.remove('section-visible');
+                });
+                
+                const t=document.getElementById('page-'+pid); 
+                if(t){
+                    t.classList.remove('section-hidden');
+                    t.classList.add('section-visible');
+                    window.scrollTo(0,0);
+                }
+                
+                if(pid==='home')this.renderAds(); 
+                if(pid==='admin')this.renderAdmin(); 
+                if(pid==='profile')this.renderMyAds();
             },
+
             modal: function(n){this.closeAllModals();const e=document.getElementById('modal-'+n);if(e)e.classList.remove('section-hidden');},
             closeAllModals: function(){document.querySelectorAll('[id^="modal-"]').forEach(el=>el.classList.add('section-hidden'));},
             
+            // --- UI FONKSİYONLARI ---
             toggleDarkMode: function() {document.body.classList.toggle('dark-mode');const ic=document.getElementById('dark-icon');if(document.body.classList.contains('dark-mode'))ic.classList.replace('fa-moon','fa-sun');else ic.classList.replace('fa-sun','fa-moon');},
             toggleNotif: function() {const el=document.getElementById('notif-dropdown');el.classList.toggle('hidden');document.getElementById('notif-badge').classList.add('hidden');},
             sendNotif: function(msg) {const l=document.getElementById('notif-list');const b=document.getElementById('notif-badge');if(l.innerText.includes('yok'))l.innerHTML='';l.innerHTML=`<div class="p-3 border-b text-xs hover:bg-gray-50">${msg}</div>`+l.innerHTML;b.classList.remove('hidden');},
             applyFilter: function() {const min=document.getElementById('filter-min').value;const max=document.getElementById('filter-max').value;this.renderAds(null,null,min,max);},
 
+            // --- AUTH ---
             login: function(){
                 const e=document.getElementById('in-email').value; const p=document.getElementById('in-pass').value;
                 if(e==="emeebabaoglu61@gmail.com"&&p==="babaemre61"){this.user={name:"Patron",surname:"Yönetici",email:e,avatar:"https://cdn-icons-png.flaticon.com/512/295/295128.png"};this.isAdmin=true;document.getElementById('btn-admin').classList.remove('hidden');Swal.fire({icon:'success',title:'Yönetici Girişi'});this.log("ADMIN giriş.");}
-                else{this.isAdmin=false;document.getElementById('btn-admin').classList.add('hidden');if(!this.user)this.user={name:"Ahmet",surname:"Yılmaz",email:e,avatar:"https://i.pravatar.cc/150?img=68",phone:"0532 000"};Swal.fire({icon:'success',title:'Hoşgeldin '+this.user.name});this.log(`Giriş: ${this.user.name}`);}
+                else{this.isAdmin=false;document.getElementById('btn-admin').classList.add('hidden');if(!this.user)this.user={name:"Ahmet",surname:"Yılmaz",email:e,avatar:"https://i.pravatar.cc/150?img=68",phone:"0532 000", verified: false};Swal.fire({icon:'success',title:'Hoşgeldin '+this.user.name});this.log(`Giriş: ${this.user.name}`);}
                 this.updateUI(); this.closeAllModals(); this.sendNotif("Giriş yapıldı.");
             },
-            register: function(){const n=document.getElementById('reg-name').value;this.user={name:n,surname:document.getElementById('reg-surname').value,email:document.getElementById('reg-email').value,avatar:"https://cdn-icons-png.flaticon.com/512/149/149071.png"};this.closeAllModals();Swal.fire('Kayıt Başarılı','','success');this.updateUI();},
+            register: function(){const n=document.getElementById('reg-name').value;this.user={name:n,surname:document.getElementById('reg-surname').value,email:document.getElementById('reg-email').value,avatar:"https://cdn-icons-png.flaticon.com/512/149/149071.png", verified:false};this.closeAllModals();Swal.fire('Kayıt Başarılı','','success');this.updateUI();},
             logout: function(){this.user=null;this.isAdmin=false;this.updateUI();this.router('home');Swal.fire('Çıkış','','info');},
             updateUI: function(){
-                if(this.user){document.getElementById('nav-guest').classList.add('hidden');document.getElementById('nav-user').classList.remove('hidden');document.getElementById('nav-user').classList.add('flex');document.getElementById('user-display-name').innerText=this.user.name;document.getElementById('user-display-img').src=this.user.avatar;}
+                if(this.user){
+                    document.getElementById('nav-guest').classList.add('hidden');document.getElementById('nav-user').classList.remove('hidden');document.getElementById('nav-user').classList.add('flex');document.getElementById('user-display-name').innerText=this.user.name;document.getElementById('user-display-img').src=this.user.avatar;
+                    // Profil UI
+                    document.getElementById('p-name').value=this.user.name; document.getElementById('p-email').value=this.user.email;
+                }
                 else{document.getElementById('nav-guest').classList.remove('hidden');document.getElementById('nav-user').classList.add('hidden');document.getElementById('btn-admin').classList.add('hidden');}
             },
-            sendResetLink: function(){const e=document.getElementById('forgot-email').value;this.closeAllModals();Swal.fire({title:'Gönderiliyor...',timer:1000,didOpen:()=>Swal.showLoading()}).then(()=>Swal.fire('Başarılı',e+' adresine link gitti.','success'));},
             
+            // --- İLAN FONKSİYONLARI ---
             renderCategories: function(){const l=document.getElementById('category-list');const s=document.getElementById('ad-cat-select');l.innerHTML='';s.innerHTML='';this.categories.forEach(c=>{l.innerHTML+=`<li onclick="app.renderAds('${c}')" class="p-3 border-b hover:bg-yellow-50 cursor-pointer flex justify-between items-center group"><span class="group-hover:font-bold">${c}</span><i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i></li>`;s.innerHTML+=`<option value="${c}">${c}</option>`;});},
+            
             renderAds: function(cat=null,q=null, min=null, max=null){
                 const v=document.getElementById('vitrin-container');const l=document.getElementById('ads-list-body');v.innerHTML='';l.innerHTML='';
                 let d=this.ads;
@@ -339,11 +373,94 @@
 
                 if(d.length===0)document.getElementById('no-data').classList.remove('hidden');else document.getElementById('no-data').classList.add('hidden');
                 d.forEach(ad=>{
-                    if(ad.vitrin) v.innerHTML+=`<div onclick="app.detail(${ad.id})" class="bg-white border rounded-xl shadow-sm hover:shadow-xl transition cursor-pointer overflow-hidden relative group">${ad.acil?'<div class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded z-10 animate-pulse">ACİL</div>':''}<img src="${ad.img}" class="w-full h-40 object-cover group-hover:scale-105 transition duration-500"><div class="p-3"><h3 class="font-bold text-gray-800 truncate">${ad.title}</h3><div class="flex justify-between mt-2 items-center"><span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">${ad.cat}</span><span class="font-bold text-blue-600">${ad.price} TL</span></div></div></div>`;
-                    l.innerHTML+=`<tr onclick="app.detail(${ad.id})" class="border-b hover:bg-yellow-50 cursor-pointer transition ${ad.acil?'bg-red-50':''}"><td class="p-3"><img src="${ad.img}" class="w-16 h-12 object-cover rounded border"></td><td class="p-3 font-bold text-gray-800">${ad.title}</td><td class="p-3 text-xs text-gray-500">${ad.cat}</td><td class="p-3 font-bold">${ad.price} TL</td><td class="p-3 hidden md:table-cell text-xs text-gray-500"><i class="fa-solid fa-location-dot"></i> ${ad.loc}</td></tr>`;
+                    // Puan Hesaplama (Görsel İçin)
+                    let starHtml = ad.rating > 0 ? `<span class="text-yellow-500 font-bold text-xs"><i class="fa-solid fa-star"></i> ${ad.rating}</span>` : `<span class="text-gray-400 text-[10px]">Yeni</span>`;
+
+                    if(ad.vitrin) v.innerHTML+=`<div onclick="app.detail(${ad.id})" class="bg-white border rounded-xl shadow-sm hover:shadow-xl transition cursor-pointer overflow-hidden relative group">${ad.acil?'<div class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded z-10 animate-pulse">ACİL</div>':''}<img src="${ad.img}" class="w-full h-40 object-cover group-hover:scale-105 transition duration-500"><div class="p-3"><h3 class="font-bold text-gray-800 truncate">${ad.title}</h3><div class="flex justify-between mt-2 items-center"><span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">${ad.cat}</span><div class="flex flex-col items-end"><span class="font-bold text-blue-600">${ad.price} TL</span>${starHtml}</div></div></div></div>`;
+                    l.innerHTML+=`<tr onclick="app.detail(${ad.id})" class="border-b hover:bg-yellow-50 cursor-pointer transition ${ad.acil?'bg-red-50':''}"><td class="p-3"><img src="${ad.img}" class="w-16 h-12 object-cover rounded border"></td><td class="p-3"><div class="font-bold text-gray-800">${ad.title}</div><div class="md:hidden text-xs">${starHtml}</div></td><td class="p-3 text-xs text-gray-500">${ad.cat}</td><td class="p-3 font-bold">${ad.price} TL</td><td class="p-3 hidden md:table-cell text-xs text-gray-500"><i class="fa-solid fa-location-dot"></i> ${ad.loc}</td></tr>`;
                 });
                 if(this.isAdmin)this.renderAdmin();
             },
+
+            // --- DETAY SAYFASI (DÜZENLENDİ: PUANLAMA EKLENDİ) ---
+            detail: function(id){
+                const ad=this.ads.find(x=>x.id===id);
+                this.router('detail');
+                document.getElementById('d-img').src=ad.img;
+                document.getElementById('d-title').innerText=ad.title;
+                document.getElementById('d-price').innerText=ad.price+" TL";
+                document.getElementById('d-desc').innerText=ad.desc;
+                document.getElementById('d-loc-text').innerText=ad.loc;
+                document.getElementById('d-cat').innerText=ad.cat;
+                document.getElementById('d-owner').innerText=ad.owner;
+                document.getElementById('d-owner-img').src=ad.ownerImg;
+                
+                // Mavi Tik Kontrolü
+                // (HTML'de d-owner-verify id'si yoksa hata vermemesi için kontrol)
+                const verifyBadge = document.getElementById('d-owner-verify');
+                if(verifyBadge) {
+                    if(ad.verified) verifyBadge.classList.remove('hidden'); else verifyBadge.classList.add('hidden');
+                }
+
+                // --- SATICI KARTI GÜNCELLEME (PUAN) ---
+                // Satıcı kartındaki puan kısmını dinamik yapıyoruz
+                // Mevcut HTML'i bulup değiştiriyoruz
+                const ownerCard = document.querySelector('#page-detail .border.rounded-lg.p-4.bg-white.shadow-sm');
+                if(ownerCard) {
+                    let ratingDisplay = '';
+                    if(ad.rating === 0) {
+                        ratingDisplay = `<span class="text-xs font-bold text-gray-500">Yeni Satıcı (Henüz Puan Yok)</span>`;
+                    } else {
+                        ratingDisplay = `<span class="text-xs font-bold text-yellow-800">Satıcı Puanı</span><span class="font-bold text-yellow-600 flex items-center gap-1"><i class="fa-solid fa-star"></i> ${ad.rating} (${ad.reviewCount})</span>`;
+                    }
+                    
+                    ownerCard.innerHTML = `
+                        <div class="flex items-center gap-3 mb-3">
+                            <img src="${ad.ownerImg}" class="w-12 h-12 rounded-full border">
+                            <div>
+                                <div class="font-bold flex items-center gap-1">${ad.owner} ${ad.verified ? '<i class="fa-solid fa-circle-check text-blue-500" title="Doğrulanmış"></i>' : ''}</div>
+                                <div class="text-xs text-green-600 font-bold">Aktif Üye</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-yellow-50 p-2 rounded border border-yellow-100 mb-2">
+                            ${ratingDisplay}
+                        </div>
+                        <button onclick="app.rateSeller(${ad.id})" class="w-full border border-yellow-400 text-yellow-700 text-xs font-bold py-1 rounded hover:bg-yellow-100 transition">⭐ Satıcıya Puan Ver</button>
+                    `;
+                }
+
+                const th=document.getElementById('d-thumbs');th.innerHTML='';for(let i=0;i<4;i++)th.innerHTML+=`<img src="${ad.img}" class="w-20 h-14 object-cover rounded border hover:opacity-75 cursor-pointer">`;
+                const del=document.getElementById('btn-delete-ad');if(this.user&&(this.isAdmin||ad.owner===this.user.name)){del.classList.remove('hidden');del.onclick=()=>this.deleteAd(ad.id);}else del.classList.add('hidden');
+                const fav=document.getElementById('d-fav-btn');if(this.favorites.includes(id))fav.innerHTML='<i class="fa-solid fa-heart text-red-500"></i> Favorilerden Çıkar';else fav.innerHTML='<i class="fa-regular fa-heart"></i> Favorile';fav.onclick=()=>this.toggleFav(id);
+            },
+
+            // --- PUAN VERME FONKSİYONU (YENİ) ---
+            rateSeller: function(id) {
+                if(!this.user) { this.modal('login'); return; }
+                const ad = this.ads.find(x => x.id === id);
+                if(ad.owner === this.user.name) { Swal.fire('Hata', 'Kendi kendine puan veremezsin uyanık! :)', 'error'); return; }
+
+                Swal.fire({
+                    title: 'Satıcıyı Puanla',
+                    text: '1 ile 5 arası puan ver',
+                    input: 'range',
+                    inputAttributes: { min: 1, max: 5, step: 1 },
+                    inputValue: 5,
+                    showCancelButton: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const newRating = parseInt(result.value);
+                        // Basit ortalama hesabı simülasyonu
+                        const totalScore = (ad.rating * ad.reviewCount) + newRating;
+                        ad.reviewCount++;
+                        ad.rating = (totalScore / ad.reviewCount).toFixed(1);
+                        
+                        this.detail(id); // Sayfayı yenile
+                        Swal.fire('Teşekkürler', 'Puanınız kaydedildi!', 'success');
+                    }
+                });
+            },
+
             renderMyAds: function() {
                 const c = document.getElementById('my-ads-list');
                 const cnt = document.getElementById('my-ads-count');
@@ -353,35 +470,54 @@
                 if(cnt) cnt.innerText = my.length;
                 if(my.length === 0) { c.innerHTML = '<div class="text-center text-gray-400 text-sm mt-4">İlanınız yok.</div>'; return; }
                 my.forEach(ad => {
-                    c.innerHTML += `<div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border hover:border-yellow-400 transition"><div class="flex items-center gap-3"><img src="${ad.img}" class="w-12 h-12 rounded object-cover border"><div><div class="font-bold text-sm text-gray-800 cursor-pointer" onclick="app.detail(${ad.id})">${ad.title}</div><div class="text-xs text-gray-500">${ad.price} TL</div></div></div><button onclick="app.deleteAd(${ad.id})" class="text-red-500 hover:bg-red-100 p-2 rounded-full transition"><i class="fa-solid fa-trash"></i></button></div>`;
+                    c.innerHTML += `<div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border hover:border-yellow-400 transition"><div class="flex items-center gap-3"><img src="${ad.img}" class="w-12 h-12 rounded object-cover border"><div><div class="font-bold text-sm text-gray-800 cursor-pointer" onclick="app.detail(${ad.id})">${ad.title}</div><div class="text-xs text-gray-500">${ad.price} TL • Puan: ${ad.rating}</div></div></div><button onclick="app.deleteAd(${ad.id})" class="text-red-500 hover:bg-red-100 p-2 rounded-full transition"><i class="fa-solid fa-trash"></i></button></div>`;
                 });
             },
-            search: function(v){if(!v)this.renderAds();else this.renderAds(null,v);},
-            detail: function(id){
-                const ad=this.ads.find(x=>x.id===id);this.router('detail');
-                document.getElementById('d-img').src=ad.img;document.getElementById('d-title').innerText=ad.title;document.getElementById('d-price').innerText=ad.price+" TL";document.getElementById('d-desc').innerText=ad.desc;document.getElementById('d-loc-text').innerText=ad.loc;document.getElementById('d-cat').innerText=ad.cat;document.getElementById('d-owner').innerText=ad.owner;document.getElementById('d-owner-img').src=ad.ownerImg;
-                const th=document.getElementById('d-thumbs');th.innerHTML='';for(let i=0;i<4;i++)th.innerHTML+=`<img src="${ad.img}" class="w-20 h-14 object-cover rounded border hover:opacity-75 cursor-pointer">`;
-                const del=document.getElementById('btn-delete-ad');if(this.user&&(this.isAdmin||ad.owner===this.user.name)){del.classList.remove('hidden');del.onclick=()=>this.deleteAd(ad.id);}else del.classList.add('hidden');
-                const fav=document.getElementById('d-fav-btn');if(this.favorites.includes(id))fav.innerHTML='<i class="fa-solid fa-heart text-red-500"></i> Favorilerden Çıkar';else fav.innerHTML='<i class="fa-regular fa-heart"></i> Favorile';fav.onclick=()=>this.toggleFav(id);
-            },
+
+            // --- İŞLEMLER ---
             deleteAd: function(id){Swal.fire({title:'Silinsin mi?',icon:'warning',showCancelButton:true}).then(r=>{if(r.isConfirmed){this.ads=this.ads.filter(x=>x.id!==id);this.renderAds();if(document.getElementById('page-profile').classList.contains('section-visible')) this.renderMyAds(); else this.router('home');this.log(`İlan silindi ID: ${id}`);Swal.fire('Silindi','','success');}});},
             toggleFav: function(id){if(!this.user){this.modal('login');return;}if(this.favorites.includes(id))this.favorites=this.favorites.filter(x=>x!==id);else{this.favorites.push(id);this.sendNotif("Favorilere eklendi.");}this.detail(id);},
             checkLoginForAd: function(){if(!this.user){Swal.fire('Giriş Yapmalısın','','info');this.modal('login');}else this.modal('create-ad');},
+            
             initPayment: function(){
                 const t=document.getElementById('ad-title').value;const d=document.querySelector('input[name="doping"]:checked').value;
-                this.pendingAd={id:Date.now(),title:t,cat:document.getElementById('ad-cat-select').value,price:document.getElementById('ad-price').value,loc:document.getElementById('ad-loc').value,desc:document.getElementById('ad-desc').value,img:"https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=500&q=80",owner:this.user.name,ownerImg:this.user.avatar,vitrin:(d==='vitrin'),acil:(d==='acil')};
+                // YENİ İLAN OLUŞTURURKEN PUANI SIFIRLIYORUZ (RATING: 0)
+                this.pendingAd={id:Date.now(),title:t,cat:document.getElementById('ad-cat-select').value,price:document.getElementById('ad-price').value,loc:document.getElementById('ad-loc').value,desc:document.getElementById('ad-desc').value,img:"https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=500&q=80",owner:this.user.name,ownerImg:this.user.avatar,vitrin:(d==='vitrin'),acil:(d==='acil'), verified: this.user.verified, rating: 0, reviewCount: 0};
                 if(d==='none')this.finishAd(false);else{const a=(d==='vitrin')?150:75;document.getElementById('pay-amount').innerText=a+" TL";this.modal('payment');document.getElementById('pay-step-1').classList.remove('hidden');document.getElementById('pay-step-2').classList.add('hidden');}
             },
+            
             start3D: function(){if(document.getElementById('card-no').value.length<16){Swal.fire('Hata','Kart No Eksik','error');return;}Swal.showLoading();setTimeout(()=>{Swal.close();document.getElementById('pay-step-1').classList.add('hidden');document.getElementById('pay-step-2').classList.remove('hidden');},1500);},
             finalizePayment: function(){const a=this.pendingAd.vitrin?150:75;this.balance+=a;document.getElementById('admin-kasa').innerText=this.balance+" TL";this.modal('create-ad');this.closeAllModals();this.finishAd(true);},
             finishAd: function(p){this.ads.unshift(this.pendingAd);this.renderAds();this.router('home');document.getElementById('form-create-ad').reset();this.closeAllModals();this.log(`Yeni İlan: ${this.pendingAd.title}`);Swal.fire('Tebrikler!','İlan yayında.','success');this.sendNotif("İlanınız yayınlandı.");},
+            
             log: function(m){const t=new Date().toLocaleTimeString();this.logs.unshift(`[${t}] ${m}`);if(this.isAdmin)this.renderAdmin();},
             renderAdmin: function(){document.getElementById('admin-logs').innerHTML=this.logs.map(l=>`<div class="mb-1 border-b border-gray-800 pb-1">${l}</div>`).join('');const t=document.getElementById('admin-ads-table');t.innerHTML='';this.ads.forEach(ad=>{t.innerHTML+=`<tr class="border-b"><td class="p-2">${ad.id}</td><td class="p-2 font-bold">${ad.title}</td><td class="p-2"><button onclick="app.deleteAd(${ad.id})" class="text-red-600 font-bold hover:underline">Sil</button></td></tr>`;});document.getElementById('admin-ilan-sayisi').innerText=this.ads.length;},
-            showPhone: function(){Swal.fire('İletişim','Tel: 0532 555 44 33','info');}, openChat: function(){Swal.fire('Mesaj','Panel açılıyor...','info');},
+            
+            showPhone: function(){Swal.fire('İletişim','Tel: 0532 555 44 33','info');}, 
+            openChat: function(){Swal.fire('Mesaj','Panel açılıyor...','info');},
+            
+            // WHATSAPP BUTONU FONKSİYONU
+            openWhatsapp: function() {
+                const title = document.getElementById('d-title').innerText;
+                const url = `https://wa.me/905320000000?text=Merhaba, BiKirala'daki "${title}" ilanı ile ilgileniyorum. Müsaitlik durumu nedir?`;
+                window.open(url, '_blank');
+            },
+
             changeProfilePic: function(input){if(input.files&&input.files[0]){var r=new FileReader();r.onload=(e)=>{this.user.avatar=e.target.result;this.updateUI();};r.readAsDataURL(input.files[0]);}},
-            saveProfile: function(){this.user.name=document.getElementById('p-name').value;this.updateUI();Swal.fire('Kaydedildi','','success');}
+            
+            // PROFİL DOĞRULAMA (MAVİ TİK İSTEĞİ)
+            requestVerification: function() {
+                // Demo için direkt onaylanmış gibi yapmıyoruz, admin tarafına log atıyoruz.
+                // Gerçek senaryoda veritabanına istek gider.
+                this.log(`Mavi tik isteği: ${this.user.name}`);
+                Swal.fire('Başvuru Alındı', 'Yöneticilerimiz inceliyor.', 'success');
+            },
+
+            saveProfile: function(){this.user.name=document.getElementById('p-name').value;this.updateUI();Swal.fire('Kaydedildi','','success');},
+            sendResetLink: function(){const e=document.getElementById('forgot-email').value;this.closeAllModals();Swal.fire({title:'Gönderiliyor...',timer:1000,didOpen:()=>Swal.showLoading()}).then(()=>Swal.fire('Başarılı',e+' adresine link gitti.','success'));}
         };
         window.onload=()=>app.init();
+    </script>
     </script>
 </body>
 </html>
