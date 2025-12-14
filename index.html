@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BiKirala | Yönetici</title>
+    <title>BiKirala | Sorunsuz</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -28,7 +28,7 @@
         .btn-primary-c:hover { background-color: #e6bc00; transform: scale(1.05); }
         .btn-google { background: white; color: #333; border: 1px solid #ddd; font-weight: bold; width: 100%; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
 
-        /* YAPI */
+        /* ANA YAPI */
         .main-wrapper { display: flex; margin-top: 20px; gap: 20px; }
         .sidebar { width: 260px; background: white; border-radius: 15px; padding: 20px; height: fit-content; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .cat-item { display: block; padding: 12px 15px; margin-bottom: 5px; color: #555; text-decoration: none; font-weight: 600; border-radius: 10px; transition: 0.2s; }
@@ -56,9 +56,10 @@
         .msg-me { background: var(--primary); color: black; margin-left: auto; border-bottom-right-radius: 2px; }
         .msg-other { background: #e0e0e0; color: black; margin-right: auto; border-bottom-left-radius: 2px; }
         
-        /* ADMIN PANEL */
-        .admin-row { border-bottom: 1px solid #eee; padding: 8px 0; display: flex; justify-content: space-between; align-items: center; }
+        /* ADMIN SATIRI */
+        .admin-row { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
 
+        /* YÜKLEME EKRANI */
         #loader { position: fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; display:flex; align-items:center; justify-content:center; }
     </style>
 </head>
@@ -95,3 +96,336 @@
         <div class="sidebar">
             <h6 class="fw-bold mb-3 ms-2">KATEGORİLER</h6>
             <a href="#" class="cat-item active" onclick="filterCat('Hepsi', this)"><i class="fas fa-th-large"></i> Tümü</a>
+            <a href="#" class="cat-item" onclick="filterCat('Araba', this)"><i class="fas fa-car"></i> Araba</a>
+            <a href="#" class="cat-item" onclick="filterCat('Emlak', this)"><i class="fas fa-home"></i> Emlak</a>
+            <a href="#" class="cat-item" onclick="filterCat('Teknoloji', this)"><i class="fas fa-laptop"></i> Teknoloji</a>
+            <a href="#" class="cat-item" onclick="filterCat('Giysi', this)"><i class="fas fa-tshirt"></i> Giysi</a>
+            <a href="#" class="cat-item" onclick="filterCat('Yedek Parça', this)"><i class="fas fa-cogs"></i> Yedek Parça</a>
+        </div>
+
+        <div class="content">
+            <div id="page-home" class="page-section">
+                <div class="row" id="ads-container"></div>
+            </div>
+            
+            <div id="page-fav" class="page-section d-none text-center pt-5">
+                <i class="fas fa-heart fa-3x text-secondary mb-3"></i><h4>Favorilerim</h4>
+                <div id="fav-container" class="row mt-4"></div>
+            </div>
+
+            <div id="page-messages" class="page-section d-none">
+                <h4 class="mb-4">Mesajlarım</h4>
+                <div class="list-group" id="inbox-list"></div>
+            </div>
+
+            <div id="page-account" class="page-section d-none text-center pt-5">
+                <div style="width:100px; height:100px; background:var(--dark); color:var(--primary); border-radius:50%; margin:0 auto 20px; display:flex; align-items:center; justify-content:center; font-size:40px;"><i class="fas fa-user"></i></div>
+                <h3 id="profile-email">Misafir</h3>
+                <div id="profile-actions" class="mt-4 d-none">
+                    
+                    <button id="btn-admin-panel" onclick="openAdminPanel()" class="btn btn-danger w-75 mb-3 fw-bold d-none">
+                        <i class="fas fa-shield-alt"></i> YÖNETİCİ PANELİ
+                    </button>
+                    
+                    <button class="btn btn-outline-dark w-50 mb-2" onclick="modalOpen('postModal')">İlan Ver</button>
+                    <br>
+                    <button class="btn btn-dark w-50" onclick="logout()">Çıkış Yap</button>
+                </div>
+                <div id="guest-actions" class="mt-4">
+                    <p>İlan vermek için giriş yapmalısın.</p>
+                    <button class="btn btn-dark w-50" onclick="modalOpen('loginModal')">Giriş Yap</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-icon active" onclick="switchPage('home', this)"><i class="fas fa-home"></i> Vitrin</div>
+        <div class="nav-icon" onclick="switchPage('fav', this)"><i class="fas fa-heart"></i> Favori</div>
+        <div class="nav-icon" onclick="checkAuthForPost()"><i class="fas fa-plus-circle" style="font-size: 35px; margin-top:-15px; color:var(--primary); background:black; border-radius:50%;"></i></div>
+        <div class="nav-icon" onclick="switchPage('messages', this)"><i class="fas fa-comment"></i> Mesaj</div>
+        <div class="nav-icon" onclick="switchPage('account', this)"><i class="fas fa-user"></i> Hesabım</div>
+    </div>
+
+    <div class="modal fade" id="detailModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content rounded-4 border-0"><div class="modal-body p-0"><button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white p-2" data-bs-dismiss="modal" style="z-index:10;"></button><img id="d-img" src="" style="width:100%; height:400px; object-fit:cover;"><div class="p-4"><div class="d-flex justify-content-between align-items-center mb-2"><span class="badge bg-warning text-dark" id="d-cat">Kategori</span><button class="btn btn-light rounded-circle"><i class="far fa-heart text-danger"></i></button></div><h3 class="fw-bold" id="d-title">Başlık</h3><h2 class="text-primary fw-bold" id="d-price">0 TL</h2><hr><h5>Açıklama</h5><p class="text-muted" id="d-desc">...</p><hr><div class="d-flex gap-2 mb-3"><a id="d-call" href="#" class="btn btn-dark flex-grow-1 py-3"><i class="fas fa-phone"></i> ARA</a><button onclick="startChat()" class="btn btn-warning flex-grow-1 py-3 fw-bold"><i class="fas fa-comment"></i> MESAJ AT</button></div><button id="btn-delete" onclick="deleteAd()" class="btn btn-outline-danger w-100 d-none"><i class="fas fa-trash"></i> İLANI SİL</button></div></div></div></div></div>
+    
+    <div class="modal fade" id="adminModal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 class="modal-title fw-bold">Yönetici Paneli</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><h6 class="mb-3">Tüm İlanlar</h6><div id="admin-ad-list"></div></div></div></div></div>
+    
+    <div class="modal fade" id="postModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold">İlan Oluştur</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="text-center p-4 border rounded bg-light mb-3 cursor-pointer" onclick="document.getElementById('fileInp').click()"><i class="fas fa-camera fa-2x text-muted"></i><br><span id="uploadTxt" class="fw-bold text-muted">Fotoğraf Yükle</span><input type="file" id="fileInp" class="d-none" accept="image/*" onchange="compressImage(this)"></div><input type="text" id="p-title" class="form-control mb-2" placeholder="İlan Başlığı"><input type="number" id="p-price" class="form-control mb-2" placeholder="Fiyat (TL)"><select id="p-cat" class="form-select mb-2"><option>Araba</option><option>Emlak</option><option>Teknoloji</option><option>Giysi</option><option>Yedek Parça</option></select><textarea id="p-desc" class="form-control mb-2" rows="3" placeholder="Açıklama"></textarea><input type="text" id="p-tel" class="form-control mb-3" placeholder="Telefon"><button onclick="postAd()" id="btnPost" class="btn btn-dark w-100 fw-bold">YAYINLA</button></div></div></div></div>
+    
+    <div class="modal fade" id="loginModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content text-center p-4"><h4 class="fw-bold mb-3">Giriş Yap</h4><button onclick="loginWithGoogle()" class="btn-google mb-3"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">Google ile Giriş</button><div class="text-muted small mb-3">- VEYA -</div><input type="email" id="l-email" class="form-control mb-2" placeholder="E-Posta"><input type="password" id="l-pass" class="form-control mb-2" placeholder="Şifre"><div class="text-end mb-3"><a href="#" class="text-decoration-none small text-muted" onclick="switchModal('loginModal','forgotModal')">Şifremi Unuttum?</a></div><button onclick="login()" class="btn btn-warning w-100 fw-bold mb-2">GİRİŞ</button><small class="text-muted"><a href="#" onclick="switchModal('loginModal','registerModal')">Kayıt Ol</a></small></div></div></div>
+    
+    <div class="modal fade" id="registerModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content text-center p-4"><h4 class="fw-bold mb-3">Kayıt Ol</h4><input type="email" id="r-email" class="form-control mb-2" placeholder="E-Posta"><input type="password" id="r-pass" class="form-control mb-3" placeholder="Şifre"><button onclick="register()" class="btn btn-dark w-100 fw-bold mb-2">KAYIT OL</button><small class="text-muted"><a href="#" onclick="switchModal('registerModal','loginModal')">Giriş Yap</a></small></div></div></div>
+    
+    <div class="modal fade" id="forgotModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content text-center p-4"><h5 class="fw-bold mb-3">Şifre Sıfırla</h5><input type="email" id="f-email" class="form-control mb-3" placeholder="E-Posta"><button onclick="resetPassword()" class="btn btn-dark w-100 fw-bold mb-3">LİNK GÖNDER</button><a href="#" class="small text-muted" onclick="switchModal('forgotModal','loginModal')">Geri Dön</a></div></div></div>
+    
+    <div class="modal fade" id="chatWindowModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-dark text-white"><h6 class="m-0" id="chat-receiver-name">Sohbet</h6><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><div id="chat-history" class="chat-box"></div><div class="input-group"><input type="text" id="msg-input" class="form-control" placeholder="Mesaj..."><button onclick="sendMessage()" class="btn btn-warning fw-bold">GÖNDER</button></div></div></div></div></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // ============================================
+        // 1. BURAYA KENDİ E-POSTANI YAZ! (TIRNAK İÇİNE)
+        const ADMINS = ["emeebabaoglu61@gmail.com"]; 
+        // ============================================
+
+        // 2. YÜKLEME EKRANI KORUMASI (3 SANİYE SONRA ZORLA KAPAT)
+        setTimeout(() => {
+            const l = document.getElementById('loader');
+            if(l) l.style.display = 'none';
+        }, 3000);
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyARO3eKpa058215Sdo3Dqf6U7uTr-z4pMM",
+            authDomain: "kiralagitsin-855c9.firebaseapp.com",
+            projectId: "kiralagitsin-855c9",
+            storageBucket: "kiralagitsin-855c9.firebasestorage.app",
+            messagingSenderId: "677047831958",
+            appId: "1:677047831958:web:82c4d37ee0055bfbafa1b7"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let currentUser = null;
+        let allAds = [];
+        let currentAd = null;
+        let currentChatId = null;
+        let selectedImg = null;
+
+        auth.onAuthStateChanged(user => {
+            document.getElementById('loader').style.display = 'none'; // Giriş yapılınca kapat
+            currentUser = user;
+            updateUI(user);
+        });
+
+        function updateUI(user) {
+            if(user) {
+                document.getElementById('guest-area').classList.add('d-none');
+                document.getElementById('user-area').classList.remove('d-none');
+                document.getElementById('guest-actions').classList.add('d-none');
+                document.getElementById('profile-actions').classList.remove('d-none');
+                document.getElementById('nav-username').innerText = user.displayName || user.email.split('@')[0];
+                document.getElementById('profile-email').innerText = user.email;
+
+                // ADMIN KONTROLÜ
+                if(ADMINS.includes(user.email)) {
+                    document.getElementById('btn-admin-panel').classList.remove('d-none');
+                } else {
+                    document.getElementById('btn-admin-panel').classList.add('d-none');
+                }
+            } else {
+                document.getElementById('guest-area').classList.remove('d-none');
+                document.getElementById('user-area').classList.add('d-none');
+                document.getElementById('guest-actions').classList.remove('d-none');
+                document.getElementById('profile-actions').classList.add('d-none');
+                document.getElementById('profile-email').innerText = "Misafir";
+            }
+        }
+
+        // --- ADMIN ---
+        function openAdminPanel() {
+            modalOpen('adminModal');
+            const listDiv = document.getElementById('admin-ad-list');
+            listDiv.innerHTML = "";
+            allAds.forEach(ad => {
+                const title = ad.baslik || ad.ad || "İsimsiz";
+                listDiv.innerHTML += `
+                <div class="admin-row">
+                    <div class="d-flex align-items-center">
+                        <img src="${ad.resim}" style="width:40px; height:40px; border-radius:5px; object-fit:cover; margin-right:10px;">
+                        <small class="fw-bold">${title}</small>
+                    </div>
+                    <button onclick="adminDeleteAd('${ad.id}')" class="btn btn-sm btn-outline-danger">Sil</button>
+                </div>`;
+            });
+        }
+        function adminDeleteAd(id) {
+            if(confirm("Yönetici Yetkisi: Bu ilanı silmek istediğine emin misin?")) {
+                db.collection("ilanlar").doc(id).delete().then(() => {
+                    alert("İlan Silindi!");
+                    openAdminPanel();
+                });
+            }
+        }
+
+        // --- GENEL ---
+        function loginWithGoogle() {
+            var provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then(() => { bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide(); })
+                .catch(err => alert("Google Hata: " + err.message));
+        }
+        function resetPassword() {
+            const email = document.getElementById('f-email').value;
+            if(!email) { alert("E-posta gir."); return; }
+            auth.sendPasswordResetEmail(email).then(() => { alert("Link Gönderildi!"); switchModal('forgotModal', 'loginModal'); });
+        }
+        function login() {
+            const e = document.getElementById('l-email').value;
+            const p = document.getElementById('l-pass').value;
+            auth.signInWithEmailAndPassword(e, p).then(() => { bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide(); }).catch(e=>alert(e.message));
+        }
+        function register() {
+            const e = document.getElementById('r-email').value;
+            const p = document.getElementById('r-pass').value;
+            auth.createUserWithEmailAndPassword(e, p).then(() => { bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide(); alert("Başarılı!"); }).catch(e=>alert(e.message));
+        }
+        function logout() { auth.signOut(); location.reload(); }
+        function checkAuthForPost() { if(currentUser) modalOpen('postModal'); else modalOpen('loginModal'); }
+
+        db.collection("ilanlar").orderBy("tarih", "desc").onSnapshot(snap => {
+            allAds = [];
+            snap.forEach(doc => { let d = doc.data(); d.id = doc.id; allAds.push(d); });
+            renderAds(allAds);
+        });
+
+        function renderAds(list) {
+            const container = document.getElementById('ads-container');
+            container.innerHTML = "";
+            if(list.length === 0) { container.innerHTML = "<p class='text-center w-100 mt-5'>İlan bulunamadı.</p>"; return; }
+            list.forEach(ad => {
+                const realTitle = ad.baslik || ad.ad || "İsimsiz İlan"; 
+                container.innerHTML += `
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="ad-card cursor-pointer" onclick="openDetail('${ad.id}')">
+                        <img src="${ad.resim}" class="ad-img">
+                        <div class="p-2">
+                            <div class="ad-price">${ad.fiyat} TL</div>
+                            <div class="ad-title">${realTitle}</div>
+                            <small class="text-muted"><i class="fas fa-map-marker-alt"></i> TR</small>
+                        </div>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function postAd() {
+            if(!currentUser) return;
+            const title = document.getElementById('p-title').value;
+            const price = document.getElementById('p-price').value;
+            const cat = document.getElementById('p-cat').value;
+            const desc = document.getElementById('p-desc').value;
+            const tel = document.getElementById('p-tel').value;
+            if(!title || !price || !selectedImg) { alert("Eksik bilgi!"); return; }
+            const btn = document.getElementById('btnPost');
+            btn.innerText = "Yükleniyor..."; btn.disabled = true;
+            db.collection("ilanlar").add({
+                baslik: title, fiyat: price, kategori: cat, aciklama: desc, tel: tel,
+                resim: selectedImg, userId: currentUser.uid, userEmail: currentUser.email, tarih: Date.now()
+            }).then(() => { alert("Yayında!"); location.reload(); }).catch(e => { alert(e.message); btn.innerText="YAYINLA"; btn.disabled=false; });
+        }
+
+        function openDetail(id) {
+            currentAd = allAds.find(x => x.id === id);
+            if(!currentAd) return;
+            const realTitle = currentAd.baslik || currentAd.ad || "İsimsiz İlan";
+            document.getElementById('d-img').src = currentAd.resim;
+            document.getElementById('d-title').innerText = realTitle;
+            document.getElementById('d-price').innerText = currentAd.fiyat + " TL";
+            document.getElementById('d-cat').innerText = currentAd.kategori;
+            document.getElementById('d-desc').innerText = currentAd.aciklama || "Açıklama yok.";
+            document.getElementById('d-call').href = "tel:" + currentAd.tel;
+            
+            const btnDel = document.getElementById('btn-delete');
+            const isAdmin = currentUser && ADMINS.includes(currentUser.email);
+            const isOwner = currentUser && currentAd.userId === currentUser.uid;
+            
+            if(isOwner || isAdmin) {
+                btnDel.classList.remove('d-none');
+                btnDel.innerText = isAdmin ? "YÖNETİCİ SİLME" : "İLANI SİL";
+            } else {
+                btnDel.classList.add('d-none');
+            }
+            modalOpen('detailModal');
+        }
+
+        function deleteAd() {
+            if(confirm("Silmek istediğine emin misin?")) {
+                db.collection("ilanlar").doc(currentAd.id).delete().then(() => {
+                    alert("Silindi.");
+                    bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();
+                });
+            }
+        }
+
+        function startChat() {
+            if(!currentUser) { modalOpen('loginModal'); return; }
+            if(currentAd.userId === currentUser.uid) { alert("Bu senin ilanın."); return; }
+            const u1 = currentUser.uid < currentAd.userId ? currentUser.uid : currentAd.userId;
+            const u2 = currentUser.uid > currentAd.userId ? currentUser.uid : currentAd.userId;
+            const chatId = `${u1}_${u2}_${currentAd.id}`;
+            currentChatId = chatId;
+            document.getElementById('chat-receiver-name').innerText = "Satıcı ile Sohbet";
+            bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();
+            modalOpen('chatWindowModal');
+            loadChatMessages(chatId);
+        }
+        function sendMessage() {
+            const txt = document.getElementById('msg-input').value;
+            if(!txt || !currentChatId) return;
+            db.collection("mesajlar").add({ chatId: currentChatId, text: txt, senderId: currentUser.uid, senderEmail: currentUser.email, tarih: Date.now() });
+            document.getElementById('msg-input').value = "";
+        }
+        function loadChatMessages(chatId) {
+            db.collection("mesajlar").where("chatId", "==", chatId).orderBy("tarih", "asc").onSnapshot(snap => {
+                const box = document.getElementById('chat-history');
+                box.innerHTML = "";
+                snap.forEach(doc => {
+                    const m = doc.data();
+                    const cls = m.senderId === currentUser.uid ? "msg-me" : "msg-other";
+                    box.innerHTML += `<div class="msg-bubble ${cls}">${m.text}</div>`;
+                });
+                box.scrollTop = box.scrollHeight;
+            });
+        }
+        function compressImage(input) {
+            const file = input.files[0];
+            if(!file) return;
+            document.getElementById('uploadTxt').innerText = "⏳ İşleniyor...";
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const maxWidth = 800;
+                    const scale = maxWidth / img.width;
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * scale;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    selectedImg = canvas.toDataURL('image/jpeg', 0.6);
+                    document.getElementById('uploadTxt').innerText = "✔ Hazır";
+                    document.getElementById('uploadTxt').style.color = "green";
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+        function switchPage(pageId, btn) {
+            document.querySelectorAll('.page-section').forEach(p => p.classList.add('d-none'));
+            document.getElementById('page-' + pageId).classList.remove('d-none');
+            document.querySelectorAll('.nav-icon').forEach(n => n.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+        }
+        function filterCat(cat, btn) {
+            document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            if(cat === "Hepsi") renderAds(allAds);
+            else renderAds(allAds.filter(x => x.kategori === cat));
+        }
+        function searchAds(val) {
+            const v = val.toLowerCase();
+            renderAds(allAds.filter(x => { const t = x.baslik || x.ad || ""; return t.toLowerCase().includes(v); }));
+        }
+        function modalOpen(id) { new bootstrap.Modal(document.getElementById(id)).show(); }
+        function switchModal(closeId, openId) {
+            bootstrap.Modal.getInstance(document.getElementById(closeId)).hide();
+            setTimeout(() => modalOpen(openId), 500);
+        }
+    </script>
+</body>
+</html>
