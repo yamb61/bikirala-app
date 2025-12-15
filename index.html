@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - V30 Tıklama Sorunu Giderildi</title>
+    <title>BiKirala - V31 Kritik Z-Index Düzeltmesi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -75,17 +75,19 @@
         .spec-row:nth-child(odd) { background-color: rgba(0,0,0,0.02); }
         .dark .spec-row:nth-child(odd) { background-color: rgba(255,255,255,0.05); }
         
-        /* Z-INDEX DÜZELTMESİ: Header ve Modal butonları için Z-index yükseltildi */
-        header { z-index: 100; }
-        .modal { z-index: 200; }
-        .fixed { z-index: 99; }
+        /* Z-INDEX DÜZELTMELERİ */
+        /* Header ve Mobil Nav kesinlikle en üstte olmalı */
+        header, nav { z-index: 1000; } 
+        /* Modallar her şeyin üstünde olmalı */
+        .fixed:not(header):not(nav) { z-index: 100; }
+        .modal { z-index: 200; } 
     </style>
 </head>
 <body class="bg-graybg text-dark pb-24 md:pb-0" onclick="app.closeDropdown(event)">
 
     <div id="toast-container" class="fixed top-24 right-5 z-[300] flex flex-col gap-3 pointer-events-none"></div>
 
-    <header class="fixed top-0 w-full bg-white z-[100] h-20 shadow-sm border-b flex items-center justify-between px-4 md:px-8 transition-colors">
+    <header class="fixed top-0 w-full bg-white z-[1000] h-20 shadow-sm border-b flex items-center justify-between px-4 md:px-8 transition-colors">
         <div class="flex items-center gap-1 cursor-pointer select-none" onclick="app.goHome()">
             <div class="bg-primary px-3 py-1 rounded text-dark font-black text-2xl transform -skew-x-12 shadow-sm">Bi</div>
             <div class="text-2xl font-bold text-accent tracking-tight">Kirala</div>
@@ -97,7 +99,7 @@
             <button class="absolute right-2 top-2 h-8 px-4 bg-primary text-dark font-bold text-xs rounded-full hover:bg-yellow-400 transition">ARA</button>
         </div>
 
-        <div class="flex items-center gap-4 z-[101]">
+        <div class="flex items-center gap-4 z-[1001]">
             <button onclick="document.documentElement.classList.toggle('dark')" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-yellow-400 transition"><i class="fa-solid fa-moon"></i></button>
             <button onclick="app.modal('cart-modal', true)" id="cart-btn" class="relative w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-white transition hover:text-accent">
                 <i class="fa-solid fa-shopping-cart text-lg"></i>
@@ -151,7 +153,7 @@
         </main>
     </div>
 
-    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t h-16 flex justify-around items-center z-[101] text-gray-400 pb-safe shadow-[0_-5px_15px_rgba(0,0,0,0.03)] dark:bg-black dark:border-gray-800">
+    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t h-16 flex justify-around items-center z-[1000] text-gray-400 pb-safe shadow-[0_-5px_15px_rgba(0,0,0,0.03)] dark:bg-black dark:border-gray-800">
         <div onclick="app.goHome()" class="flex flex-col items-center gap-1 text-accent cursor-pointer"><i class="fa-solid fa-house text-xl"></i><span class="text-[10px]">Vitrin</span></div>
         <div onclick="app.checkAuth('favs')" class="flex flex-col items-center gap-1 cursor-pointer"><i class="fa-solid fa-heart text-xl"></i><span class="text-[10px]">Favoriler</span></div>
         <div onclick="app.checkAuth('post')" class="relative -top-6 cursor-pointer">
@@ -463,7 +465,7 @@
                 <div><div class="text-xs text-gray-500">Alıcı</div><div class="font-bold text-sm" id="msg-to-name">Satıcı</div></div>
             </div>
             <textarea id="msg-content" rows="4" class="bk-input mb-4" placeholder="Mesajınız..."></textarea>
-            <button onclick="app.sendMessage()" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition flex justify-center gap-2 items-center"><i class="fa-regular fa-paper-plane"></i> Gönder</button>
+            <button onclick="app.sendMessage()" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition flex justify-center gap-2 items-center"><i class="fa-solid fa-paper-plane"></i> Gönder</button>
         </div>
     </div>
 
