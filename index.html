@@ -3,189 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - Tam Fonksiyonel V2</title>
+    <title>BiKirala - Sahibinden & Letgo Hibrit V3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#FFD700',
-                        secondary: '#4338ca',
-                        dark: '#1a1a1a'
+                        'sahibinden-sari': '#FFD700', // İkonik Sarı
+                        'sahibinden-mavi': '#2962FF', // Link Mavisi
+                        'letgo-kirmizi': '#ff3f55', // Letgo vurgusu
+                        'dark-text': '#333333'
                     }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f3f4f6; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .active-tab { border-bottom: 2px solid #4338ca; color: #4338ca; font-weight: bold; }
-        .modal { transition: opacity 0.3s ease; }
+        body { font-family: 'Roboto', 'Arial', sans-serif; background: #f1f1f1; }
+        /* Sahibinden Tarzı Detaylı Liste */
+        .category-item:hover { background-color: #f5f5f5; color: #2962FF; }
+        /* Scrollbar Gizleme */
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        /* Modal Animasyon */
+        .modal-content { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 pb-20 md:pb-0">
+<body class="pb-20 md:pb-0">
 
-    <header class="bg-white shadow-md fixed w-full top-0 z-50">
-        <div class="container mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center cursor-pointer" onclick="app.renderHome()">
-                <div class="bg-primary text-dark font-bold text-2xl p-1 rounded mr-1">Bi</div>
-                <div class="text-2xl font-bold text-secondary">Kirala</div>
+    <header class="bg-[#f8f8f8] border-b border-gray-300 fixed w-full top-0 z-50">
+        <div class="container mx-auto px-4 h-14 flex items-center justify-between">
+            <div class="flex items-center gap-1 cursor-pointer" onclick="app.goHome()">
+                <span class="bg-sahibinden-sari text-black font-extrabold px-2 py-1 rounded text-lg tracking-tighter">Bi</span>
+                <span class="font-bold text-xl text-dark-text tracking-tight">Kirala</span>
             </div>
 
-            <div class="flex-1 mx-4 hidden md:flex relative">
-                <input type="text" id="searchInput" placeholder="İlan ara..." class="w-full border border-gray-300 rounded-l-lg py-2 px-4 focus:outline-none focus:border-secondary">
-                <button class="bg-secondary text-white px-6 rounded-r-lg" onclick="app.renderAds()">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
+            <div class="hidden md:flex flex-1 max-w-2xl mx-10">
+                <input type="text" id="desktopSearch" placeholder="Kelime, ilan no veya mağaza adı ile ara" class="w-full border border-gray-300 rounded-l py-2 px-3 focus:outline-none focus:border-sahibinden-mavi text-sm">
+                <button class="bg-sahibinden-mavi text-white px-5 rounded-r font-bold text-sm uppercase">Ara</button>
             </div>
 
-            <div class="flex items-center gap-4 desktop-menu">
+            <div class="flex items-center gap-4 text-sm" id="headerAuthArea">
                 </div>
-            
-            <div class="md:hidden text-2xl text-secondary" onclick="app.checkAuth('profile')">
-                <i class="fa-solid fa-user"></i>
-            </div>
         </div>
     </header>
 
-    <div class="container mx-auto mt-20 flex gap-4 min-h-screen">
-        <aside class="w-64 bg-white rounded-lg shadow-sm p-4 hidden md:block h-[80vh] overflow-y-auto sticky top-20">
-            <h3 class="font-bold text-gray-400 text-xs mb-2 uppercase">Kategoriler</h3>
-            <ul class="space-y-1" id="categoryList"></ul>
+    <div class="container mx-auto mt-16 flex gap-4 min-h-screen">
+        
+        <aside class="hidden md:block w-60 bg-white border border-gray-200 rounded shadow-sm h-fit sticky top-20">
+            <div class="p-3 border-b bg-gray-50 font-bold text-xs text-gray-500 uppercase">Kategoriler</div>
+            <ul class="text-sm text-dark-text" id="desktopCategories">
+                </ul>
         </aside>
 
         <main class="flex-1">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-800" id="pageTitle">Tüm İlanlar</h2>
+            <div class="bg-white p-4 rounded shadow-sm mb-4 border border-sahibinden-sari relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-sahibinden-sari text-xs font-bold px-2 py-1">VİTRİN</div>
+                <h2 class="font-bold text-dark-text mb-3 text-sm">Günün Fırsatları</h2>
+                <div class="flex gap-4 overflow-x-auto hide-scroll" id="vitrinArea">
+                    </div>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="adGrid"></div>
+
+            <div class="flex justify-between items-center mb-3 px-2">
+                <h1 class="text-lg font-bold text-dark-text">Tüm İlanlar</h1>
+                <div class="text-xs text-gray-500">Sırala: <span class="text-sahibinden-mavi cursor-pointer">Tarihe Göre (Yeni)</span></div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 px-2 md:px-0" id="adList">
+                </div>
         </main>
     </div>
 
-    <nav class="fixed bottom-0 w-full bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] flex justify-around items-center py-3 z-50 md:hidden">
-        <div onclick="app.renderHome()" class="flex flex-col items-center text-secondary"><i class="fa-solid fa-house text-xl"></i><span class="text-[10px]">Vitrin</span></div>
-        <div onclick="app.showFavorites()" class="flex flex-col items-center text-gray-400"><i class="fa-regular fa-heart text-xl"></i><span class="text-[10px]">Favoriler</span></div>
-        <div onclick="app.checkAuth('post')" class="flex flex-col items-center -mt-6"><div class="bg-primary p-4 rounded-full shadow-lg border-4 border-gray-100"><i class="fa-solid fa-camera text-2xl text-dark"></i></div></div>
-        <div onclick="alert('Mesajlar: Bu özellik V3\'te eklenecek.')" class="flex flex-col items-center text-gray-400"><i class="fa-regular fa-comment-dots text-xl"></i><span class="text-[10px]">Sohbet</span></div>
-        <div onclick="app.checkAuth('profile')" class="flex flex-col items-center text-gray-400"><i class="fa-regular fa-user text-xl"></i><span class="text-[10px]">Profilim</span></div>
+    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around items-center py-2 z-40 text-gray-500">
+        <div onclick="app.goHome()" class="flex flex-col items-center cursor-pointer text-letgo-kirmizi">
+            <i class="fa-solid fa-home text-xl"></i>
+            <span class="text-[10px]">Vitrin</span>
+        </div>
+        <div onclick="app.openFavorites()" class="flex flex-col items-center cursor-pointer hover:text-letgo-kirmizi">
+            <i class="fa-regular fa-heart text-xl"></i>
+            <span class="text-[10px]">Favoriler</span>
+        </div>
+        <div onclick="app.checkAuth('post')" class="flex flex-col items-center -mt-6 cursor-pointer">
+            <div class="bg-letgo-kirmizi text-white p-3 rounded-full shadow-lg border-4 border-white">
+                <i class="fa-solid fa-camera text-2xl"></i>
+            </div>
+            <span class="text-[10px] font-bold text-letgo-kirmizi mt-1">SAT</span>
+        </div>
+        <div onclick="alert('Sohbet Sistemi V4')" class="flex flex-col items-center cursor-pointer hover:text-letgo-kirmizi">
+            <i class="fa-regular fa-comment text-xl"></i>
+            <span class="text-[10px]">Sohbet</span>
+        </div>
+        <div onclick="app.openProfile()" class="flex flex-col items-center cursor-pointer hover:text-letgo-kirmizi">
+            <i class="fa-regular fa-user text-xl"></i>
+            <span class="text-[10px]">Profilim</span>
+        </div>
     </nav>
 
-    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[60] flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl w-full max-w-sm p-6 relative">
-            <button onclick="app.toggleModal('loginModal')" class="absolute top-4 right-4 text-gray-500 text-2xl">&times;</button>
-            <h2 class="text-2xl font-bold mb-6 text-center text-secondary">Giriş Yap</h2>
-            <form onsubmit="event.preventDefault(); app.login();" class="space-y-4">
-                <input type="email" id="loginEmail" placeholder="E-posta (admin@bikirala.com)" class="w-full border p-3 rounded-lg" required>
-                <input type="password" id="loginPass" placeholder="Şifre (123456)" class="w-full border p-3 rounded-lg" required>
-                <button type="submit" class="w-full bg-secondary text-white font-bold py-3 rounded-lg hover:bg-blue-800">Giriş Yap</button>
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded w-full max-w-sm p-6 modal-content relative">
+            <button onclick="app.closeModal('loginModal')" class="absolute top-2 right-3 text-2xl text-gray-400">&times;</button>
+            <h2 class="text-xl font-bold mb-6 text-center text-sahibinden-mavi">Giriş Yap</h2>
+            <form onsubmit="event.preventDefault(); app.login();">
+                <input type="text" id="loginUser" placeholder="E-Posta" class="w-full border p-2 mb-3 rounded text-sm">
+                <input type="password" placeholder="Şifre" class="w-full border p-2 mb-4 rounded text-sm">
+                <button class="w-full bg-sahibinden-mavi text-white font-bold py-2 rounded shadow hover:bg-blue-700">Giriş Yap</button>
             </form>
-            <div class="mt-4 text-center text-sm">
-                Hesabın yok mu? <a href="#" onclick="app.toggleModal('loginModal'); app.toggleModal('registerModal')" class="text-primary font-bold">Kayıt Ol</a>
+            <div class="mt-4 text-center text-xs">
+                Üye değil misin? <a href="#" onclick="app.closeModal('loginModal'); app.openModal('registerModal')" class="font-bold text-sahibinden-mavi">Hemen Üye Ol</a>
             </div>
         </div>
     </div>
 
-    <div id="registerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[60] flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl w-full max-w-md p-6 relative">
-            <button onclick="app.toggleModal('registerModal')" class="absolute top-4 right-4 text-gray-500">&times;</button>
-            <h2 class="text-2xl font-bold mb-4 text-center">Kayıt Ol</h2>
-            <div class="flex gap-2 mb-4 bg-gray-100 p-1 rounded-lg">
-                <button onclick="app.setRegType('bireysel')" id="btnBireysel" class="flex-1 py-2 rounded-md bg-white shadow font-bold">Bireysel</button>
-                <button onclick="app.setRegType('kurumsal')" id="btnKurumsal" class="flex-1 py-2 rounded-md text-gray-500 font-bold">Kurumsal</button>
+    <div id="registerModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded w-full max-w-md p-6 modal-content relative max-h-[90vh] overflow-y-auto">
+            <button onclick="app.closeModal('registerModal')" class="absolute top-2 right-3 text-2xl text-gray-400">&times;</button>
+            <h2 class="text-xl font-bold mb-4 text-center">Hesap Oluştur</h2>
+            
+            <div class="flex border rounded mb-4 overflow-hidden">
+                <button onclick="app.setRegType('bireysel')" id="tabBireysel" class="flex-1 py-2 bg-sahibinden-mavi text-white font-bold text-sm">Bireysel</button>
+                <button onclick="app.setRegType('kurumsal')" id="tabKurumsal" class="flex-1 py-2 bg-gray-100 text-gray-600 font-bold text-sm">Kurumsal</button>
             </div>
-            <form onsubmit="event.preventDefault(); app.register();" class="space-y-3">
-                <input type="text" id="regName" placeholder="Ad Soyad" class="w-full border p-2 rounded" required>
-                <input type="email" id="regEmail" placeholder="E-posta" class="w-full border p-2 rounded" required>
-                <input type="password" id="regPass" placeholder="Şifre" class="w-full border p-2 rounded" required>
-                <div id="kurumsalFields" class="hidden space-y-3 bg-yellow-50 p-2 rounded border border-yellow-200">
-                    <input type="text" id="regCompany" placeholder="İşletme Adı" class="w-full border p-2 rounded">
-                    <input type="text" id="regTaxNo" placeholder="Vergi No (10 Haneli)" class="w-full border p-2 rounded">
+
+            <form onsubmit="event.preventDefault(); app.register();">
+                <div class="space-y-3">
+                    <input type="text" id="regName" placeholder="Ad Soyad" class="w-full border p-2 rounded text-sm" required>
+                    <input type="email" id="regEmail" placeholder="E-Posta Adresi" class="w-full border p-2 rounded text-sm" required>
+                    <input type="password" id="regPass" placeholder="Şifre Belirle" class="w-full border p-2 rounded text-sm" required>
+                    
+                    <div id="corporateFields" class="hidden bg-yellow-50 p-3 border border-yellow-200 rounded space-y-2">
+                        <div class="text-xs text-orange-600 font-bold mb-1"><i class="fa-solid fa-store"></i> Kurumsal Mağaza Bilgileri</div>
+                        <input type="text" id="storeName" placeholder="Mağaza Adı (Örn: Yıldız Emlak)" class="w-full border p-2 rounded text-sm bg-white">
+                        <input type="text" id="taxNo" placeholder="Vergi No (10 Haneli)" class="w-full border p-2 rounded text-sm bg-white">
+                        <div class="text-[10px] text-gray-500">* Vergi numarası doğrulama algoritması aktiftir.</div>
+                    </div>
                 </div>
-                <button type="submit" class="w-full bg-primary text-dark font-bold py-2 rounded">Üye Ol</button>
+                <button class="w-full bg-sahibinden-sari text-black font-bold py-3 mt-4 rounded shadow hover:bg-yellow-400">Üyeliği Tamamla</button>
             </form>
         </div>
     </div>
 
-    <div id="profileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[60] flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl w-full max-w-4xl h-[80vh] flex flex-col relative overflow-hidden">
-            <div class="bg-secondary text-white p-6 flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-secondary text-2xl font-bold border-4 border-primary">
-                        <i class="fa-solid fa-user"></i>
+    <div id="profileModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-4xl h-[85vh] flex overflow-hidden modal-content shadow-2xl">
+            <div class="w-1/4 bg-gray-50 border-r p-4 hidden md:block">
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 bg-gray-300 rounded-full mx-auto mb-2 overflow-hidden border-2 border-sahibinden-mavi">
+                        <img id="menuAvatar" src="https://via.placeholder.com/150" class="w-full h-full object-cover">
                     </div>
-                    <div>
-                        <h2 class="text-xl font-bold" id="profileName">Kullanıcı Adı</h2>
-                        <span class="text-sm opacity-80" id="profileType">Bireysel Üye</span>
-                    </div>
+                    <h3 id="menuName" class="font-bold text-sm truncate">Kullanıcı Adı</h3>
+                    <span id="menuType" class="text-xs bg-sahibinden-sari px-2 rounded-full">Bireysel</span>
                 </div>
-                <button onclick="app.toggleModal('profileModal')" class="text-white text-2xl hover:text-primary">&times;</button>
+                <nav class="space-y-1 text-sm">
+                    <a href="#" onclick="app.profileTab('ads')" class="block p-2 rounded hover:bg-white hover:shadow text-sahibinden-mavi font-bold">İlanlarım</a>
+                    <a href="#" onclick="app.profileTab('favs')" class="block p-2 rounded hover:bg-white hover:shadow text-gray-600">Favorilerim</a>
+                    <a href="#" onclick="app.profileTab('edit')" class="block p-2 rounded hover:bg-white hover:shadow text-gray-600">Üyelik Bilgilerim</a>
+                    <a href="#" onclick="app.logout()" class="block p-2 rounded hover:bg-red-50 text-red-500 mt-10">Çıkış Yap</a>
+                </nav>
+            </div>
+
+            <div class="flex-1 flex flex-col">
+                <div class="md:hidden bg-sahibinden-mavi text-white p-4 flex justify-between items-center">
+                    <span class="font-bold">Hesabım</span>
+                    <button onclick="app.closeModal('profileModal')" class="text-xl">&times;</button>
+                </div>
+                <button onclick="app.closeModal('profileModal')" class="hidden md:block absolute top-4 right-4 text-2xl text-gray-400 hover:text-black">&times;</button>
+
+                <div class="flex-1 p-6 overflow-y-auto bg-white" id="profileContentArea">
+                    </div>
+                
+                <div class="md:hidden flex border-t">
+                    <button onclick="app.profileTab('ads')" class="flex-1 p-3 text-xs font-bold text-sahibinden-mavi border-b-2 border-sahibinden-mavi">İlanlar</button>
+                    <button onclick="app.profileTab('favs')" class="flex-1 p-3 text-xs font-bold text-gray-500">Favoriler</button>
+                    <button onclick="app.profileTab('edit')" class="flex-1 p-3 text-xs font-bold text-gray-500">Ayarlar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="postAdModal" class="fixed inset-0 bg-white z-[70] hidden overflow-y-auto">
+        <div class="container mx-auto max-w-3xl p-4">
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <h1 class="text-2xl font-bold text-dark-text">İlan Ver</h1>
+                <button onclick="app.closeModal('postAdModal')" class="text-red-500 font-bold hover:bg-red-50 px-3 py-1 rounded">Vazgeç</button>
             </div>
             
-            <div class="flex border-b">
-                <button onclick="app.switchTab('ads')" class="flex-1 py-4 text-center hover:bg-gray-50 font-medium active-tab" id="tab-ads">İlanlarım</button>
-                <button onclick="app.switchTab('favs')" class="flex-1 py-4 text-center hover:bg-gray-50 font-medium" id="tab-favs">Favorilerim</button>
-                <button onclick="app.switchTab('settings')" class="flex-1 py-4 text-center hover:bg-gray-50 font-medium" id="tab-settings">Ayarlar</button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
-                <div id="content-ads" class="block">
-                    <div class="flex justify-between mb-4">
-                        <h3 class="font-bold">Yayındaki İlanlarım</h3>
-                        <button onclick="app.toggleModal('profileModal'); app.openPostAd()" class="text-xs bg-primary px-3 py-1 rounded font-bold">Yeni İlan</button>
+            <div class="space-y-6">
+                <div class="bg-blue-50 p-4 rounded border border-blue-100">
+                    <label class="block font-bold text-sm mb-1">İlan Başlığı</label>
+                    <input type="text" id="adTitle" oninput="app.aiCheck()" placeholder="Örn: Hatasız Boyasız 2016 Passat" class="w-full border p-3 rounded shadow-sm focus:border-sahibinden-mavi focus:ring-1 focus:ring-sahibinden-mavi outline-none">
+                    <div id="aiResult" class="hidden mt-2 text-sm text-sahibinden-mavi font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>AI Önerisi: Kategori "Vasıta" olarak seçildi.</span>
                     </div>
-                    <div id="myAdsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        </div>
                 </div>
 
-                <div id="content-favs" class="hidden">
-                    <h3 class="font-bold mb-4">Favorilediğim İlanlar</h3>
-                    <div id="myFavsList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-bold text-sm mb-1">Fiyat (TL)</label>
+                        <input type="number" id="adPrice" class="w-full border p-3 rounded shadow-sm">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-sm mb-1">Kategori</label>
+                        <select id="adCategory" class="w-full border p-3 rounded shadow-sm bg-white"></select>
+                    </div>
                 </div>
 
-                <div id="content-settings" class="hidden max-w-md mx-auto">
-                    <form class="space-y-4 bg-white p-6 rounded shadow">
-                        <h3 class="font-bold border-b pb-2">Üyelik Bilgileri</h3>
-                        <div>
-                            <label class="block text-sm">Ad Soyad</label>
-                            <input type="text" id="editName" class="w-full border p-2 rounded">
-                        </div>
-                        <div>
-                            <label class="block text-sm">E-posta</label>
-                            <input type="email" id="editEmail" class="w-full border p-2 rounded" disabled>
-                        </div>
-                        <button type="button" onclick="alert('Bilgiler güncellendi!')" class="w-full bg-secondary text-white py-2 rounded">Kaydet</button>
-                        <button type="button" onclick="app.logout()" class="w-full border border-red-500 text-red-500 py-2 rounded hover:bg-red-50">Çıkış Yap</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="postAdModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[60] flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
-            <div class="sticky top-0 bg-white p-4 border-b flex justify-between items-center z-10">
-                <h2 class="text-lg font-bold">İlan Ver</h2>
-                <button onclick="app.toggleModal('postAdModal')" class="text-2xl">&times;</button>
-            </div>
-            <div class="p-6 space-y-4">
                 <div>
-                    <label class="block text-sm font-medium">Başlık</label>
-                    <input type="text" id="adTitle" oninput="app.aiSuggest()" class="w-full border p-3 rounded-lg" placeholder="Örn: iPhone 13">
-                    <div id="aiSuggestion" class="hidden text-xs text-blue-600 mt-1"><i class="fa-solid fa-robot"></i> Kategori öneriliyor...</div>
+                    <label class="block font-bold text-sm mb-1">Açıklama</label>
+                    <textarea id="adDesc" rows="5" class="w-full border p-3 rounded shadow-sm"></textarea>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <select id="adCategory" class="border p-3 rounded-lg"></select>
-                    <input type="number" id="adPrice" class="border p-3 rounded-lg" placeholder="Fiyat (TL)">
+
+                <div class="border-2 border-dashed border-gray-300 rounded p-8 text-center cursor-pointer hover:bg-gray-50">
+                    <i class="fa-solid fa-camera text-4xl text-gray-300 mb-2"></i>
+                    <p class="text-gray-500 text-sm">Fotoğraf yüklemek için tıklayın (Max 10)</p>
                 </div>
-                <textarea id="adDesc" rows="3" class="w-full border p-3 rounded-lg" placeholder="Açıklama"></textarea>
-                <div class="flex gap-4">
-                    <label><input type="checkbox" id="dopingShowcase"> Vitrin (+50TL)</label>
-                    <label><input type="checkbox" id="dopingUrgent"> Acil</label>
+
+                <div class="bg-gray-50 p-4 rounded">
+                    <h3 class="font-bold text-sm mb-3">Doping Seçenekleri (Daha Hızlı Sat)</h3>
+                    <label class="flex items-center gap-2 mb-2 cursor-pointer">
+                        <input type="checkbox" id="dopingVitrin" class="w-5 h-5 text-sahibinden-mavi">
+                        <span class="text-sm">Vitrin İlanı (+50 TL)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="dopingBold" class="w-5 h-5 text-sahibinden-mavi">
+                        <span class="text-sm">Kalın Yazı & Renkli Çerçeve (+20 TL)</span>
+                    </label>
                 </div>
-                <button onclick="app.publishAd()" class="w-full bg-secondary text-white py-3 rounded-lg font-bold">Yayınla</button>
+
+                <button onclick="app.submitAd()" class="w-full bg-sahibinden-mavi text-white font-bold py-4 rounded text-lg shadow-lg hover:bg-blue-800 transition">İlanı Yayına Al</button>
             </div>
         </div>
     </div>
@@ -193,326 +240,393 @@
     <script>
         const app = {
             data: {
+                user: null, // Giriş yapmış kullanıcı
                 categories: [
-                    { name: 'Emlak', icon: 'fa-house' }, { name: 'Vasıta', icon: 'fa-car' },
-                    { name: 'Telefon', icon: 'fa-mobile-screen' }, { name: 'Bilgisayar', icon: 'fa-laptop' },
-                    { name: 'Giyim', icon: 'fa-shirt' }, { name: 'Diğer', icon: 'fa-box-open' }
+                    { name: 'Emlak', icon: 'fa-house' },
+                    { name: 'Vasıta', icon: 'fa-car' },
+                    { name: 'Yedek Parça', icon: 'fa-gear' },
+                    { name: 'Telefon', icon: 'fa-mobile-screen' },
+                    { name: 'Bilgisayar', icon: 'fa-laptop' },
+                    { name: 'Giyim', icon: 'fa-shirt' }
                 ],
                 ads: [],
-                currentUser: null, // Giriş yapan kullanıcı
                 regType: 'bireysel'
             },
 
             init: function() {
-                // LocalStorage'dan verileri çek
-                const storedAds = localStorage.getItem('bikirala_ads_v2');
-                const storedUser = localStorage.getItem('bikirala_user');
+                // Verileri Yükle
+                const savedUser = localStorage.getItem('bk_user_v3');
+                const savedAds = localStorage.getItem('bk_ads_v3');
                 
-                if (storedAds) {
-                    this.data.ads = JSON.parse(storedAds);
+                if (savedUser) this.data.user = JSON.parse(savedUser);
+                if (savedAds) {
+                    this.data.ads = JSON.parse(savedAds);
                 } else {
-                    this.seedData(); // İlk açılışta sahte veri bas
+                    this.seedData(); // İlk açılış verileri
                 }
 
-                if (storedUser) {
-                    this.data.currentUser = JSON.parse(storedUser);
-                }
-
+                this.renderHeader();
                 this.renderCategories();
-                this.renderHeader(); // Giriş/Çıkış butonlarını ayarla
                 this.renderAds();
+                this.renderVitrin();
             },
 
             seedData: function() {
                 this.data.ads = [
-                    { id: 1, title: 'Temiz iPhone 11', price: 15000, category: 'Telefon', image: 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=400', favs: [] },
-                    { id: 2, title: 'Sahibinden Satılık Daire', price: 3500000, category: 'Emlak', image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400', favs: [] }
+                    { id: 101, title: 'Sahibinden Satılık 3+1 Daire', price: 2500000, cat: 'Emlak', image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400', vitrin: true, owner: 'Ahmet Y.', city: 'İstanbul' },
+                    { id: 102, title: 'Hatasız Boyasız BMW 320i', price: 1850000, cat: 'Vasıta', image: 'https://images.unsplash.com/photo-1555215696-b9776f188899?w=400', vitrin: true, owner: 'Galerici Ali', city: 'Ankara', isStore: true },
+                    { id: 103, title: 'iPhone 13 Pro Temiz', price: 35000, cat: 'Telefon', image: 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=400', vitrin: false, owner: 'Mehmet', city: 'İzmir' }
                 ];
-                this.saveData();
+                this.save();
             },
 
-            saveData: function() {
-                localStorage.setItem('bikirala_ads_v2', JSON.stringify(this.data.ads));
-                if (this.data.currentUser) {
-                    localStorage.setItem('bikirala_user', JSON.stringify(this.data.currentUser));
-                } else {
-                    localStorage.removeItem('bikirala_user');
-                }
+            save: function() {
+                localStorage.setItem('bk_ads_v3', JSON.stringify(this.data.ads));
+                if (this.data.user) localStorage.setItem('bk_user_v3', JSON.stringify(this.data.user));
+                else localStorage.removeItem('bk_user_v3');
             },
 
-            // --- AUTH SISTEMI (Giriş/Kayıt) ---
+            // --- AUTHENTICATION ---
             
             checkAuth: function(action) {
-                if (!this.data.currentUser) {
-                    this.toggleModal('loginModal');
+                if (!this.data.user) {
+                    this.openModal('loginModal');
                     return false;
                 }
-                if (action === 'post') this.openPostAd();
-                if (action === 'profile') this.openProfile();
+                if (action === 'post') this.openModal('postAdModal');
                 return true;
+            },
+
+            login: function() {
+                const mail = document.getElementById('loginUser').value;
+                if(!mail) return alert('Lütfen e-posta girin');
+                
+                // Demo Login
+                this.data.user = {
+                    name: 'Kullanıcı',
+                    email: mail,
+                    type: 'bireysel',
+                    favs: [],
+                    avatar: 'https://ui-avatars.com/api/?name=Kullanici&background=random'
+                };
+                
+                this.save();
+                this.closeModal('loginModal');
+                this.renderHeader();
+                alert('Giriş Başarılı!');
+            },
+
+            logout: function() {
+                if(confirm('Çıkış yapmak istiyor musunuz?')) {
+                    this.data.user = null;
+                    this.save();
+                    location.reload();
+                }
             },
 
             setRegType: function(type) {
                 this.data.regType = type;
-                if(type === 'kurumsal') {
-                    document.getElementById('kurumsalFields').classList.remove('hidden');
-                    document.getElementById('btnKurumsal').classList.add('bg-white','shadow','text-black');
-                    document.getElementById('btnBireysel').classList.remove('bg-white','shadow');
+                const btnB = document.getElementById('tabBireysel');
+                const btnK = document.getElementById('tabKurumsal');
+                const fields = document.getElementById('corporateFields');
+
+                if (type === 'kurumsal') {
+                    btnK.className = 'flex-1 py-2 bg-sahibinden-mavi text-white font-bold text-sm';
+                    btnB.className = 'flex-1 py-2 bg-gray-100 text-gray-600 font-bold text-sm';
+                    fields.classList.remove('hidden');
                 } else {
-                    document.getElementById('kurumsalFields').classList.add('hidden');
-                    document.getElementById('btnBireysel').classList.add('bg-white','shadow','text-black');
-                    document.getElementById('btnKurumsal').classList.remove('bg-white','shadow');
+                    btnB.className = 'flex-1 py-2 bg-sahibinden-mavi text-white font-bold text-sm';
+                    btnK.className = 'flex-1 py-2 bg-gray-100 text-gray-600 font-bold text-sm';
+                    fields.classList.add('hidden');
                 }
             },
 
             register: function() {
                 const name = document.getElementById('regName').value;
-                const email = document.getElementById('regEmail').value;
                 const type = this.data.regType;
-                
-                // Basit Kayıt (Backend olmadığı için direkt login yapıyoruz)
-                this.data.currentUser = {
-                    id: Date.now(),
-                    name: name,
-                    email: email,
+                let storeName = '';
+
+                if (type === 'kurumsal') {
+                    const tax = document.getElementById('taxNo').value;
+                    if(tax.length !== 10) return alert('Hata: Vergi numarası 10 haneli olmalıdır!');
+                    storeName = document.getElementById('storeName').value;
+                }
+
+                this.data.user = {
+                    name: storeName || name, // Kurumsalsa mağaza adı görünür
+                    realName: name,
+                    email: document.getElementById('regEmail').value,
                     type: type,
-                    favorites: [] // Favori listesi
+                    taxNo: type === 'kurumsal' ? document.getElementById('taxNo').value : null,
+                    favs: [],
+                    avatar: `https://ui-avatars.com/api/?name=${name.replace(' ','+')}&background=FFD700&color=000`
                 };
-                
-                this.saveData();
+
+                this.save();
+                this.closeModal('registerModal');
                 this.renderHeader();
-                this.toggleModal('registerModal');
-                alert("Kayıt Başarılı! Hoşgeldin " + name);
+                alert('Kayıt Başarılı! Hoşgeldin ' + this.data.user.name);
             },
 
-            login: function() {
-                // Demo Login: Herhangi bir giriş kabul edilir
-                const email = document.getElementById('loginEmail').value;
-                
-                this.data.currentUser = {
-                    id: 999,
-                    name: "Demo Kullanıcı",
-                    email: email,
-                    type: "bireysel",
-                    favorites: []
-                };
-                
-                this.saveData();
-                this.renderHeader();
-                this.toggleModal('loginModal');
-            },
-
-            logout: function() {
-                if(confirm("Çıkış yapmak istediğine emin misin?")) {
-                    this.data.currentUser = null;
-                    this.saveData();
-                    window.location.reload(); // Sayfayı yenile
-                }
-            },
-
-            renderHeader: function() {
-                const container = document.querySelector('.desktop-menu');
-                if (this.data.currentUser) {
-                    // GİRİŞ YAPILMIŞ HALİ
-                    container.innerHTML = `
-                        <button onclick="app.openProfile()" class="flex items-center gap-2 text-gray-700 hover:text-secondary">
-                            <i class="fa-solid fa-user-circle text-xl"></i>
-                            <span class="font-bold">${this.data.currentUser.name}</span>
-                        </button>
-                        <button onclick="app.openPostAd()" class="bg-primary text-dark font-bold py-2 px-4 rounded-lg hover:bg-yellow-400">
-                            Ücretsiz İlan Ver
-                        </button>
-                    `;
-                } else {
-                    // MİSAFİR HALİ
-                    container.innerHTML = `
-                        <button onclick="app.toggleModal('loginModal')" class="text-gray-600 hover:text-secondary font-medium">Giriş Yap</button>
-                        <button onclick="app.toggleModal('registerModal')" class="text-gray-600 hover:text-secondary font-medium">Kayıt Ol</button>
-                        <button onclick="app.checkAuth('post')" class="bg-primary text-dark font-bold py-2 px-4 rounded-lg hover:bg-yellow-400">
-                            Ücretsiz İlan Ver
-                        </button>
-                    `;
-                }
-            },
-
-            // --- FAVORİLER SİSTEMİ ---
-
-            toggleFavorite: function(adId, event) {
-                if(event) event.stopPropagation(); // Karta tıklanmasını engelle
-                
-                if (!this.checkAuth()) return; // Giriş yapmamışsa modal aç
-
-                const user = this.data.currentUser;
-                const index = user.favorites.indexOf(adId);
-
-                if (index === -1) {
-                    user.favorites.push(adId); // Ekle
-                } else {
-                    user.favorites.splice(index, 1); // Çıkar
-                }
-
-                this.saveData();
-                this.renderAds(); // Kalpleri güncellemek için yeniden çiz
-                
-                // Eğer profil açıksa orayı da güncelle
-                if(!document.getElementById('profileModal').classList.contains('hidden')){
-                    this.renderProfileAds();
-                }
-            },
-
-            // --- PROFİL SİSTEMİ ---
+            // --- PROFİL DÜZENLEME (EN ÖNEMLİ KISIM) ---
 
             openProfile: function() {
-                if (!this.checkAuth()) return;
+                if(!this.checkAuth()) return;
                 
-                const user = this.data.currentUser;
-                document.getElementById('profileName').innerText = user.name;
-                document.getElementById('profileType').innerText = user.type === 'kurumsal' ? 'Kurumsal Mağaza' : 'Bireysel Üye';
-                document.getElementById('editName').value = user.name;
-                document.getElementById('editEmail').value = user.email;
+                // Sol menüyü doldur
+                document.getElementById('menuName').innerText = this.data.user.name;
+                document.getElementById('menuType').innerText = this.data.user.type === 'kurumsal' ? 'Kurumsal Mağaza' : 'Bireysel Üye';
+                document.getElementById('menuAvatar').src = this.data.user.avatar;
 
-                this.switchTab('ads');
-                this.renderProfileAds();
-                this.toggleModal('profileModal');
+                this.profileTab('ads'); // Varsayılan sekme
+                this.openModal('profileModal');
             },
 
-            renderProfileAds: function() {
-                const user = this.data.currentUser;
-                const myAdsDiv = document.getElementById('myAdsList');
-                const myFavsDiv = document.getElementById('myFavsList');
-                
-                // Benim İlanlarım (Şimdilik demo, gerçek backendde user_id ile filtreleriz)
-                // Bu örnekte localdeki tüm ilanları benimmiş gibi gösteriyorum demo amaçlı
-                // Normalde: ad.userId === user.id
-                myAdsDiv.innerHTML = '';
-                this.data.ads.forEach(ad => {
-                     // Demo: Sadece yeni eklediklerim benim olsun
-                     if(ad.id > 1000) { 
-                        myAdsDiv.innerHTML += this.createMiniCard(ad, true);
-                     }
-                });
-                if(myAdsDiv.innerHTML === '') myAdsDiv.innerHTML = '<div class="text-gray-500">Henüz ilanınız yok.</div>';
+            profileTab: function(tab) {
+                const content = document.getElementById('profileContentArea');
+                content.innerHTML = '';
 
-                // Favorilerim
-                myFavsDiv.innerHTML = '';
-                if (user.favorites.length === 0) {
-                    myFavsDiv.innerHTML = '<div class="text-gray-500">Henüz favori eklemediniz.</div>';
-                } else {
-                    this.data.ads.forEach(ad => {
-                        if (user.favorites.includes(ad.id)) {
-                            myFavsDiv.innerHTML += this.createMiniCard(ad, false);
-                        }
-                    });
+                if (tab === 'ads') {
+                    content.innerHTML = `<h3 class="font-bold border-b pb-2 mb-4">Yayındaki İlanlarım</h3>`;
+                    // Demo: Kendi ilanı yoksa boş göster
+                    const myAds = this.data.ads.filter(ad => ad.isMine); // Gerçekte user_id eşleşmesi
+                    if(myAds.length === 0) content.innerHTML += `<div class="text-center text-gray-400 mt-10"><i class="fa-solid fa-folder-open text-4xl mb-2"></i><p>Henüz ilanınız yok.</p></div>`;
+                    else {
+                        // İlanları listele (Buraya eklenebilir)
+                        content.innerHTML += `<p>Toplam ${myAds.length} ilanınız yayında.</p>`;
+                    }
+                } 
+                else if (tab === 'favs') {
+                    content.innerHTML = `<h3 class="font-bold border-b pb-2 mb-4">Favorilerim</h3>`;
+                    if(this.data.user.favs.length === 0) content.innerHTML += `<div class="text-gray-500">Favori ilanınız yok.</div>`;
+                    else {
+                        const favAds = this.data.ads.filter(ad => this.data.user.favs.includes(ad.id));
+                        let html = '<div class="space-y-2">';
+                        favAds.forEach(ad => {
+                            html += `
+                                <div class="flex gap-3 border p-2 rounded bg-white">
+                                    <img src="${ad.image}" class="w-20 h-20 object-cover rounded">
+                                    <div>
+                                        <div class="font-bold text-sm">${ad.title}</div>
+                                        <div class="text-sahibinden-mavi font-bold">${ad.price.toLocaleString()} TL</div>
+                                    </div>
+                                    <button onclick="app.toggleFav(${ad.id})" class="ml-auto text-red-500 text-sm">Kaldır</button>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        content.innerHTML += html;
+                    }
+                } 
+                else if (tab === 'edit') {
+                    // *** İŞTE İSTEDİĞİN DÜZENLEME FORMU ***
+                    content.innerHTML = `
+                        <h3 class="font-bold border-b pb-2 mb-4 text-dark-text">Üyelik Bilgilerimi Düzenle</h3>
+                        <form onsubmit="event.preventDefault(); app.updateProfile();" class="max-w-md space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Görünen İsim / Mağaza Adı</label>
+                                <input type="text" id="editName" value="${this.data.user.name}" class="w-full border p-2 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">E-Posta Adresi</label>
+                                <input type="email" id="editEmail" value="${this.data.user.email}" class="w-full border p-2 rounded bg-gray-100" disabled>
+                                <span class="text-xs text-gray-500">E-posta adresi güvenlik nedeniyle değiştirilemez.</span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Yeni Şifre (İsteğe Bağlı)</label>
+                                <input type="password" id="editPass" placeholder="Değiştirmek istemiyorsanız boş bırakın" class="w-full border p-2 rounded">
+                            </div>
+                             <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Profil Fotoğrafı URL</label>
+                                <input type="text" id="editAvatar" value="${this.data.user.avatar}" class="w-full border p-2 rounded">
+                            </div>
+                            <div class="pt-4 border-t">
+                                <button class="bg-sahibinden-mavi text-white px-6 py-2 rounded font-bold hover:bg-blue-700 w-full md:w-auto">Değişiklikleri Kaydet</button>
+                            </div>
+                        </form>
+                    `;
                 }
             },
 
-            createMiniCard: function(ad, isMyAd) {
-                return `
-                    <div class="flex gap-3 border p-2 rounded bg-white relative">
-                        <img src="${ad.image}" class="w-20 h-20 object-cover rounded">
-                        <div>
-                            <div class="font-bold text-sm">${ad.title}</div>
-                            <div class="text-secondary font-bold">${ad.price} TL</div>
-                            <div class="text-xs text-gray-400">${ad.city || 'İstanbul'}</div>
-                        </div>
-                        ${isMyAd ? '<button class="absolute top-2 right-2 text-red-500 text-xs border border-red-500 px-2 rounded hover:bg-red-50">Sil</button>' : ''}
-                    </div>
-                `;
-            },
-
-            switchTab: function(tabName) {
-                ['ads', 'favs', 'settings'].forEach(t => {
-                    document.getElementById('content-' + t).classList.add('hidden');
-                    document.getElementById('tab-' + t).classList.remove('active-tab');
-                });
-                document.getElementById('content-' + tabName).classList.remove('hidden');
-                document.getElementById('tab-' + tabName).classList.add('active-tab');
-            },
-
-            // --- GENEL UI ---
-
-            renderCategories: function() {
-                const list = document.getElementById('categoryList');
-                const select = document.getElementById('adCategory');
-                select.innerHTML = '';
-                list.innerHTML = '';
+            updateProfile: function() {
+                const newName = document.getElementById('editName').value;
+                const newAvatar = document.getElementById('editAvatar').value;
                 
-                this.data.categories.forEach(cat => {
-                    list.innerHTML += `<li class="p-2 hover:bg-gray-100 cursor-pointer text-sm flex gap-2 items-center" onclick="app.filterCat('${cat.name}')"><i class="fa-solid ${cat.icon} text-secondary"></i> ${cat.name}</li>`;
-                    select.innerHTML += `<option value="${cat.name}">${cat.name}</option>`;
-                });
-            },
+                if(!newName) return alert('İsim boş olamaz!');
 
-            renderAds: function() {
-                const grid = document.getElementById('adGrid');
-                grid.innerHTML = '';
+                this.data.user.name = newName;
+                this.data.user.avatar = newAvatar;
                 
-                this.data.ads.forEach(ad => {
-                    // Favori kontrolü
-                    const isFav = this.data.currentUser && this.data.currentUser.favorites.includes(ad.id);
-                    const heartClass = isFav ? 'fa-solid text-red-500' : 'fa-regular text-gray-500';
+                // Şifre mantığı backend olmadığı için simüle edilir
+                const pass = document.getElementById('editPass').value;
+                if(pass) alert('Şifreniz başarıyla güncellendi.');
 
-                    grid.innerHTML += `
-                        <div class="bg-white rounded-lg shadow hover:shadow-lg transition relative group overflow-hidden border border-gray-100">
-                            <div class="absolute top-2 right-2 z-10 bg-white rounded-full p-1 shadow cursor-pointer w-8 h-8 flex items-center justify-center hover:bg-gray-100" onclick="app.toggleFavorite(${ad.id}, event)">
-                                <i class="${heartClass} fa-heart"></i>
-                            </div>
-                            <img src="${ad.image}" class="w-full h-40 object-cover">
-                            <div class="p-3">
-                                <h3 class="font-bold text-gray-800 text-sm truncate">${ad.title}</h3>
-                                <div class="text-secondary font-bold mt-1">${ad.price.toLocaleString()} TL</div>
-                                <div class="text-xs text-gray-400 mt-2">${ad.category}</div>
-                            </div>
-                        </div>
-                    `;
-                });
+                this.save();
+                alert('Profil bilgileriniz güncellendi!');
+                
+                // UI Güncelle
+                this.renderHeader();
+                document.getElementById('menuName').innerText = newName;
+                document.getElementById('menuAvatar').src = newAvatar;
             },
 
-            openPostAd: function() {
+            // --- İLAN FONKSİYONLARI ---
+
+            toggleFav: function(id) {
                 if(!this.checkAuth()) return;
-                this.toggleModal('postAdModal');
+                
+                const idx = this.data.user.favs.indexOf(id);
+                if(idx === -1) {
+                    this.data.user.favs.push(id);
+                } else {
+                    this.data.user.favs.splice(idx, 1);
+                }
+                this.save();
+                this.renderAds(); // Kalpleri güncelle
+                this.renderVitrin(); // Vitrin kalplerini güncelle
+                
+                // Eğer profil açıksa orayı da yenile
+                if(!document.getElementById('profileModal').classList.contains('hidden')) {
+                    this.profileTab('favs');
+                }
             },
 
-            publishAd: function() {
+            submitAd: function() {
                 const title = document.getElementById('adTitle').value;
                 const price = document.getElementById('adPrice').value;
                 const cat = document.getElementById('adCategory').value;
-                
-                if(!title || !price) { alert("Lütfen alanları doldur"); return; }
+                const isVitrin = document.getElementById('dopingVitrin').checked;
+
+                if (!title || !price) return alert('Lütfen zorunlu alanları doldurun.');
 
                 const newAd = {
                     id: Date.now(),
                     title: title,
                     price: parseInt(price),
-                    category: cat,
+                    cat: cat,
                     image: 'https://via.placeholder.com/400x300?text=' + cat,
-                    favs: []
+                    vitrin: isVitrin,
+                    owner: this.data.user.name,
+                    city: 'İstanbul',
+                    isMine: true
                 };
 
                 this.data.ads.unshift(newAd);
-                this.saveData();
+                this.save();
+                
+                this.closeModal('postAdModal');
                 this.renderAds();
-                this.toggleModal('postAdModal');
-                alert("İlan Yayında!");
+                this.renderVitrin();
+                alert('İlanınız yayına alındı! ' + (isVitrin ? '(Vitrin ödemesi simüle edildi)' : ''));
             },
 
-            aiSuggest: function() {
+            aiCheck: function() {
                 const val = document.getElementById('adTitle').value.toLowerCase();
-                const box = document.getElementById('aiSuggestion');
-                if(val.length > 3) box.classList.remove('hidden');
-                else box.classList.add('hidden');
+                const box = document.getElementById('aiResult');
+                const catSelect = document.getElementById('adCategory');
+                
+                if (val.length > 3) {
+                    box.classList.remove('hidden');
+                    if(val.includes('ev') || val.includes('daire')) catSelect.value = 'Emlak';
+                    else if(val.includes('araba') || val.includes('bmw')) catSelect.value = 'Vasıta';
+                    else if(val.includes('telefon')) catSelect.value = 'Telefon';
+                } else {
+                    box.classList.add('hidden');
+                }
             },
 
-            toggleModal: function(id) {
-                document.getElementById(id).classList.toggle('hidden');
+            // --- RENDER (GÖRÜNTÜLEME) ---
+
+            renderHeader: function() {
+                const area = document.getElementById('headerAuthArea');
+                if (this.data.user) {
+                    area.innerHTML = `
+                        <div onclick="app.openProfile()" class="flex items-center gap-2 cursor-pointer hover:bg-gray-100 p-1 rounded">
+                            <img src="${this.data.user.avatar}" class="w-8 h-8 rounded-full border border-gray-300">
+                            <span class="font-bold hidden md:inline">${this.data.user.name}</span>
+                        </div>
+                        <button onclick="app.openModal('postAdModal')" class="bg-sahibinden-mavi text-white px-4 py-2 rounded font-bold hover:bg-blue-700 transition">Ücretsiz İlan Ver</button>
+                    `;
+                } else {
+                    area.innerHTML = `
+                        <a href="#" onclick="app.openModal('loginModal')" class="hover:text-sahibinden-mavi">Giriş Yap</a>
+                        <span class="text-gray-300">|</span>
+                        <a href="#" onclick="app.openModal('registerModal')" class="hover:text-sahibinden-mavi">Üye Ol</a>
+                        <button onclick="app.checkAuth('post')" class="bg-sahibinden-mavi text-white px-4 py-2 rounded font-bold hover:bg-blue-700 transition ml-2">Ücretsiz İlan Ver</button>
+                    `;
+                }
             },
-            
-            renderHome: function() {
-                window.scrollTo(0,0);
-                this.renderAds();
+
+            renderCategories: function() {
+                const list = document.getElementById('desktopCategories');
+                const select = document.getElementById('adCategory');
+                list.innerHTML = '';
+                select.innerHTML = '';
+
+                this.data.categories.forEach(c => {
+                    list.innerHTML += `<li class="category-item p-2 cursor-pointer flex items-center gap-2 border-b border-gray-100"><i class="fa-solid ${c.icon} w-5 text-gray-400"></i> ${c.name}</li>`;
+                    select.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+                });
+            },
+
+            renderAds: function() {
+                const grid = document.getElementById('adList');
+                grid.innerHTML = '';
+                
+                this.data.ads.forEach(ad => {
+                    const isFav = this.data.user && this.data.user.favs.includes(ad.id);
+                    grid.innerHTML += `
+                        <div class="bg-white rounded border border-gray-200 shadow-sm hover:shadow-lg transition group cursor-pointer relative">
+                            <div class="h-40 overflow-hidden relative">
+                                <img src="${ad.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black to-transparent p-2 pt-6">
+                                    <p class="text-white text-xs font-bold"><i class="fa-solid fa-location-dot"></i> ${ad.city}</p>
+                                </div>
+                                <button onclick="app.toggleFav(${ad.id})" class="absolute top-2 right-2 bg-white rounded-full p-1 w-8 h-8 shadow flex items-center justify-center">
+                                    <i class="${isFav ? 'fa-solid text-red-500' : 'fa-regular text-gray-400'} fa-heart"></i>
+                                </button>
+                            </div>
+                            <div class="p-3">
+                                <h3 class="text-dark-text font-bold text-sm truncate mb-1">${ad.title}</h3>
+                                <div class="text-sahibinden-mavi font-bold text-lg">${ad.price.toLocaleString()} TL</div>
+                                <div class="flex justify-between items-center mt-2 text-xs text-gray-500">
+                                    <span>${ad.cat}</span>
+                                    <span>${ad.owner}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            },
+
+            renderVitrin: function() {
+                const area = document.getElementById('vitrinArea');
+                area.innerHTML = '';
+                const vitrinAds = this.data.ads.filter(a => a.vitrin);
+
+                vitrinAds.forEach(ad => {
+                     area.innerHTML += `
+                        <div class="flex-shrink-0 w-32 cursor-pointer group">
+                            <div class="border rounded overflow-hidden relative mb-1">
+                                <img src="${ad.image}" class="w-32 h-24 object-cover">
+                                <div class="absolute inset-0 border-2 border-sahibinden-sari opacity-0 group-hover:opacity-100 transition"></div>
+                            </div>
+                            <div class="text-xs font-bold text-dark-text truncate">${ad.title}</div>
+                            <div class="text-xs text-red-600 font-bold">${ad.price.toLocaleString()} TL</div>
+                        </div>
+                    `;
+                });
+            },
+
+            openModal: function(id) { document.getElementById(id).classList.remove('hidden'); },
+            closeModal: function(id) { document.getElementById(id).classList.add('hidden'); },
+            goHome: function() { window.scrollTo(0,0); },
+            openFavorites: function() { 
+                if(this.checkAuth()) { this.openProfile(); setTimeout(() => this.profileTab('favs'), 100); }
             }
         };
 
+        // Başlat
         app.init();
     </script>
 </body>
