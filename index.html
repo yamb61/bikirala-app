@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - V33 JS Delegasyonu ile Tıklama Hatası Giderildi</title>
+    <title>BiKirala - V34 Son Düzeltme (Tıklama)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -19,8 +19,6 @@
                         dark: '#1a1a1a',          
                         surface: '#ffffff',       
                         graybg: '#f1f2f6',
-                        chatme: '#e3f2fd',
-                        chatyou: '#f1f2f6'
                     },
                     boxShadow: {
                         'float': '0 10px 40px rgba(0,0,0,0.1)',
@@ -45,44 +43,19 @@
         .bk-input:focus { border-color: #2962FF; box-shadow: 0 0 0 3px rgba(41, 98, 255, 0.1); }
         .modal-enter { animation: pop 0.3s forwards; }
         
-        .doping-card { border: 2px solid transparent; transition: 0.2s; cursor: pointer; }
-        .doping-card:hover { border-color: #e5e7eb; }
-        .doping-card.selected { border-color: #2962FF; background-color: #eff6ff; }
-        
-        .toast-item { background: rgba(25, 25, 25, 0.95); backdrop-filter: blur(10px); color: white; border-left: 4px solid #2962FF; }
-        .toast-item.success { border-left-color: #00d26a; }
-        .toast-item.error { border-left-color: #ff4757; }
-
-        .chat-bubble { max-width: 80%; padding: 10px 15px; border-radius: 12px; font-size: 14px; position: relative; margin-bottom: 8px; }
-        .chat-bubble.me { background-color: #2962FF; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .chat-bubble.you { background-color: #f1f2f6; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
-        
-        /* Dark Mode Ayarları */
-        .dark body { background-color: #111; color: #eee; }
-        .dark .bg-white { background-color: #1e1e1e; color: #eee; border-color: #333; }
-        .dark .text-dark { color: #eee; }
-        .dark .bk-input { background-color: #2d2d2d; border-color: #444; color: white; }
-        .dark .bg-gray-50 { background-color: #252525; }
-        .dark header { background-color: #1e1e1e; border-color: #333; }
-        .dark .doping-card { background-color: #2d2d2d; }
-        .dark .chat-bubble.you { background-color: #333; color: white; }
-
-        /* Galeri Thumbnails */
-        .gallery-thumb { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
-        .gallery-thumb.active { border-color: #2962FF; transform: scale(1.1); }
-
-        /* Tablo Stili */
-        .spec-row:nth-child(odd) { background-color: rgba(0,0,0,0.02); }
-        .dark .spec-row:nth-child(odd) { background-color: rgba(255,255,255,0.05); }
-        
-        /* Z-INDEX SADELEŞTİRMESİ */
+        /* Z-INDEX SADELEŞTİRMESİ - Tıklama Sorunu İçin Tek Çözüm */
         header, nav { z-index: 90; } 
-        .fixed:not(header):not(nav) { z-index: 50; }
+        .fixed:not(header):not(nav) { z-index: 50; } 
         .modal { z-index: 100; } 
         #toast-container { z-index: 1000; }
+        
+        /* İlan Kartı Tıklama Alanını Genişlet */
+        .ilan-kart-link { display: block; position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 10; cursor: pointer; }
     </style>
 </head>
-<body class="bg-graybg text-dark pb-24 md:pb-0"> <div id="toast-container" class="fixed top-24 right-5 z-[1000] flex flex-col gap-3 pointer-events-none"></div>
+<body class="bg-graybg text-dark pb-24 md:pb-0">
+
+    <div id="toast-container" class="fixed top-24 right-5 z-[1000] flex flex-col gap-3 pointer-events-none"></div>
 
     <header class="fixed top-0 w-full bg-white z-[90] h-20 shadow-sm border-b flex items-center justify-between px-4 md:px-8 transition-colors">
         <div class="flex items-center gap-1 cursor-pointer select-none" onclick="app.goHome()">
@@ -562,7 +535,7 @@
                 if(state.ads.length === 0) app.seed(); 
                 app.checkAutoConfirm();
                 ui.render(); 
-                document.body.addEventListener('click', app.handleGlobalClick); // YENİ: Global tıklama dinleyicisi
+                document.body.addEventListener('click', app.handleGlobalClick);
             },
             save: () => {
                 localStorage.setItem(STORAGE_KEY + 'user', JSON.stringify(state.user));
@@ -591,26 +564,41 @@
                 }
             },
             
-            // YENİ: Global Tıklama Yakalama ve Yönlendirme
+            // YENİ: Global Tıklama Yakalama ve Yönlendirme (Düzeltme)
             handleGlobalClick: (e) => {
-                // 1. İlan Kartı Tıklaması
+                // Modallar açıksa, dışarı tıklanmayı kontrol et
+                const modalElements = document.querySelectorAll('.modal');
+                let isModalOpen = false;
+                modalElements.forEach(modal => {
+                    if (modal.style.display === 'flex') {
+                        isModalOpen = true;
+                        // Modalin dışına tıklanıp tıklanmadığını kontrol et
+                        if (e.target.classList.contains('modal')) {
+                            app.modal(modal.id, false);
+                        }
+                    }
+                });
+
+                if (isModalOpen) return; // Modal açıksa sadece modal dışı tıklamaları dinle
+
+                // İlan Kartı Tıklaması
                 const adCard = e.target.closest('#ads-grid > div');
                 if (adCard) {
-                    const id = parseInt(adCard.getAttribute('onclick').match(/\d+/)[0]);
-                    app.openDetail(id);
-                    return;
+                    // Bu div'in onclick özelliğindeki ID'yi al
+                    const onclickAttr = adCard.getAttribute('onclick');
+                    const idMatch = onclickAttr ? onclickAttr.match(/\d+/) : null;
+                    if (idMatch) {
+                        const id = parseInt(idMatch[0]);
+                        app.openDetail(id);
+                        return;
+                    }
                 }
-
-                // 2. Header Profil Butonu (Sağ üst)
-                const headerAuthArea = e.target.closest('#header-auth-area');
-                if (headerAuthArea) {
-                     // Sadece giriş yapılmışsa çalışır (fonksiyon çağrısı zaten HTML'de)
-                     const profileButton = e.target.closest('[onclick*="openPanel"]');
-                     if (profileButton) {
-                         const tab = profileButton.getAttribute('onclick').match(/'([^']*)'/)[1];
-                         app.openPanel(tab);
-                         return;
-                     }
+                
+                // Header Profil Butonu (Çünkü mobil nav üzerindeki tıklamalar da buraya geliyor)
+                const headerAuthAreaButton = e.target.closest('#header-auth-area button');
+                if(headerAuthAreaButton) {
+                    headerAuthAreaButton.click(); // HTML'deki onclick'i tetikle
+                    return;
                 }
             },
             
@@ -1246,9 +1234,11 @@
         };
 
         // Kodu yüklendikten sonra çalıştır
-        document.addEventListener('DOMContentLoaded', app.init);
-        // Yeni: Global tıklama dinleyicisi (CSS çakışmalarını aşmak için)
-        document.body.addEventListener('click', app.handleGlobalClick);
+        document.addEventListener('DOMContentLoaded', () => {
+             app.init();
+             // Ekstra güvenlik için body olay dinleyicisi eklenmiştir (Tıklama Sorununu çözmek için)
+             document.body.addEventListener('click', app.handleGlobalClick);
+        });
     </script>
 </body>
 </html>
