@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - Final Sürüm (V4)</title>
+    <title>BiKirala V5 - Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -12,252 +12,341 @@
             theme: {
                 extend: {
                     colors: {
-                        'sahibinden-sari': '#FFD700',
-                        'sahibinden-mavi': '#2962FF',
-                        'letgo-kirmizi': '#ff3f55',
-                        'dark-text': '#333333'
+                        'primary': '#FFD700',      // Sahibinden Sarısı
+                        'accent': '#2962FF',       // Link Mavisi
+                        'brand-red': '#ff3f55',    // Letgo Kırmızısı
+                        'dark': '#2d3436',
+                        'success': '#00b894'
                     }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Roboto', sans-serif; background: #f1f1f1; }
+        body { font-family: 'Roboto', sans-serif; background: #f4f6f8; -webkit-font-smoothing: antialiased; }
         .hide-scroll::-webkit-scrollbar { display: none; }
         
-        /* ÖZEL BİLDİRİM ANİMASYONU */
-        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-        .toast-msg { animation: slideInRight 0.5s ease-out forwards; }
+        /* Animasyonlar */
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .toast-item { animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .modal-box { animation: popIn 0.3s ease-out; }
 
-        /* Modal Geçişi */
-        .modal-content { animation: scaleUp 0.3s ease; }
-        @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        /* Kategori Aktiflik */
-        .cat-active { background-color: #e3f2fd; color: #2962FF; font-weight: bold; border-left: 4px solid #2962FF; }
+        /* Renkli Doping Stilleri */
+        .doping-color-text { color: #6c5ce7 !important; font-weight: 800 !important; text-shadow: 0 0 1px rgba(108, 92, 231, 0.2); }
+        .doping-border { border: 2px solid #FFD700 !important; }
+        
+        /* Story Doping Alanı */
+        .story-ring { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); padding: 3px; border-radius: 50%; }
     </style>
 </head>
-<body class="pb-20 md:pb-0 relative">
+<body class="pb-20 md:pb-0 relative text-gray-700">
 
-    <div id="toastContainer" class="fixed top-20 right-5 z-[100] flex flex-col gap-2"></div>
+    <div id="toastArea" class="fixed top-24 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
-    <header class="bg-[#f8f8f8] border-b border-gray-300 fixed w-full top-0 z-50">
-        <div class="container mx-auto px-4 h-14 flex items-center justify-between">
-            <div class="flex items-center gap-1 cursor-pointer" onclick="app.goHome()">
-                <span class="bg-sahibinden-sari text-black font-extrabold px-2 py-1 rounded text-lg tracking-tighter">Bi</span>
-                <span class="font-bold text-xl text-dark-text tracking-tight">Kirala</span>
+    <header class="bg-white border-b border-gray-200 fixed w-full top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-1 cursor-pointer select-none" onclick="app.goHome()">
+                <span class="bg-primary text-black font-extrabold px-3 py-1 rounded-lg text-xl tracking-tighter transform -skew-x-12">Bi</span>
+                <span class="font-bold text-2xl text-accent tracking-tight">Kirala</span>
             </div>
 
-            <div class="hidden md:flex flex-1 max-w-2xl mx-10">
-                <input type="text" id="desktopSearch" placeholder="Kelime, ilan no veya mağaza adı ile ara" class="w-full border border-gray-300 rounded-l py-2 px-3 focus:outline-none focus:border-sahibinden-mavi text-sm">
-                <button class="bg-sahibinden-mavi text-white px-5 rounded-r font-bold text-sm uppercase" onclick="app.searchAds()">Ara</button>
+            <div class="hidden md:flex flex-1 max-w-2xl mx-8 relative">
+                <input type="text" id="mainSearch" placeholder="Marka, model veya kelime ara..." class="w-full border border-gray-300 rounded-l-lg py-2.5 px-4 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition text-sm">
+                <button onclick="app.renderAds()" class="bg-accent text-white px-6 rounded-r-lg font-bold hover:bg-blue-700 transition"><i class="fa-solid fa-search"></i></button>
             </div>
 
-            <div class="flex items-center gap-4 text-sm" id="headerAuthArea"></div>
+            <button class="md:hidden text-accent text-xl mr-2" onclick="document.getElementById('mobileSearchPanel').classList.toggle('hidden')">
+                <i class="fa-solid fa-search"></i>
+            </button>
+
+            <div class="flex items-center gap-4 text-sm" id="headerUserArea">
+                </div>
+        </div>
+        
+        <div id="mobileSearchPanel" class="hidden md:hidden p-3 bg-gray-50 border-b">
+            <input type="text" id="mobileSearchInput" placeholder="Mobilde ara..." class="w-full border p-2 rounded" oninput="document.getElementById('mainSearch').value = this.value; app.renderAds()">
         </div>
     </header>
 
-    <div class="container mx-auto mt-16 flex gap-4 min-h-screen">
+    <div class="container mx-auto mt-20 flex gap-6 px-2 md:px-0 min-h-screen">
         
-        <aside class="hidden md:block w-60 bg-white border border-gray-200 rounded shadow-sm h-fit sticky top-20">
-            <div class="p-3 border-b bg-gray-50 font-bold text-xs text-gray-500 uppercase flex justify-between">
-                <span>Kategoriler</span>
-                <span onclick="app.renderAds()" class="cursor-pointer text-sahibinden-mavi hover:underline">Tümü</span>
-            </div>
-            <ul class="text-sm text-dark-text" id="desktopCategories">
-                </ul>
+        <aside class="hidden md:block w-64 bg-white rounded-xl shadow-sm h-fit sticky top-24 border border-gray-100 overflow-hidden">
+            <div class="p-4 bg-gray-50 border-b font-bold text-gray-500 text-xs uppercase tracking-wider">Kategoriler</div>
+            <ul id="categoryList" class="text-sm"></ul>
         </aside>
 
-        <main class="flex-1">
-            <div class="bg-white p-4 rounded shadow-sm mb-4 border border-sahibinden-sari relative overflow-hidden" id="vitrinWrapper">
-                <div class="absolute top-0 right-0 bg-sahibinden-sari text-xs font-bold px-2 py-1">VİTRİN</div>
-                <h2 class="font-bold text-dark-text mb-3 text-sm">Günün Fırsatları</h2>
-                <div class="flex gap-4 overflow-x-auto hide-scroll" id="vitrinArea"></div>
-            </div>
-
-            <div class="flex justify-between items-center mb-3 px-2">
-                <h1 class="text-lg font-bold text-dark-text" id="pageTitle">Tüm İlanlar</h1>
-                <div class="text-xs text-gray-500">Toplam <span id="totalAdsCount" class="font-bold">0</span> ilan</div>
-            </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 px-2 md:px-0" id="adList"></div>
+        <main class="flex-1 w-full">
             
-            <div id="emptyState" class="hidden text-center py-20 text-gray-400">
-                <i class="fa-solid fa-search text-4xl mb-2"></i>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="font-bold text-dark flex items-center gap-2"><i class="fa-solid fa-star text-primary"></i> Vitrin İlanları</h2>
+                    <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">Sponsorlu</span>
+                </div>
+                <div class="flex gap-4 overflow-x-auto hide-scroll pb-2" id="storyArea">
+                    </div>
+            </div>
+
+            <div class="flex justify-between items-center mb-4 bg-white p-3 rounded-lg shadow-sm">
+                <h1 class="font-bold text-lg text-dark">Tüm İlanlar <span id="adCountBadge" class="text-xs bg-gray-200 px-2 py-0.5 rounded-full text-gray-600 ml-1">0</span></h1>
+                <select onchange="app.sortAds(this.value)" class="border rounded px-2 py-1 text-sm bg-gray-50 outline-none focus:border-accent">
+                    <option value="date-desc">En Yeni</option>
+                    <option value="price-asc">Fiyat: Önce Düşük</option>
+                    <option value="price-desc">Fiyat: Önce Yüksek</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="adsGrid"></div>
+            
+            <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-gray-400">
+                <i class="fa-solid fa-box-open text-6xl mb-4 text-gray-200"></i>
                 <p>Aradığınız kriterlere uygun ilan bulunamadı.</p>
             </div>
         </main>
     </div>
 
-    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around items-center py-2 z-40 text-gray-500">
-        <div onclick="app.goHome()" class="flex flex-col items-center cursor-pointer text-letgo-kirmizi"><i class="fa-solid fa-home text-xl"></i><span class="text-[10px]">Vitrin</span></div>
-        <div onclick="app.openFavorites()" class="flex flex-col items-center cursor-pointer"><i class="fa-regular fa-heart text-xl"></i><span class="text-[10px]">Favoriler</span></div>
-        <div onclick="app.checkAuth('post')" class="flex flex-col items-center -mt-6 cursor-pointer"><div class="bg-letgo-kirmizi text-white p-3 rounded-full shadow-lg border-4 border-white"><i class="fa-solid fa-camera text-2xl"></i></div><span class="text-[10px] font-bold text-letgo-kirmizi mt-1">SAT</span></div>
-        <div onclick="app.toggleBot()" class="flex flex-col items-center cursor-pointer"><i class="fa-solid fa-robot text-xl"></i><span class="text-[10px]">Asistan</span></div>
-        <div onclick="app.openProfile()" class="flex flex-col items-center cursor-pointer"><i class="fa-regular fa-user text-xl"></i><span class="text-[10px]">Profilim</span></div>
+    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around items-center py-2 z-40 text-gray-500 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div onclick="app.goHome()" class="flex flex-col items-center cursor-pointer text-brand-red"><i class="fa-solid fa-home text-xl mb-0.5"></i><span class="text-[10px]">Vitrin</span></div>
+        <div onclick="app.openMessages()" class="flex flex-col items-center cursor-pointer"><i class="fa-regular fa-comment-dots text-xl mb-0.5"></i><span class="text-[10px]">Mesajlar</span></div>
+        <div onclick="app.checkAuth('post')" class="flex flex-col items-center -mt-8 cursor-pointer transform transition active:scale-95">
+            <div class="bg-brand-red text-white w-14 h-14 rounded-full shadow-lg border-4 border-white flex items-center justify-center">
+                <i class="fa-solid fa-camera text-2xl"></i>
+            </div>
+            <span class="text-[10px] font-bold text-brand-red mt-1">SAT</span>
+        </div>
+        <div onclick="app.openFavorites()" class="flex flex-col items-center cursor-pointer"><i class="fa-regular fa-heart text-xl mb-0.5"></i><span class="text-[10px]">Favoriler</span></div>
+        <div onclick="app.openProfile()" class="flex flex-col items-center cursor-pointer"><i class="fa-regular fa-user text-xl mb-0.5"></i><span class="text-[10px]">Hesabım</span></div>
     </nav>
 
-    <div class="fixed bottom-20 right-5 z-40 hidden md:block" id="botTrigger">
-        <button onclick="app.toggleBot()" class="bg-sahibinden-mavi hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl transition transform hover:scale-110">
-            <i class="fa-solid fa-headset"></i>
-        </button>
-    </div>
-
-    <div id="chatWindow" class="fixed bottom-24 right-5 w-80 bg-white rounded-lg shadow-2xl border border-gray-200 hidden z-50 flex flex-col h-96">
-        <div class="bg-sahibinden-mavi text-white p-3 rounded-t-lg flex justify-between items-center">
-            <span class="font-bold text-sm"><i class="fa-solid fa-robot mr-2"></i>BiKirala Asistan</span>
-            <button onclick="app.toggleBot()">&times;</button>
-        </div>
-        <div class="flex-1 p-3 overflow-y-auto bg-gray-50 text-sm space-y-2" id="chatBody">
-            <div class="bg-white p-2 rounded border self-start max-w-[80%] shadow-sm">Merhaba! Size ilan verme, üyelik veya teknik konularda nasıl yardımcı olabilirim?</div>
-        </div>
-        <div class="p-2 border-t bg-white flex">
-            <input type="text" id="chatInput" placeholder="Mesajınız..." class="flex-1 border rounded px-2 py-1 text-sm outline-none focus:border-sahibinden-mavi">
-            <button onclick="app.sendBotMessage()" class="ml-2 text-sahibinden-mavi px-2"><i class="fa-solid fa-paper-plane"></i></button>
-        </div>
-    </div>
-
-    <div id="adDetailModal" class="fixed inset-0 bg-black bg-opacity-70 hidden z-[70] flex items-center justify-center p-0 md:p-10 overflow-y-auto">
-        <div class="bg-white w-full max-w-5xl rounded-lg shadow-2xl relative flex flex-col md:flex-row h-full md:h-auto modal-content overflow-hidden">
-            <button onclick="app.closeModal('adDetailModal')" class="absolute top-4 right-4 z-20 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow font-bold text-xl hover:text-red-500">&times;</button>
+    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-80 hidden z-[60] flex items-center justify-center p-0 md:p-6 overflow-y-auto backdrop-blur-sm">
+        <div class="bg-white w-full max-w-6xl md:rounded-2xl shadow-2xl relative flex flex-col md:flex-row h-full md:h-[85vh] modal-box overflow-hidden">
+            <button onclick="app.closeModal('detailModal')" class="absolute top-4 right-4 z-20 bg-white/90 rounded-full w-10 h-10 flex items-center justify-center shadow font-bold text-xl hover:text-red-500 transition">&times;</button>
             
-            <div class="w-full md:w-3/5 bg-black flex items-center justify-center relative bg-gray-100">
-                <img id="detailImg" src="" class="max-h-[60vh] md:max-h-[80vh] object-contain w-full">
-                <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded text-xs">
-                    <i class="fa-solid fa-camera"></i> 1/1
-                </div>
+            <div class="w-full md:w-2/3 bg-black flex items-center justify-center relative bg-gray-900">
+                <img id="dtImg" class="max-h-[50vh] md:max-h-full w-full object-contain">
             </div>
 
-            <div class="w-full md:w-2/5 p-6 flex flex-col bg-white overflow-y-auto">
-                <div class="mb-4 pb-4 border-b">
-                    <h1 id="detailTitle" class="text-xl font-bold text-dark-text mb-2">Başlık</h1>
-                    <div class="text-sahibinden-mavi text-2xl font-bold" id="detailPrice">0 TL</div>
-                    <div class="text-gray-500 text-xs mt-1 flex gap-2">
-                        <span id="detailCity">İstanbul</span> &bull; 
-                        <span id="detailCat">Kategori</span> &bull; 
-                        <span id="detailDate">Bugün</span>
+            <div class="w-full md:w-1/3 flex flex-col bg-white border-l">
+                <div class="p-6 border-b flex-1 overflow-y-auto">
+                    <div class="flex justify-between items-start mb-2">
+                        <h1 id="dtTitle" class="text-2xl font-bold text-dark leading-tight">Başlık</h1>
                     </div>
-                </div>
+                    <div id="dtPrice" class="text-3xl font-bold text-accent mb-4">0 TL</div>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center gap-3 text-sm text-gray-600 border-b pb-2">
+                            <i class="fa-solid fa-location-dot w-5 text-center"></i> <span id="dtCity">Şehir</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-gray-600 border-b pb-2">
+                            <i class="fa-solid fa-layer-group w-5 text-center"></i> <span id="dtCat">Kategori</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-gray-600 border-b pb-2">
+                            <i class="fa-regular fa-clock w-5 text-center"></i> <span id="dtDate">Tarih</span>
+                        </div>
+                    </div>
 
-                <div class="bg-gray-50 p-4 rounded border mb-4">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-12 h-12 bg-white rounded-full border flex items-center justify-center text-xl text-gray-400">
+                    <div class="bg-blue-50 p-4 rounded-xl flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-accent text-xl font-bold shadow-sm border">
                             <i class="fa-solid fa-user"></i>
                         </div>
                         <div>
-                            <div class="font-bold text-sm" id="detailOwner">Satıcı Adı</div>
-                            <div class="text-xs text-green-600 font-bold" id="detailStoreBadge"></div>
+                            <div id="dtOwner" class="font-bold text-dark">Satıcı</div>
+                            <div id="dtStoreBadge" class="text-xs text-green-600 font-bold"></div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="app.notify('Telefon numarası kopyalandı!', 'success')" class="bg-green-500 hover:bg-green-600 text-white py-2 rounded text-sm font-bold"><i class="fa-solid fa-phone"></i> Ara</button>
-                        <button onclick="app.notify('Mesaj özelliği yakında!', 'info')" class="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded text-sm font-bold"><i class="fa-solid fa-comment"></i> Mesaj</button>
+
+                    <div class="mb-4">
+                        <h3 class="font-bold text-sm mb-2 text-gray-400 uppercase">Açıklama</h3>
+                        <p id="dtDesc" class="text-gray-700 text-sm leading-relaxed whitespace-pre-line"></p>
                     </div>
                 </div>
 
-                <div class="flex-1">
-                    <h3 class="font-bold text-sm mb-2">Açıklama</h3>
-                    <p id="detailDesc" class="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">...</p>
-                </div>
-
-                <div class="mt-4 pt-4 border-t text-center text-xs text-gray-400">
-                    İlan No: <span id="detailId">123456</span>
+                <div class="p-4 border-t bg-gray-50 flex gap-2">
+                    <button id="btnCall" class="flex-1 bg-green-500 text-white py-3 rounded-lg font-bold hover:bg-green-600 transition"><i class="fa-solid fa-phone"></i> Ara</button>
+                    <button id="btnMsg" onclick="app.startChatFromAd()" class="flex-1 bg-accent text-white py-3 rounded-lg font-bold hover:bg-blue-600 transition"><i class="fa-solid fa-comment"></i> Mesaj</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-[60] flex items-center justify-center p-4">
-        <div class="bg-white rounded w-full max-w-sm p-6 modal-content relative">
-            <button onclick="app.closeModal('loginModal')" class="absolute top-2 right-3 text-2xl text-gray-400">&times;</button>
-            <h2 class="text-xl font-bold mb-6 text-center text-sahibinden-mavi">Giriş Yap</h2>
+    <div id="messagesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[70] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-4xl h-[80vh] rounded-xl shadow-2xl flex overflow-hidden modal-box relative">
+            <button onclick="app.closeModal('messagesModal')" class="absolute top-2 right-2 md:hidden text-2xl z-50">&times;</button>
+            <div class="w-1/3 border-r bg-gray-50 flex flex-col">
+                <div class="p-4 border-b font-bold bg-white">Mesaj Kutusu</div>
+                <div id="conversationList" class="overflow-y-auto flex-1">
+                    </div>
+            </div>
+            <div class="w-2/3 flex flex-col bg-white">
+                <div id="chatHeader" class="p-3 border-b bg-gray-50 font-bold text-sm flex items-center gap-2">
+                    <span class="text-gray-400">Bir sohbet seçin</span>
+                </div>
+                <div id="chatArea" class="flex-1 overflow-y-auto p-4 space-y-3 bg-white"></div>
+                <div class="p-3 border-t flex gap-2 bg-gray-50">
+                    <input type="text" id="msgInput" placeholder="Bir mesaj yaz..." class="flex-1 border rounded-full px-4 py-2 outline-none focus:border-accent">
+                    <button onclick="app.sendMessage()" class="bg-accent text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-700"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="postAdModal" class="fixed inset-0 bg-white z-[80] hidden overflow-y-auto">
+        <div class="max-w-3xl mx-auto p-4 md:p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-dark">Ne Satıyorsun?</h2>
+                <button onclick="app.closeModal('postAdModal')" class="text-gray-400 hover:text-red-500 text-2xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="space-y-8">
+                <div class="group border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center cursor-pointer hover:bg-blue-50 hover:border-accent transition relative">
+                    <input type="file" multiple class="absolute inset-0 opacity-0 cursor-pointer" onchange="alert('Fotoğraflar başarıyla yüklendi (Simülasyon). 10/10')">
+                    <div class="text-gray-400 group-hover:text-accent">
+                        <i class="fa-solid fa-camera text-5xl mb-3"></i>
+                        <p class="font-bold">Fotoğrafları buraya sürükle veya seç</p>
+                        <p class="text-xs mt-1">Maksimum 10 Fotoğraf</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold mb-2">İlan Başlığı</label>
+                    <input type="text" id="pTitle" oninput="app.getAutoPrice()" class="w-full border-2 border-gray-200 p-4 rounded-xl text-lg outline-none focus:border-accent" placeholder="Örn: iPhone 13 Pro 128GB">
+                    <div id="aiPriceBadge" class="hidden mt-3 inline-flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Önerilen Fiyat: <span id="aiPriceVal"></span> TL</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-bold mb-2">Fiyat (TL)</label>
+                        <input type="number" id="pPrice" class="w-full border-2 border-gray-200 p-4 rounded-xl outline-none focus:border-accent">
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-2">Kategori</label>
+                        <select id="pCat" class="w-full border-2 border-gray-200 p-4 rounded-xl bg-white outline-none focus:border-accent"></select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold mb-2">Açıklama</label>
+                    <textarea id="pDesc" rows="4" class="w-full border-2 border-gray-200 p-4 rounded-xl outline-none focus:border-accent"></textarea>
+                </div>
+
+                <div class="bg-gradient-to-r from-gray-50 to-white border rounded-xl p-6 shadow-sm">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fa-solid fa-rocket text-brand-red"></i> İlanını Öne Çıkar</h3>
+                    <div class="space-y-3">
+                        <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-primary bg-white">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600"><i class="fa-solid fa-crown"></i></div>
+                                <div>
+                                    <div class="font-bold">Vitrin İlanı</div>
+                                    <div class="text-xs text-gray-500">Ana sayfada en üstte hikaye olarak çıkar.</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-bold text-dark">50 TL</span>
+                                <input type="checkbox" id="dopingVitrin" class="w-5 h-5 accent-accent">
+                            </div>
+                        </label>
+
+                        <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-red-500 bg-white">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600"><i class="fa-solid fa-fire"></i></div>
+                                <div>
+                                    <div class="font-bold">Acil Acil</div>
+                                    <div class="text-xs text-gray-500">İlanın üzerinde kırmızı 'ACİL' etiketi olur.</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-bold text-dark">20 TL</span>
+                                <input type="checkbox" id="dopingUrgent" class="w-5 h-5 accent-accent">
+                            </div>
+                        </label>
+
+                        <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-blue-500 bg-white">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i class="fa-solid fa-palette"></i></div>
+                                <div>
+                                    <div class="font-bold text-blue-600">Renkli Başlık</div>
+                                    <div class="text-xs text-gray-500">İlan başlığın listede renkli ve kalın görünür.</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-bold text-dark">30 TL</span>
+                                <input type="checkbox" id="dopingColor" class="w-5 h-5 accent-accent">
+                            </div>
+                        </label>
+                    </div>
+                    <div class="text-right mt-4 text-sm font-bold text-gray-500" id="totalDopingPrice">Toplam: 0 TL</div>
+                </div>
+
+                <button onclick="app.submitAd()" class="w-full bg-brand-red text-white font-bold py-4 rounded-xl shadow-lg hover:bg-red-600 text-lg transition transform active:scale-95">HEMEN YAYINLA</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="registerModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-[90] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-md p-6 modal-box relative">
+            <button onclick="app.closeModal('registerModal')" class="absolute top-3 right-3 text-2xl text-gray-400">&times;</button>
+            <h2 class="text-2xl font-bold mb-6 text-center text-accent">BiKirala'ya Katıl</h2>
+            
+            <form onsubmit="event.preventDefault(); app.verifyPhoneStep();">
+                <div class="space-y-4">
+                    <input type="text" id="regName" placeholder="Ad Soyad" class="w-full border p-3 rounded-lg" required>
+                    <input type="email" id="regEmail" placeholder="E-Posta" class="w-full border p-3 rounded-lg" required>
+                    <div class="flex gap-2">
+                        <span class="bg-gray-100 border p-3 rounded-lg text-gray-500">+90</span>
+                        <input type="tel" id="regPhone" placeholder="5XX XXX XX XX" class="w-full border p-3 rounded-lg" required maxlength="10">
+                    </div>
+                    <input type="password" id="regPass" placeholder="Şifre" class="w-full border p-3 rounded-lg" required>
+                    
+                    <label class="flex items-center gap-2 text-sm text-gray-600">
+                        <input type="checkbox" id="regCorp" onchange="document.getElementById('corpField').classList.toggle('hidden')">
+                        Kurumsal Mağaza Açmak İstiyorum
+                    </label>
+                    <div id="corpField" class="hidden">
+                        <input type="text" id="regStoreName" placeholder="Mağaza Adı" class="w-full border p-3 rounded-lg mb-2">
+                    </div>
+                </div>
+                <button class="w-full bg-accent text-white font-bold py-3 mt-6 rounded-lg shadow hover:bg-blue-700">Devam Et</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="verifyModal" class="fixed inset-0 bg-black bg-opacity-70 hidden z-[95] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-8 text-center max-w-sm w-full modal-box">
+            <i class="fa-solid fa-shield-halved text-4xl text-green-500 mb-4"></i>
+            <h3 class="font-bold text-xl mb-2">Doğrulama Kodu</h3>
+            <p class="text-sm text-gray-500 mb-4">Telefonunuza gelen 4 haneli kodu girin (Simülasyon: 1234)</p>
+            <input type="text" id="smsCode" class="text-center text-2xl tracking-widest border-b-2 border-accent w-32 mx-auto outline-none mb-6" maxlength="4">
+            <button onclick="app.finalizeRegister()" class="w-full bg-green-500 text-white font-bold py-2 rounded-lg">Onayla</button>
+        </div>
+    </div>
+
+    <div id="forgotPassModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-[90] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-sm p-6 modal-box relative">
+            <button onclick="app.closeModal('forgotPassModal')" class="absolute top-3 right-3 text-2xl">&times;</button>
+            <h3 class="font-bold text-xl mb-4">Şifre Sıfırlama</h3>
+            <p class="text-xs text-gray-500 mb-4">E-posta adresinizi girin, sıfırlama bağlantısı gönderelim.</p>
+            <input type="email" id="forgotEmail" placeholder="E-posta" class="w-full border p-3 rounded-lg mb-4">
+            <button onclick="app.sendResetLink()" class="w-full bg-dark text-white font-bold py-3 rounded-lg">Gönder</button>
+        </div>
+    </div>
+
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-[90] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-sm p-6 modal-box relative">
+            <button onclick="app.closeModal('loginModal')" class="absolute top-3 right-3 text-2xl">&times;</button>
+            <h2 class="text-xl font-bold mb-6 text-center">Giriş Yap</h2>
             <form onsubmit="event.preventDefault(); app.login();">
-                <input type="text" id="loginUser" placeholder="E-Posta" class="w-full border p-2 mb-3 rounded text-sm">
-                <input type="password" placeholder="Şifre" class="w-full border p-2 mb-4 rounded text-sm">
-                <button class="w-full bg-sahibinden-mavi text-white font-bold py-2 rounded shadow hover:bg-blue-700">Giriş Yap</button>
+                <input type="text" id="loginUser" placeholder="E-Posta" class="w-full border p-3 mb-3 rounded-lg">
+                <input type="password" placeholder="Şifre" class="w-full border p-3 mb-2 rounded-lg">
+                <div class="text-right mb-4">
+                    <a href="#" onclick="app.closeModal('loginModal'); app.openModal('forgotPassModal')" class="text-xs text-accent font-bold">Şifremi Unuttum?</a>
+                </div>
+                <button class="w-full bg-accent text-white font-bold py-3 rounded-lg">Giriş Yap</button>
             </form>
-            <div class="mt-4 text-center text-xs">
-                Hesabın yok mu? <a href="#" onclick="app.closeModal('loginModal'); app.openModal('registerModal')" class="font-bold text-sahibinden-mavi">Hemen Kayıt Ol</a>
-            </div>
-        </div>
-    </div>
-
-    <div id="registerModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-[60] flex items-center justify-center p-4">
-        <div class="bg-white rounded w-full max-w-md p-6 modal-content relative max-h-[90vh] overflow-y-auto">
-            <button onclick="app.closeModal('registerModal')" class="absolute top-2 right-3 text-2xl text-gray-400">&times;</button>
-            <h2 class="text-xl font-bold mb-4 text-center">Hesap Oluştur</h2>
-            <div class="flex border rounded mb-4 overflow-hidden">
-                <button onclick="app.setRegType('bireysel')" id="tabBireysel" class="flex-1 py-2 bg-sahibinden-mavi text-white font-bold text-sm">Bireysel</button>
-                <button onclick="app.setRegType('kurumsal')" id="tabKurumsal" class="flex-1 py-2 bg-gray-100 text-gray-600 font-bold text-sm">Kurumsal</button>
-            </div>
-            <form onsubmit="event.preventDefault(); app.register();">
-                <div class="space-y-3">
-                    <input type="text" id="regName" placeholder="Ad Soyad" class="w-full border p-2 rounded text-sm" required>
-                    <input type="email" id="regEmail" placeholder="E-Posta" class="w-full border p-2 rounded text-sm" required>
-                    <input type="password" id="regPass" placeholder="Şifre" class="w-full border p-2 rounded text-sm" required>
-                    <div id="corporateFields" class="hidden bg-yellow-50 p-3 border border-yellow-200 rounded space-y-2">
-                        <input type="text" id="storeName" placeholder="Mağaza Adı" class="w-full border p-2 rounded text-sm bg-white">
-                        <input type="text" id="taxNo" placeholder="Vergi No (10 Haneli)" class="w-full border p-2 rounded text-sm bg-white">
-                    </div>
-                </div>
-                <button class="w-full bg-sahibinden-sari text-black font-bold py-3 mt-4 rounded shadow hover:bg-yellow-400">Üye Ol</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="profileModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-[60] flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg w-full max-w-4xl h-[85vh] flex overflow-hidden modal-content shadow-2xl relative">
-            <button onclick="app.closeModal('profileModal')" class="absolute top-2 right-2 md:hidden text-2xl z-50">&times;</button>
-            <div class="w-1/4 bg-gray-50 border-r p-4 hidden md:block">
-                <div class="text-center mb-6">
-                    <img id="menuAvatar" src="" class="w-16 h-16 rounded-full mx-auto mb-2 border-2 border-sahibinden-mavi object-cover">
-                    <h3 id="menuName" class="font-bold text-sm truncate">Kullanıcı</h3>
-                    <span id="menuType" class="text-[10px] bg-sahibinden-sari px-2 rounded-full">Bireysel</span>
-                </div>
-                <nav class="space-y-1 text-sm">
-                    <a href="#" onclick="app.profileTab('ads')" class="block p-2 rounded hover:bg-white hover:shadow text-sahibinden-mavi font-bold">İlanlarım</a>
-                    <a href="#" onclick="app.profileTab('favs')" class="block p-2 rounded hover:bg-white hover:shadow text-gray-600">Favorilerim</a>
-                    <a href="#" onclick="app.profileTab('edit')" class="block p-2 rounded hover:bg-white hover:shadow text-gray-600">Bilgilerim</a>
-                    <a href="#" onclick="app.logout()" class="block p-2 rounded hover:bg-red-50 text-red-500 mt-10">Çıkış Yap</a>
-                </nav>
-            </div>
-            <div class="flex-1 flex flex-col w-full">
-                <div class="md:hidden bg-sahibinden-mavi text-white p-4 font-bold flex justify-between">
-                    <span>Hesabım</span>
-                </div>
-                <button onclick="app.closeModal('profileModal')" class="hidden md:block absolute top-4 right-4 text-2xl text-gray-400 hover:text-black">&times;</button>
-                <div class="flex-1 p-6 overflow-y-auto bg-white" id="profileContentArea"></div>
-                <div class="md:hidden flex border-t bg-gray-50">
-                    <button onclick="app.profileTab('ads')" class="flex-1 p-3 text-xs font-bold border-r">İlanlar</button>
-                    <button onclick="app.profileTab('favs')" class="flex-1 p-3 text-xs font-bold border-r">Favoriler</button>
-                    <button onclick="app.profileTab('edit')" class="flex-1 p-3 text-xs font-bold">Ayarlar</button>
-                    <button onclick="app.logout()" class="flex-1 p-3 text-xs font-bold text-red-500">Çıkış</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="postAdModal" class="fixed inset-0 bg-white z-[70] hidden overflow-y-auto">
-        <div class="container mx-auto max-w-3xl p-4">
-            <div class="flex justify-between items-center mb-6 border-b pb-4">
-                <h1 class="text-2xl font-bold text-dark-text">Ücretsiz İlan Ver</h1>
-                <button onclick="app.closeModal('postAdModal')" class="text-red-500 font-bold hover:bg-red-50 px-3 py-1 rounded">Vazgeç</button>
-            </div>
-            <div class="space-y-6">
-                <div class="bg-blue-50 p-4 rounded border border-blue-100">
-                    <label class="block font-bold text-sm mb-1">Başlık</label>
-                    <input type="text" id="adTitle" oninput="app.aiCheck()" placeholder="Örn: 2020 Honda Civic" class="w-full border p-3 rounded outline-none">
-                    <div id="aiResult" class="hidden mt-2 text-sm text-sahibinden-mavi font-bold"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Önerisi: <span id="aiCatName"></span></div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label class="block font-bold text-sm mb-1">Fiyat (TL)</label><input type="number" id="adPrice" class="w-full border p-3 rounded"></div>
-                    <div><label class="block font-bold text-sm mb-1">Kategori</label><select id="adCategory" class="w-full border p-3 rounded bg-white"></select></div>
-                </div>
-                <div><label class="block font-bold text-sm mb-1">Şehir</label><select id="adCity" class="w-full border p-3 rounded bg-white"><option>İstanbul</option><option>Ankara</option><option>İzmir</option><option>Trabzon</option><option>Antalya</option></select></div>
-                <div><label class="block font-bold text-sm mb-1">Açıklama</label><textarea id="adDesc" rows="5" class="w-full border p-3 rounded"></textarea></div>
-                <div class="bg-gray-50 p-4 rounded"><h3 class="font-bold text-sm mb-3">Doping</h3><label class="flex items-center gap-2"><input type="checkbox" id="dopingVitrin" class="w-5 h-5 text-sahibinden-mavi"><span class="text-sm">Vitrin İlanı (+50 TL)</span></label></div>
-                <button onclick="app.submitAd()" class="w-full bg-sahibinden-mavi text-white font-bold py-4 rounded text-lg shadow hover:bg-blue-800 transition">Yayınla</button>
+            <div class="mt-4 text-center text-sm">
+                Hesabın yok mu? <a href="#" onclick="app.closeModal('loginModal'); app.openModal('registerModal')" class="font-bold text-accent">Kayıt Ol</a>
             </div>
         </div>
     </div>
@@ -268,295 +357,446 @@
                 user: null,
                 categories: [
                     { name: 'Emlak', icon: 'fa-house' }, { name: 'Vasıta', icon: 'fa-car' },
-                    { name: 'Yedek Parça', icon: 'fa-gear' }, { name: 'Telefon', icon: 'fa-mobile-screen' },
-                    { name: 'Bilgisayar', icon: 'fa-laptop' }, { name: 'Giyim', icon: 'fa-shirt' },
-                    { name: 'Diğer', icon: 'fa-box-open' }
+                    { name: 'Telefon', icon: 'fa-mobile-screen' }, { name: 'Bilgisayar', icon: 'fa-laptop' },
+                    { name: 'Giyim', icon: 'fa-shirt' }, { name: 'Diğer', icon: 'fa-box-open' }
                 ],
                 ads: [],
-                regType: 'bireysel'
+                messages: [], // { id, adId, users: [u1, u2], chat: [{from, text}] }
+                tempUser: null // Kayıt sırasında veri tutmak için
             },
 
             init: function() {
-                const u = localStorage.getItem('bk_user_v4');
-                const a = localStorage.getItem('bk_ads_v4');
+                const u = localStorage.getItem('bk_v5_user');
+                const a = localStorage.getItem('bk_v5_ads');
+                const m = localStorage.getItem('bk_v5_msgs');
+                
                 if(u) this.data.user = JSON.parse(u);
                 if(a) this.data.ads = JSON.parse(a);
                 else this.seedData();
+                if(m) this.data.messages = JSON.parse(m);
 
                 this.renderHeader();
-                this.renderAds(); // Bu aynı zamanda kategorileri de render eder
-                this.renderVitrin();
+                this.renderCategories();
+                this.renderAds();
+                this.renderStories();
             },
 
             seedData: function() {
                 this.data.ads = [
-                    { id: 101, title: 'Deniz Manzaralı Lüks Daire', price: 4500000, cat: 'Emlak', city: 'Trabzon', desc: 'Merkezi konumda, 3+1, krediye uygun.', image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500', vitrin: true, owner: 'Yılmaz Emlak', isStore: true },
-                    { id: 102, title: 'BMW 520i M Sport', price: 2800000, cat: 'Vasıta', city: 'İstanbul', desc: 'Hatasız boyasız, servis bakımlı.', image: 'https://images.unsplash.com/photo-1555215696-b9776f188899?w=500', vitrin: true, owner: 'Ahmet K.', isStore: false },
-                    { id: 103, title: 'iPhone 14 Pro Deep Purple', price: 55000, cat: 'Telefon', city: 'Ankara', desc: 'Kutulu faturalı, garantisi devam ediyor.', image: 'https://images.unsplash.com/photo-1678652197831-2d180705cd2c?w=500', vitrin: false, owner: 'Tekno Store', isStore: true }
+                    { id: 101, title: 'Deniz Kenarı Lüks Villa', price: 12500000, cat: 'Emlak', city: 'Muğla', date: new Date().toISOString(), dopingVitrin: true, dopingColor: true, owner: 'Emlakçı', image: 'https://images.unsplash.com/photo-1613490493576-2f5037657911?w=500' },
+                    { id: 102, title: 'Acil Satılık Honda Civic', price: 1100000, cat: 'Vasıta', city: 'Ankara', date: new Date().toISOString(), dopingUrgent: true, owner: 'Ahmet', image: 'https://images.unsplash.com/photo-1606152421802-db97b9c7a11b?w=500' },
+                    { id: 103, title: 'iPhone 14 Pro Max', price: 65000, cat: 'Telefon', city: 'İstanbul', date: new Date().toISOString(), owner: 'TeknoMarket', isStore: true, image: 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500' }
                 ];
                 this.save();
             },
 
             save: function() {
-                localStorage.setItem('bk_ads_v4', JSON.stringify(this.data.ads));
-                if(this.data.user) localStorage.setItem('bk_user_v4', JSON.stringify(this.data.user));
-                else localStorage.removeItem('bk_user_v4');
+                localStorage.setItem('bk_v5_ads', JSON.stringify(this.data.ads));
+                localStorage.setItem('bk_v5_msgs', JSON.stringify(this.data.messages));
+                if(this.data.user) localStorage.setItem('bk_v5_user', JSON.stringify(this.data.user));
+                else localStorage.removeItem('bk_v5_user');
             },
 
-            // --- CUSTOM NOTIFICATION (TOAST) ---
-            notify: function(msg, type = 'success') {
-                const container = document.getElementById('toastContainer');
-                const div = document.createElement('div');
-                
-                let bg = type === 'success' ? 'bg-green-600' : (type === 'error' ? 'bg-red-600' : 'bg-blue-600');
-                let icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
-
-                div.className = `${bg} text-white px-6 py-3 rounded shadow-lg flex items-center gap-3 toast-msg min-w-[250px]`;
-                div.innerHTML = `<i class="fa-solid ${icon} text-lg"></i> <span class="font-bold text-sm">${msg}</span>`;
-                
-                container.appendChild(div);
-                
-                // 3 Saniye sonra sil
-                setTimeout(() => {
-                    div.style.animation = 'fadeOut 0.5s forwards';
-                    setTimeout(() => div.remove(), 500);
-                }, 3000);
-            },
-
-            // --- İLAN DETAY & TIKLAMA ---
-            openAdDetail: function(id) {
-                const ad = this.data.ads.find(a => a.id === id);
-                if(!ad) return;
-
-                document.getElementById('detailImg').src = ad.image;
-                document.getElementById('detailTitle').innerText = ad.title;
-                document.getElementById('detailPrice').innerText = ad.price.toLocaleString() + ' TL';
-                document.getElementById('detailCity').innerText = ad.city;
-                document.getElementById('detailCat').innerText = ad.cat;
-                document.getElementById('detailDate').innerText = new Date().toLocaleDateString('tr-TR');
-                document.getElementById('detailDesc').innerText = ad.desc || 'Açıklama girilmemiş.';
-                document.getElementById('detailOwner').innerText = ad.owner;
-                document.getElementById('detailId').innerText = ad.id;
-
-                const badge = document.getElementById('detailStoreBadge');
-                if(ad.isStore) badge.innerHTML = '<i class="fa-solid fa-store"></i> Kurumsal Mağaza';
-                else badge.innerHTML = '<i class="fa-solid fa-user-check"></i> Doğrulanmış Üye';
-
-                this.openModal('adDetailModal');
-            },
-
-            // --- BOT ---
-            toggleBot: function() {
-                const win = document.getElementById('chatWindow');
-                win.classList.toggle('hidden');
-            },
+            // --- AUTHENTICATION & VERIFICATION ---
             
-            sendBotMessage: function() {
-                const input = document.getElementById('chatInput');
-                const body = document.getElementById('chatBody');
-                if(!input.value) return;
+            verifyPhoneStep: function() {
+                // Formu al, temp'e kaydet, modal değiştir
+                this.data.tempUser = {
+                    name: document.getElementById('regName').value,
+                    email: document.getElementById('regEmail').value,
+                    phone: document.getElementById('regPhone').value,
+                    isStore: document.getElementById('regCorp').checked,
+                    storeName: document.getElementById('regStoreName').value
+                };
                 
-                body.innerHTML += `<div class="bg-blue-100 p-2 rounded border self-end max-w-[80%] text-right shadow-sm mb-2">${input.value}</div>`;
-                input.value = '';
-                body.scrollTop = body.scrollHeight;
-
-                setTimeout(() => {
-                    const responses = ["Anlaşıldı, bu konuda size destek olabilirim.", "Lütfen ilan numarasını kontrol edin.", "BiKirala'yı tercih ettiğiniz için teşekkürler!"];
-                    const randomRes = responses[Math.floor(Math.random() * responses.length)];
-                    body.innerHTML += `<div class="bg-white p-2 rounded border self-start max-w-[80%] shadow-sm mb-2"><i class="fa-solid fa-robot text-sahibinden-mavi mr-1"></i> ${randomRes}</div>`;
-                    body.scrollTop = body.scrollHeight;
-                }, 1000);
+                this.closeModal('registerModal');
+                this.openModal('verifyModal');
+                this.toast("Telefonunuza kod gönderildi (1234)", "info");
             },
 
-            // --- KATEGORİ & RENDER ---
-            renderAds: function(filterCat = null) {
-                const grid = document.getElementById('adList');
-                grid.innerHTML = '';
-                let list = this.data.ads;
+            finalizeRegister: function() {
+                const code = document.getElementById('smsCode').value;
+                if(code !== '1234') return this.toast("Hatalı kod!", "error");
                 
-                // Başlık filtreleme
-                const search = document.getElementById('desktopSearch').value.toLowerCase();
-                if(search) list = list.filter(a => a.title.toLowerCase().includes(search));
-
-                // Kategori filtreleme
-                if(filterCat) list = list.filter(a => a.cat === filterCat);
-
-                document.getElementById('totalAdsCount').innerText = list.length;
+                const t = this.data.tempUser;
+                this.data.user = {
+                    id: Date.now(),
+                    name: t.isStore ? t.storeName : t.name,
+                    realName: t.name,
+                    email: t.email,
+                    phone: t.phone,
+                    type: t.isStore ? 'kurumsal' : 'bireysel',
+                    avatar: `https://ui-avatars.com/api/?name=${t.name}&background=random`,
+                    favs: []
+                };
                 
-                if(list.length === 0) document.getElementById('emptyState').classList.remove('hidden');
-                else document.getElementById('emptyState').classList.add('hidden');
+                this.save();
+                this.closeModal('verifyModal');
+                this.renderHeader();
+                this.toast("Hesap doğrulandı! Hoşgeldiniz.", "success");
+            },
 
-                list.forEach(ad => {
-                    const isFav = this.data.user && this.data.user.favs && this.data.user.favs.includes(ad.id);
-                    grid.innerHTML += `
-                        <div class="bg-white rounded border border-gray-200 shadow-sm hover:shadow-lg transition group cursor-pointer relative" onclick="app.openAdDetail(${ad.id})">
-                            <div class="h-40 overflow-hidden relative">
-                                <img src="${ad.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                                <button onclick="event.stopPropagation(); app.toggleFav(${ad.id})" class="absolute top-2 right-2 bg-white rounded-full w-8 h-8 shadow flex items-center justify-center hover:bg-gray-100">
-                                    <i class="${isFav ? 'fa-solid text-red-500' : 'fa-regular text-gray-400'} fa-heart"></i>
-                                </button>
-                                ${ad.isStore ? '<div class="absolute bottom-0 left-0 bg-dark-text text-white text-[10px] px-1">Kurumsal</div>' : ''}
-                            </div>
-                            <div class="p-3">
-                                <h3 class="text-dark-text font-bold text-sm truncate mb-1">${ad.title}</h3>
-                                <div class="text-sahibinden-mavi font-bold text-lg">${ad.price.toLocaleString()} TL</div>
-                                <div class="flex justify-between mt-2 text-xs text-gray-500">
-                                    <span>${ad.city}</span>
-                                    <span>${ad.cat}</span>
-                                </div>
-                            </div>
+            sendResetLink: function() {
+                const e = document.getElementById('forgotEmail').value;
+                if(!e) return this.toast("E-posta girin", "error");
+                this.closeModal('forgotPassModal');
+                this.toast("Sıfırlama bağlantısı e-postanıza gönderildi.", "success");
+            },
+
+            login: function() {
+                // Demo Login
+                const m = document.getElementById('loginUser').value;
+                if(!m) return this.toast("Bilgileri girin", "error");
+                this.data.user = { id: 999, name: "Kullanıcı", type: "bireysel", email: m, favs: [], avatar: "https://ui-avatars.com/api/?name=User" };
+                this.save();
+                this.closeModal('loginModal');
+                this.renderHeader();
+                this.toast("Giriş Başarılı", "success");
+            },
+
+            logout: function() {
+                if(confirm("Çıkış?")) {
+                    this.data.user = null;
+                    this.save();
+                    location.reload();
+                }
+            },
+
+            // --- MESSAGING SYSTEM ---
+
+            startChatFromAd: function() {
+                if(!this.checkAuth()) return;
+                
+                // İlan detay modalındaki bilgilerden satıcıyı bulmak lazım ama demo için basitleştiriyorum
+                // Şu anki açık olan ilanı bulalım (UI'dan ID alarak)
+                // Gerçek senaryoda ad object parametre gelir.
+                const title = document.getElementById('dtTitle').innerText;
+                const ad = this.data.ads.find(a => a.title === title); // Basit eşleşme
+                
+                if(!ad) return;
+                if(ad.owner === this.data.user.name) return this.toast("Kendine mesaj atamazsın", "error");
+
+                // Konuşma var mı kontrol et
+                let conv = this.data.messages.find(m => m.adId === ad.id && m.users.includes(this.data.user.name));
+                
+                if(!conv) {
+                    conv = {
+                        id: Date.now(),
+                        adId: ad.id,
+                        adTitle: ad.title,
+                        users: [this.data.user.name, ad.owner],
+                        chat: []
+                    };
+                    this.data.messages.push(conv);
+                    this.save();
+                }
+
+                this.closeModal('detailModal');
+                this.openMessages(conv.id);
+            },
+
+            openMessages: function(activeConvId = null) {
+                if(!this.checkAuth()) return;
+                this.openModal('messagesModal');
+                
+                const list = document.getElementById('conversationList');
+                list.innerHTML = '';
+                
+                const myMsgs = this.data.messages.filter(m => m.users.includes(this.data.user.name));
+                if(myMsgs.length === 0) list.innerHTML = '<div class="p-4 text-gray-400 text-sm">Mesajınız yok.</div>';
+
+                myMsgs.forEach(m => {
+                    const other = m.users.find(u => u !== this.data.user.name);
+                    const activeClass = m.id === activeConvId ? 'bg-blue-50 border-l-4 border-accent' : 'hover:bg-gray-50';
+                    list.innerHTML += `
+                        <div onclick="app.loadChat(${m.id})" class="p-4 border-b cursor-pointer ${activeClass}">
+                            <div class="font-bold text-sm">${other}</div>
+                            <div class="text-xs text-gray-500 truncate">${m.adTitle}</div>
                         </div>
                     `;
                 });
 
-                // KATEGORİLERİ GERÇEK SAYILARLA YENİLE
-                this.renderCategories(filterCat);
+                if(activeConvId) this.loadChat(activeConvId);
             },
 
-            renderCategories: function(activeCat) {
-                const list = document.getElementById('desktopCategories');
-                const select = document.getElementById('adCategory');
-                list.innerHTML = '';
-                select.innerHTML = '<option value="">Seçiniz</option>';
+            loadChat: function(convId) {
+                const conv = this.data.messages.find(m => m.id === convId);
+                const area = document.getElementById('chatArea');
+                const header = document.getElementById('chatHeader');
+                
+                // Active class güncelleme (Basit DOM işlemi)
+                document.querySelectorAll('#conversationList > div').forEach(d => d.classList.remove('bg-blue-50', 'border-l-4', 'border-accent'));
+                // (Burada active class eklemek için event target kullanılabilir ama demo için geçiyorum)
 
-                // Sayımları Hesapla
-                const counts = {};
-                this.data.categories.forEach(c => counts[c.name] = 0);
-                this.data.ads.forEach(ad => { if(counts[ad.cat] !== undefined) counts[ad.cat]++ });
+                area.innerHTML = '';
+                area.setAttribute('data-conv-id', convId);
+                
+                const other = conv.users.find(u => u !== this.data.user.name);
+                header.innerHTML = `<span class="text-accent">${other}</span> ile sohbet ediyorsun`;
 
-                this.data.categories.forEach(c => {
-                    const count = counts[c.name];
-                    const isActive = activeCat === c.name ? 'cat-active' : '';
-                    
-                    list.innerHTML += `
-                        <li onclick="app.renderAds('${c.name}')" class="p-2 cursor-pointer flex justify-between items-center border-b border-gray-100 hover:bg-gray-50 transition ${isActive}">
-                            <span class="flex items-center gap-2"><i class="fa-solid ${c.icon} w-5 text-gray-400"></i> ${c.name}</span>
-                            <span class="text-xs font-bold ${count > 0 ? 'text-sahibinden-mavi' : 'text-gray-300'}">${count}</span>
-                        </li>
+                conv.chat.forEach(msg => {
+                    const isMe = msg.from === this.data.user.name;
+                    area.innerHTML += `
+                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+                            <div class="${isMe ? 'bg-accent text-white' : 'bg-gray-200 text-dark'} px-4 py-2 rounded-xl max-w-[80%] text-sm">
+                                ${msg.text}
+                            </div>
+                        </div>
                     `;
-                    select.innerHTML += `<option value="${c.name}">${c.name}</option>`;
                 });
+                area.scrollTop = area.scrollHeight;
             },
 
-            // --- İŞLEMLER ---
-            submitAd: function() {
-                const title = document.getElementById('adTitle').value;
-                const price = document.getElementById('adPrice').value;
-                const cat = document.getElementById('adCategory').value;
-                const city = document.getElementById('adCity').value;
-                const desc = document.getElementById('adDesc').value;
+            sendMessage: function() {
+                const input = document.getElementById('msgInput');
+                const area = document.getElementById('chatArea');
+                const convId = parseInt(area.getAttribute('data-conv-id'));
+                if(!input.value || !convId) return;
 
-                if (!title || !price || !cat) return this.notify('Lütfen zorunlu alanları doldurun!', 'error');
+                const conv = this.data.messages.find(m => m.id === convId);
+                conv.chat.push({
+                    from: this.data.user.name,
+                    text: input.value,
+                    time: Date.now()
+                });
+                this.save();
+                input.value = '';
+                this.loadChat(convId);
+            },
+
+            // --- ADS & LISTING ---
+
+            getAutoPrice: function() {
+                const t = document.getElementById('pTitle').value.toLowerCase();
+                const badge = document.getElementById('aiPriceBadge');
+                const val = document.getElementById('aiPriceVal');
+                const cat = document.getElementById('pCat');
+
+                if(t.length > 4) {
+                    badge.classList.remove('hidden');
+                    badge.classList.add('flex');
+                    
+                    // Basit AI Mantığı
+                    let price = 0;
+                    if(t.includes('iphone')) { price = 25000; cat.value = 'Telefon'; }
+                    else if(t.includes('pro max')) { price = 60000; cat.value = 'Telefon'; }
+                    else if(t.includes('bmw')) { price = 2000000; cat.value = 'Vasıta'; }
+                    else if(t.includes('ev') || t.includes('daire')) { price = 3000000; cat.value = 'Emlak'; }
+                    else { price = 500; } // Default
+
+                    val.innerText = price.toLocaleString();
+                } else {
+                    badge.classList.add('hidden');
+                    badge.classList.remove('flex');
+                }
+            },
+
+            submitAd: function() {
+                const title = document.getElementById('pTitle').value;
+                const price = document.getElementById('pPrice').value;
+                const cat = document.getElementById('pCat').value;
+                const desc = document.getElementById('pDesc').value;
+
+                if(!title || !price) return this.toast("Eksik bilgi!", "error");
+
+                // Doping
+                const isVitrin = document.getElementById('dopingVitrin').checked;
+                const isUrgent = document.getElementById('dopingUrgent').checked;
+                const isColor = document.getElementById('dopingColor').checked;
 
                 const newAd = {
                     id: Date.now(),
-                    title: title, price: parseInt(price), cat: cat, city: city, desc: desc,
-                    image: 'https://via.placeholder.com/500x400?text=' + cat,
-                    vitrin: document.getElementById('dopingVitrin').checked,
-                    owner: this.data.user.name, isStore: this.data.user.type === 'kurumsal',
-                    isMine: true
+                    title: title,
+                    price: parseInt(price),
+                    cat: cat,
+                    desc: desc,
+                    city: 'İstanbul', // Demo
+                    date: new Date().toISOString(),
+                    owner: this.data.user.name,
+                    isStore: this.data.user.type === 'kurumsal',
+                    image: 'https://via.placeholder.com/500?text=' + cat,
+                    dopingVitrin: isVitrin,
+                    dopingUrgent: isUrgent,
+                    dopingColor: isColor
                 };
 
                 this.data.ads.unshift(newAd);
                 this.save();
                 this.closeModal('postAdModal');
                 this.renderAds();
-                this.renderVitrin();
-                this.notify('İlanınız başarıyla yayına alındı!');
+                this.renderStories();
+                this.toast("İlan Yayında! Bol kazançlar.", "success");
+            },
+
+            sortAds: function(type) {
+                let sorted = [...this.data.ads];
+                if(type === 'price-asc') sorted.sort((a,b) => a.price - b.price);
+                else if(type === 'price-desc') sorted.sort((a,b) => b.price - a.price);
+                else if(type === 'date-desc') sorted.sort((a,b) => new Date(b.date) - new Date(a.date));
+                
+                this.renderAdsList(sorted);
+            },
+
+            renderAds: function(filterTerm = null) {
+                let list = this.data.ads;
+                
+                // Arama Filtresi
+                const term = document.getElementById('mainSearch').value.toLowerCase();
+                if(term) list = list.filter(a => a.title.toLowerCase().includes(term));
+
+                this.renderAdsList(list);
+            },
+
+            renderAdsList: function(list) {
+                const grid = document.getElementById('adsGrid');
+                grid.innerHTML = '';
+                document.getElementById('adCountBadge').innerText = list.length;
+
+                if(list.length === 0) document.getElementById('emptyState').classList.remove('hidden');
+                else document.getElementById('emptyState').classList.add('hidden');
+
+                list.forEach(ad => {
+                    // Doping Classları
+                    const colorClass = ad.dopingColor ? 'doping-color-text' : 'text-dark';
+                    const borderClass = ad.dopingVitrin ? 'doping-border' : 'border-gray-200';
+                    
+                    grid.innerHTML += `
+                        <div onclick="app.openDetail(${ad.id})" class="bg-white rounded-lg shadow-sm hover:shadow-lg transition cursor-pointer group relative overflow-hidden border ${borderClass}">
+                            ${ad.dopingUrgent ? '<div class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow z-10 animate-pulse">ACİL</div>' : ''}
+                            <div class="aspect-[4/3] overflow-hidden bg-gray-100 relative">
+                                <img src="${ad.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                ${ad.isStore ? '<div class="absolute bottom-0 left-0 bg-dark text-white text-[10px] px-2 py-0.5">Kurumsal</div>' : ''}
+                                <button onclick="event.stopPropagation(); app.toggleFav(${ad.id})" class="absolute top-2 right-2 bg-white/90 p-1.5 rounded-full shadow hover:text-red-500 transition">
+                                    <i class="${(this.data.user?.favs?.includes(ad.id)) ? 'fa-solid text-red-500' : 'fa-regular text-gray-400'} fa-heart"></i>
+                                </button>
+                            </div>
+                            <div class="p-3">
+                                <h3 class="font-bold text-sm truncate mb-1 ${colorClass}">${ad.title}</h3>
+                                <div class="text-accent font-bold text-lg">${ad.price.toLocaleString()} TL</div>
+                                <div class="flex justify-between items-center mt-2 text-xs text-gray-400">
+                                    <span>${ad.city}</span>
+                                    <span>${app.timeAgo(ad.date)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            },
+
+            renderStories: function() {
+                const area = document.getElementById('storyArea');
+                area.innerHTML = '';
+                // Sadece Vitrin İlanları
+                const stories = this.data.ads.filter(a => a.dopingVitrin);
+                
+                stories.forEach(ad => {
+                    area.innerHTML += `
+                        <div onclick="app.openDetail(${ad.id})" class="flex-shrink-0 w-20 flex flex-col items-center gap-1 cursor-pointer group">
+                            <div class="w-16 h-16 rounded-full p-[2px] story-ring">
+                                <img src="${ad.image}" class="w-full h-full rounded-full object-cover border-2 border-white">
+                            </div>
+                            <span class="text-[10px] font-bold text-center truncate w-full group-hover:text-accent">${ad.title}</span>
+                        </div>
+                    `;
+                });
+                
+                if(stories.length === 0) area.innerHTML = '<span class="text-xs text-gray-400 p-2">Vitrinde ilan yok. İlk sen ol!</span>';
+            },
+
+            openDetail: function(id) {
+                const ad = this.data.ads.find(a => a.id === id);
+                if(!ad) return;
+
+                document.getElementById('dtImg').src = ad.image;
+                document.getElementById('dtTitle').innerText = ad.title;
+                if(ad.dopingColor) document.getElementById('dtTitle').className = "text-2xl font-bold leading-tight doping-color-text";
+                else document.getElementById('dtTitle').className = "text-2xl font-bold leading-tight text-dark";
+
+                document.getElementById('dtPrice').innerText = ad.price.toLocaleString() + ' TL';
+                document.getElementById('dtCity').innerText = ad.city;
+                document.getElementById('dtCat').innerText = ad.cat;
+                document.getElementById('dtDate').innerText = new Date(ad.date).toLocaleDateString('tr-TR');
+                document.getElementById('dtDesc').innerText = ad.desc || 'Açıklama yok.';
+                document.getElementById('dtOwner').innerText = ad.owner;
+                document.getElementById('dtStoreBadge').innerText = ad.isStore ? 'Kurumsal Mağaza' : 'Doğrulanmış Satıcı';
+
+                this.openModal('detailModal');
+            },
+
+            // --- UI HELPERS ---
+
+            renderCategories: function() {
+                const l = document.getElementById('categoryList');
+                const s = document.getElementById('pCat');
+                l.innerHTML = ''; s.innerHTML = '';
+                this.data.categories.forEach(c => {
+                    l.innerHTML += `<li class="p-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3 text-gray-600 hover:text-accent transition border-b border-gray-50"><i class="fa-solid ${c.icon} w-5 text-center"></i> ${c.name}</li>`;
+                    s.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+                });
+            },
+
+            renderHeader: function() {
+                const u = this.data.user;
+                const area = document.getElementById('headerUserArea');
+                if(u) {
+                    area.innerHTML = `
+                        <div onclick="app.openProfile()" class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1.5 rounded-lg transition">
+                            <img src="${u.avatar}" class="w-8 h-8 rounded-full border border-gray-200">
+                            <span class="font-bold hidden md:inline text-dark">${u.name}</span>
+                        </div>
+                        <button onclick="app.checkAuth('post')" class="bg-accent text-white px-5 py-2 rounded-lg font-bold hover:bg-blue-700 shadow-md transform hover:scale-105 transition">İlan Ver</button>
+                    `;
+                } else {
+                    area.innerHTML = `
+                        <button onclick="app.openModal('loginModal')" class="font-bold text-gray-600 hover:text-accent">Giriş</button>
+                        <button onclick="app.openModal('registerModal')" class="font-bold text-gray-600 hover:text-accent">Kayıt</button>
+                        <button onclick="app.checkAuth('post')" class="bg-primary text-dark px-5 py-2 rounded-lg font-bold hover:bg-yellow-400 shadow-md">Sat</button>
+                    `;
+                }
+            },
+
+            toast: function(msg, type = 'success') {
+                const area = document.getElementById('toastArea');
+                const div = document.createElement('div');
+                const colors = { success: 'bg-green-500', error: 'bg-red-500', info: 'bg-blue-500' };
+                div.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 toast-item font-bold text-sm`;
+                div.innerHTML = `<i class="fa-solid fa-circle-info"></i> ${msg}`;
+                area.appendChild(div);
+                setTimeout(() => div.remove(), 3500);
             },
 
             toggleFav: function(id) {
                 if(!this.checkAuth()) return;
                 const u = this.data.user;
                 if(!u.favs) u.favs = [];
-                
                 const idx = u.favs.indexOf(id);
-                if(idx > -1) { u.favs.splice(idx, 1); this.notify('Favorilerden çıkarıldı', 'info'); }
-                else { u.favs.push(id); this.notify('Favorilere eklendi'); }
-                
+                if(idx > -1) { u.favs.splice(idx, 1); this.toast('Favorilerden çıkarıldı', 'info'); }
+                else { u.favs.push(id); this.toast('Favorilere eklendi'); }
                 this.save();
-                this.renderAds(); // Kalbi güncelle (sayfa yenilenmez)
+                this.renderAds();
             },
 
-            // --- YARDIMCI FONKSİYONLAR ---
+            timeAgo: function(date) {
+                const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+                let interval = seconds / 31536000;
+                if (interval > 1) return Math.floor(interval) + " yıl önce";
+                interval = seconds / 2592000;
+                if (interval > 1) return Math.floor(interval) + " ay önce";
+                interval = seconds / 86400;
+                if (interval > 1) return Math.floor(interval) + " gün önce";
+                return "Bugün";
+            },
+
             checkAuth: function(action) {
                 if(!this.data.user) { this.openModal('loginModal'); return false; }
                 if(action === 'post') this.openModal('postAdModal');
                 return true;
             },
-            login: function() {
-                const mail = document.getElementById('loginUser').value;
-                if(!mail) return this.notify('E-posta giriniz', 'error');
-                this.data.user = { name: 'Demo Kullanıcı', email: mail, type: 'bireysel', avatar: 'https://ui-avatars.com/api/?name=User&background=random', favs: [] };
-                this.save();
-                this.closeModal('loginModal');
-                this.renderHeader();
-                this.notify('Giriş Başarılı! Hoşgeldiniz.');
-            },
-            register: function() {
-                const name = document.getElementById('regName').value;
-                const type = this.data.regType;
-                const sName = document.getElementById('storeName').value;
-                this.data.user = { name: type==='kurumsal'?sName:name, realName: name, email: document.getElementById('regEmail').value, type: type, favs: [], avatar: `https://ui-avatars.com/api/?name=${name}&background=FFD700` };
-                this.save();
-                this.closeModal('registerModal');
-                this.renderHeader();
-                this.notify('Kayıt Başarılı!');
-            },
-            updateProfile: function() {
-                const n = document.getElementById('editName').value;
-                const a = document.getElementById('editAvatar').value;
-                if(n) { this.data.user.name = n; this.data.user.avatar = a; this.save(); this.renderHeader(); document.getElementById('menuName').innerText = n; document.getElementById('menuAvatar').src = a; this.notify('Profil güncellendi'); }
-            },
-            aiCheck: function() {
-                const v = document.getElementById('adTitle').value.toLowerCase();
-                const b = document.getElementById('aiResult');
-                if(v.length > 3) {
-                    b.classList.remove('hidden');
-                    let c = 'Diğer';
-                    if(v.includes('ev')||v.includes('daire')) c = 'Emlak';
-                    else if(v.includes('araba')||v.includes('bmw')) c = 'Vasıta';
-                    else if(v.includes('telefon')) c = 'Telefon';
-                    document.getElementById('aiCatName').innerText = c;
-                    document.getElementById('adCategory').value = c;
-                } else b.classList.add('hidden');
-            },
-            
-            // UI Helpers
             openModal: function(id) { document.getElementById(id).classList.remove('hidden'); },
             closeModal: function(id) { document.getElementById(id).classList.add('hidden'); },
-            setRegType: function(t) { this.data.regType=t; document.getElementById('corporateFields').className = t==='kurumsal'?'block bg-yellow-50 p-3 border border-yellow-200 rounded space-y-2':'hidden'; document.getElementById('tabBireysel').className = t==='bireysel'?'flex-1 py-2 bg-sahibinden-mavi text-white font-bold text-sm':'flex-1 py-2 bg-gray-100 text-gray-600 font-bold text-sm'; document.getElementById('tabKurumsal').className = t==='kurumsal'?'flex-1 py-2 bg-sahibinden-mavi text-white font-bold text-sm':'flex-1 py-2 bg-gray-100 text-gray-600 font-bold text-sm'; },
-            profileTab: function(t) {
-                const c = document.getElementById('profileContentArea'); c.innerHTML='';
-                if(t==='ads'){
-                    c.innerHTML='<h3 class="font-bold border-b pb-2 mb-4">Yayındaki İlanlarım</h3>';
-                    const my = this.data.ads.filter(a=>a.isMine);
-                    if(my.length===0) c.innerHTML+='<div class="text-gray-400 text-center mt-10">İlanınız yok.</div>';
-                    else my.forEach(a=> c.innerHTML+=`<div class="flex gap-3 border p-2 rounded mb-2"><img src="${a.image}" class="w-16 h-16 object-cover rounded"><div><div class="font-bold text-sm">${a.title}</div><div class="text-sahibinden-mavi font-bold">${a.price} TL</div></div></div>`);
-                } else if(t==='favs'){
-                    c.innerHTML='<h3 class="font-bold border-b pb-2 mb-4">Favorilerim</h3>';
-                    const f = this.data.ads.filter(a=>this.data.user.favs.includes(a.id));
-                    if(f.length===0) c.innerHTML+='<div class="text-gray-400">Favori yok.</div>';
-                    else f.forEach(a=> c.innerHTML+=`<div class="flex gap-3 border p-2 rounded mb-2"><img src="${a.image}" class="w-16 h-16 object-cover rounded"><div><div class="font-bold text-sm">${a.title}</div><div class="text-sahibinden-mavi font-bold">${a.price} TL</div><button onclick="app.toggleFav(${a.id}); app.profileTab('favs')" class="text-red-500 text-xs">Kaldır</button></div></div>`);
-                } else if(t==='edit'){
-                    c.innerHTML=`<h3 class="font-bold border-b pb-2 mb-4">Bilgilerim</h3><div class="space-y-4"><input id="editName" value="${this.data.user.name}" class="w-full border p-2 rounded"><input id="editAvatar" value="${this.data.user.avatar}" class="w-full border p-2 rounded"><button onclick="app.updateProfile()" class="bg-sahibinden-mavi text-white px-4 py-2 rounded font-bold">Kaydet</button></div>`;
-                }
-            },
-            logout: function() { this.data.user=null; this.save(); location.reload(); },
-            goHome: function() { window.scrollTo(0,0); this.renderAds(); },
-            openProfile: function() { if(this.checkAuth()) { this.openModal('profileModal'); document.getElementById('menuName').innerText=this.data.user.name; document.getElementById('menuAvatar').src=this.data.user.avatar; this.profileTab('ads'); } },
-            openFavorites: function() { if(this.checkAuth()) { this.openProfile(); setTimeout(()=>this.profileTab('favs'),50); }},
-            searchAds: function() { this.renderAds(); },
-            renderVitrin: function() {
-                const a = document.getElementById('vitrinArea'); a.innerHTML='';
-                this.data.ads.filter(i=>i.vitrin).forEach(x=> a.innerHTML+=`<div class="flex-shrink-0 w-32 cursor-pointer group" onclick="app.openAdDetail(${x.id})"><div class="border rounded overflow-hidden relative mb-1"><img src="${x.image}" class="w-32 h-24 object-cover"><div class="absolute inset-0 border-2 border-sahibinden-sari opacity-0 group-hover:opacity-100 transition"></div></div><div class="text-xs font-bold text-dark-text truncate">${x.title}</div><div class="text-xs text-red-600 font-bold">${x.price.toLocaleString()} TL</div></div>`);
-            },
-            renderHeader: function() {
-                const d = document.getElementById('headerAuthArea');
-                if(this.data.user) d.innerHTML=`<div onclick="app.openProfile()" class="flex items-center gap-2 cursor-pointer hover:bg-gray-100 p-1 rounded"><img src="${this.data.user.avatar}" class="w-8 h-8 rounded-full border border-gray-300"><span class="font-bold hidden md:inline">${this.data.user.name}</span></div><button onclick="app.openModal('postAdModal')" class="bg-sahibinden-mavi text-white px-4 py-2 rounded font-bold hover:bg-blue-700 transition ml-2">İlan Ver</button>`;
-                else d.innerHTML=`<a href="#" onclick="app.openModal('loginModal')" class="hover:text-sahibinden-mavi">Giriş Yap</a><span class="text-gray-300">|</span><a href="#" onclick="app.openModal('registerModal')" class="hover:text-sahibinden-mavi">Üye Ol</a><button onclick="app.checkAuth('post')" class="bg-sahibinden-mavi text-white px-4 py-2 rounded font-bold hover:bg-blue-700 transition ml-2">İlan Ver</button>`;
-            }
+            goHome: function() { window.scrollTo(0,0); }
         };
+
         app.init();
     </script>
 </body>
