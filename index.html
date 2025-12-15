@@ -3,423 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - Türkiye'nin Kiralama Platformu</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>BiKirala - Güvenli Kiralama Platformu</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
-        
-        :root { --primary: #FFD000; --dark-bg: #111827; }
-        .bk-yellow { background-color: var(--primary); color: #000; }
-        
-        /* Dark Mode */
-        body.dark-mode { background-color: var(--dark-bg); color: #f3f4f6; }
-        .dark-mode .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; color: white !important; }
-        .dark-mode .bg-gray-50, .dark-mode .bg-gray-100 { background-color: #374151 !important; color: #e5e7eb !important; border-color: #4b5563 !important; }
-        .dark-mode .text-gray-500, .dark-mode .text-gray-600, .dark-mode .text-gray-700 { color: #9ca3af !important; }
-        .dark-mode .text-gray-800, .dark-mode .text-gray-900 { color: #f3f4f6 !important; }
-        .dark-mode input, .dark-mode select, .dark-mode textarea { background-color: #374151; border-color: #4b5563; color: white; }
-        .dark-mode .border { border-color: #374151 !important; }
+        :root {
+            --primary: #FF9F1C; /* BiKirala Turuncusu */
+            --secondary: #2EC4B6; /* Güven/Onay Yeşili */
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --white: #ffffff;
+            --danger: #e71d36;
+        }
 
-        .stories-scroll::-webkit-scrollbar { display: none; }
-        .section-hidden { display: none !important; }
-        .section-visible { display: block !important; animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--light); color: var(--dark); padding-bottom: 80px;}
+
+        /* --- HEADER --- */
+        header { background: var(--white); padding: 15px 5%; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: bold; color: var(--dark); }
+        .logo span { color: var(--primary); }
+        
+        .nav-actions { display: flex; gap: 15px; align-items: center; }
+        .btn { padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { border: 2px solid var(--primary); color: var(--primary); background: transparent; }
+        .btn:hover { opacity: 0.9; transform: scale(1.02); }
+        
+        .cart-icon { position: relative; font-size: 20px; cursor: pointer; margin-right: 10px; }
+        .cart-badge { position: absolute; top: -8px; right: -8px; background: var(--danger); color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; display: none; }
+
+        /* --- MODERN KATEGORİLER (IZGARA) --- */
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .section-title { margin-bottom: 15px; font-size: 1.2rem; border-left: 4px solid var(--primary); padding-left: 10px; }
+        
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 40px; }
+        .cat-card { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.3s; cursor: pointer; border: 1px solid transparent; }
+        .cat-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .cat-card i { font-size: 32px; color: var(--dark); margin-bottom: 10px; }
+        .cat-card span { display: block; font-weight: 500; font-size: 0.9rem; }
+
+        /* --- FİLTRELEME & SIRALAMA --- */
+        .filter-bar { display: flex; justify-content: flex-end; margin-bottom: 15px; }
+        .sort-select { padding: 8px; border-radius: 5px; border: 1px solid #ddd; outline: none; }
+
+        /* --- ÜRÜN KARTLARI --- */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .product-card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: relative; }
+        .product-img { width: 100%; height: 180px; background: #ddd; object-fit: cover; }
+        .product-info { padding: 15px; }
+        .price { color: var(--primary); font-size: 1.2rem; font-weight: bold; }
+        .title { font-size: 1rem; margin: 5px 0; font-weight: 600; }
+        .location { font-size: 0.8rem; color: #777; margin-bottom: 10px; }
+        .actions { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-sm { padding: 5px 10px; font-size: 0.8rem; flex: 1; }
+        .btn-cart { background: var(--secondary); color: white; }
+
+        /* --- İLAN VERME MODALI (WIZARD) --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background: white; width: 90%; max-width: 600px; padding: 30px; border-radius: 15px; position: relative; max-height: 90vh; overflow-y: auto; }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; }
+        
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .price-opt { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px solid #eee; }
+
+        /* --- SEPET & MESAJLAŞMA --- */
+        .cart-modal-content { max-width: 400px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .secure-badge { background: #e0f2f1; color: #00695c; padding: 10px; border-radius: 5px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; margin-top: 15px; }
+        
+        /* KURUMSAL KUTUSU */
+        .corporate-badge { background: #2c3e50; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.7rem; display: inline-block; margin-bottom: 5px; }
+
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 pb-20 md:pb-0">
+<body>
 
-    <header class="bg-white border-b sticky top-0 z-50 shadow-sm transition-colors duration-300">
-        <div class="container mx-auto px-4 h-20 flex justify-between items-center gap-4">
-            <a href="javascript:void(0)" onclick="app.router('home')" class="text-3xl font-black tracking-tighter flex items-center group shrink-0 select-none">
-                <span class="bk-yellow px-2 py-1 rounded-md transform group-hover:-rotate-6 transition duration-300 shadow">Bi</span>
-                <span class="ml-1 font-bold">Kirala</span>
-            </a>
-
-            <div class="hidden md:flex flex-1 max-w-xl relative">
-                <input type="text" id="desktop-search" onkeyup="app.search(this.value)" placeholder="Marka, ürün veya kategori ara..." class="w-full bg-gray-100 border-2 border-transparent focus:bg-white focus:border-yellow-400 rounded-full px-5 py-2.5 outline-none transition">
-                <button class="absolute right-2 top-1.5 bg-black text-white w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-800" onclick="app.search(document.getElementById('desktop-search').value)">
-                    <i class="fa-solid fa-search text-sm"></i>
-                </button>
+    <header>
+        <div class="logo">Bi<span>Kirala</span></div>
+        <div class="nav-actions">
+            <div class="cart-icon" onclick="openCart()">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cartCount" class="cart-badge">0</span>
             </div>
-
-            <div class="flex items-center gap-3">
-                <button onclick="app.toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-200 transition" title="Karanlık Mod"><i class="fa-solid fa-moon text-xl" id="dark-icon"></i></button>
-                <div class="relative">
-                    <button onclick="app.toggleNotif()" class="p-2 rounded-full hover:bg-gray-200 transition relative">
-                        <i class="fa-regular fa-bell text-xl"></i>
-                        <span id="notif-badge" class="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white hidden"></span>
-                    </button>
-                    <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border z-50 overflow-hidden">
-                        <div class="p-3 border-b font-bold text-sm bg-gray-50">Bildirimler</div>
-                        <div id="notif-list" class="max-h-64 overflow-y-auto"><div class="p-4 text-center text-gray-400 text-xs">Henüz bildirim yok.</div></div>
-                    </div>
-                </div>
-                <button id="btn-admin" onclick="app.router('admin')" class="hidden bg-red-600 text-white px-3 py-2 rounded-lg font-bold shadow-lg animate-pulse text-sm"><i class="fa-solid fa-shield-halved"></i> Panel</button>
-                
-                <div id="nav-guest" class="flex items-center gap-3 text-sm font-bold">
-                    <button onclick="app.modal('login')" class="hover:text-yellow-600 transition">Giriş</button>
-                    <span class="text-gray-300">|</span>
-                    <button onclick="app.modal('register')" class="bg-black text-white px-4 py-2 rounded-full hover:bg-gray-800 transition">Kayıt Ol</button>
-                </div>
-
-                <div id="nav-user" class="hidden flex items-center gap-3">
-                    <div class="text-right hidden lg:block cursor-pointer" onclick="app.router('profile')">
-                        <div class="text-xs text-gray-500">Hoşgeldin</div>
-                        <div class="font-bold text-sm flex items-center gap-1">
-                            <span id="user-display-name">Kullanıcı</span>
-                            <i id="user-badge-icon" class="hidden" title="Onaylı"></i>
-                        </div>
-                    </div>
-                    <img id="user-display-img" onclick="app.router('profile')" src="" class="w-10 h-10 rounded-full border-2 border-yellow-400 object-cover cursor-pointer">
-                    <button onclick="app.logout()" class="text-red-500 hover:bg-gray-100 p-2 rounded-full transition" title="Çıkış Yap"><i class="fa-solid fa-power-off"></i></button>
-                </div>
-                <button onclick="app.checkLoginForAd()" class="bk-yellow text-black px-4 py-2 rounded-lg font-bold shadow hover:bg-yellow-400 transition hidden md:flex items-center gap-2 text-sm"><i class="fa-solid fa-plus"></i> İlan Ver</button>
-            </div>
+            <button class="btn btn-outline" onclick="openListingModal()">+ Ücretsiz İlan Ver</button>
+            <button class="btn btn-primary">Giriş Yap</button>
         </div>
     </header>
 
-    <div class="container mx-auto px-4 py-6 min-h-screen">
-        
-        <div id="page-home" class="section-visible">
-            
-            <div class="mb-6 overflow-x-auto stories-scroll pb-2">
-                <div class="flex gap-4" id="stories-wrapper"></div>
-            </div>
-
-            <div class="flex flex-col md:flex-row gap-6">
-                <aside class="w-full md:w-64 shrink-0 space-y-4">
-                    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-                        <div class="p-3 bg-gray-50 border-b font-bold text-gray-700">Kategoriler</div>
-                        <ul id="category-list" class="text-sm"></ul>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm border p-4">
-                        <h3 class="font-bold text-gray-700 mb-3 text-sm">Fiyat Aralığı</h3>
-                        <div class="flex gap-2 mb-3">
-                            <input type="number" id="filter-min" placeholder="Min" class="w-1/2 border rounded p-2 text-sm outline-none focus:border-yellow-400">
-                            <input type="number" id="filter-max" placeholder="Max" class="w-1/2 border rounded p-2 text-sm outline-none focus:border-yellow-400">
-                        </div>
-                        <button onclick="app.applyFilter()" class="w-full bg-gray-900 text-white py-2 rounded text-sm font-bold hover:bg-black transition">Filtrele</button>
-                        <button onclick="app.resetFilter()" class="w-full text-gray-500 text-xs mt-2 underline">Sıfırla</button>
-                    </div>
-                </aside>
-
-                <main class="flex-1">
-                    <div class="mb-6">
-                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-fire text-red-500"></i> Vitrin İlanları</h2>
-                        <div id="vitrin-container" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-end mb-3 border-b pb-2">
-                            <h2 class="text-xl font-bold">Son İlanlar</h2>
-                            <span id="result-text" class="text-xs text-gray-500">Tümü gösteriliyor</span>
-                        </div>
-                        <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-gray-50 text-gray-500"><tr><th class="p-3">Görsel</th><th class="p-3">Başlık</th><th class="p-3">Kategori</th><th class="p-3">Fiyat</th><th class="p-3 hidden md:table-cell">Konum</th></tr></thead>
-                                <tbody id="ads-list-body" class="divide-y"></tbody>
-                            </table>
-                            <div id="no-data" class="hidden p-8 text-center text-gray-400"><i class="fa-solid fa-folder-open text-3xl mb-2"></i><p>Aradığınız kriterde ilan bulunamadı.</p></div>
-                        </div>
-                    </div>
-                </main>
-            </div>
+    <div class="container">
+        <h3 class="section-title">Kategoriler</h3>
+        <div class="category-grid">
+            <div class="cat-card"><i class="fas fa-home"></i><span>Emlak</span></div>
+            <div class="cat-card"><i class="fas fa-car"></i><span>Vasıta</span></div>
+            <div class="cat-card"><i class="fas fa-mobile-alt"></i><span>Elektronik</span></div>
+            <div class="cat-card"><i class="fas fa-camera"></i><span>Hobi & Eğlence</span></div>
+            <div class="cat-card"><i class="fas fa-tshirt"></i><span>Giyim</span></div>
+            <div class="cat-card"><i class="fas fa-baby-carriage"></i><span>Anne & Bebek</span></div>
         </div>
 
-        <div id="page-detail" class="section-hidden">
-            <button onclick="app.router('home')" class="mb-4 text-gray-500 hover:text-black font-medium flex items-center gap-2"><i class="fa-solid fa-arrow-left"></i> Geri Dön</button>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white rounded-xl p-6 shadow-lg border relative">
-                <button id="btn-delete-ad" class="hidden absolute top-4 right-4 bg-red-100 text-red-600 px-3 py-1 rounded text-sm font-bold z-10 hover:bg-red-600 hover:text-white transition"><i class="fa-solid fa-trash"></i> Sil</button>
-                <div class="md:col-span-2 space-y-6">
-                    <div>
-                        <div class="h-[400px] bg-gray-200 rounded-lg overflow-hidden mb-2 border relative group"><img id="d-img" class="w-full h-full object-cover"></div>
-                        <div class="flex gap-2" id="d-thumbs"></div>
-                    </div>
-                    <div><h3 class="font-bold text-lg border-b pb-2 mb-2">Açıklama</h3><p id="d-desc" class="text-gray-600 whitespace-pre-wrap leading-relaxed"></p></div>
-                    <div class="bg-gray-100 rounded-lg p-4 border">
-                        <h3 class="font-bold text-sm mb-2 text-gray-700">Konum</h3>
-                        <div class="h-48 bg-gray-300 rounded overflow-hidden relative group cursor-pointer hover:opacity-90">
-                            <img src="https://static.mapquest.com/mqmaps/3.0.4/images/unavailable_map.png" class="w-full h-full object-cover opacity-60">
-                            <div class="absolute inset-0 flex items-center justify-center font-bold text-gray-600 group-hover:text-black"><i class="fa-solid fa-map-location-dot mr-2"></i> Harita (Temsili)</div>
-                        </div>
-                        <div id="d-loc-text" class="text-xs text-gray-500 mt-2 font-bold"></div>
-                    </div>
-                </div>
-                <div class="md:col-span-1 space-y-6">
-                    <div><h1 id="d-title" class="text-2xl font-bold leading-tight text-gray-900"></h1><p class="text-gray-500 text-sm mt-1"><i class="fa-solid fa-layer-group"></i> <span id="d-cat"></span></p></div>
-                    <div class="bg-gray-50 p-4 rounded-lg border"><span class="block text-xs text-gray-500 font-bold uppercase">Kiralama Bedeli</span><span id="d-price" class="text-3xl font-black text-blue-600"></span></div>
-                    <div class="border rounded-lg p-4 bg-white shadow-sm" id="owner-card"></div>
-                    <div class="space-y-2">
-                        <button onclick="app.openContract()" class="w-full bg-black text-white font-bold py-3 rounded-lg hover:bg-gray-800 shadow flex items-center justify-center gap-2 transition animate-bounce"><i class="fa-solid fa-file-signature text-yellow-400"></i> Hemen Kirala</button>
-                        <button onclick="app.openWhatsapp()" class="w-full bg-green-500 text-white font-bold py-3 rounded-lg hover:bg-green-600 shadow flex items-center justify-center gap-2 transition"><i class="fa-brands fa-whatsapp text-xl"></i> WhatsApp</button>
-                        <button onclick="app.showPhone()" class="w-full border-2 border-gray-200 text-gray-700 font-bold py-3 rounded-lg hover:bg-gray-50 transition"><i class="fa-solid fa-phone"></i> Numarayı Göster</button>
-                        <button onclick="app.toggleFav()" id="d-fav-btn" class="w-full border-2 border-gray-300 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50 transition"><i class="fa-regular fa-heart"></i> Favorile</button>
-                    </div>
-                </div>
-            </div>
+        <div class="filter-bar">
+            <select class="sort-select" onchange="sortListings(this.value)">
+                <option value="new">Sırala: En Yeni</option>
+                <option value="price-asc">Fiyat: Artan</option>
+                <option value="price-desc">Fiyat: Azalan</option>
+            </select>
         </div>
 
-        <div id="page-profile" class="section-hidden">
-            <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden border">
-                    <div class="bg-gray-800 h-28 relative">
-                        <div class="absolute -bottom-10 left-6">
-                            <img id="p-img" src="" class="w-24 h-24 rounded-full border-4 border-white bg-white object-cover">
-                            <label class="absolute bottom-0 right-0 bg-yellow-400 p-1.5 rounded-full cursor-pointer hover:bg-yellow-500 border border-white shadow"><i class="fa-solid fa-camera text-xs"></i><input type="file" class="hidden" onchange="app.changeProfilePic(this)"></label>
-                        </div>
-                    </div>
-                    <div class="pt-14 px-6 pb-6">
-                        <h2 class="text-xl font-bold mb-2 flex items-center gap-2">Hesap Ayarları <i id="p-verified-icon" class="hidden"></i></h2>
-                        <p id="p-account-type" class="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wider">Bireysel Hesap</p>
-                        
-                        <div id="corporate-apply-area" class="mb-4">
-                            <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                <h4 class="font-bold text-sm mb-2"><i class="fa-solid fa-briefcase text-yellow-600"></i> Kurumsal Mağaza Aç</h4>
-                                <p class="text-xs text-gray-600 mb-3">Vergi levhanız varsa hemen mağazanızı açın. Üyelik ücretsiz, sadece kiralamadan düşük komisyon!</p>
-                                <button onclick="app.modal('corporate')" class="w-full bg-yellow-400 text-black font-bold text-xs py-2.5 rounded hover:bg-yellow-500 transition shadow-sm">Mağaza Başvurusu Yap (Ücretsiz)</button>
-                            </div>
-                        </div>
-
-                        <div id="verification-area" class="mb-4 p-3 bg-blue-50 rounded border border-blue-100 hidden">
-                            <p class="text-xs text-blue-800 mb-2 font-bold"><i class="fa-solid fa-shield-cat"></i> Bireysel Güven Rozeti (Mavi Tik)</p>
-                            <button onclick="app.requestVerification()" class="w-full bg-blue-600 text-white text-xs py-2 rounded hover:bg-blue-700 transition">Doğrulama İsteği Gönder</button>
-                        </div>
-
-                        <form onsubmit="event.preventDefault(); app.saveProfile()">
-                            <div class="grid grid-cols-2 gap-3 mb-3"><input id="p-name" type="text" class="border p-2 rounded text-sm outline-none focus:border-yellow-400" placeholder="Ad"><input id="p-surname" type="text" class="border p-2 rounded text-sm outline-none focus:border-yellow-400" placeholder="Soyad"></div>
-                            <input id="p-email" type="email" class="w-full border p-2 rounded mb-3 bg-gray-100 text-sm" readonly><input id="p-phone" type="tel" class="w-full border p-2 rounded mb-4 text-sm outline-none focus:border-yellow-400" placeholder="Telefon">
-                            <button class="w-full bg-gray-900 text-white font-bold py-2 rounded hover:bg-black text-sm transition">Bilgileri Güncelle</button>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-lg border p-6 flex flex-col h-full">
-                    <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-list-check text-yellow-500"></i> İlanlarım</h2><button onclick="app.checkLoginForAd()" class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-bold hover:bg-yellow-200">+ Yeni Ekle</button></div>
-                    <div class="flex-1 overflow-y-auto max-h-96 pr-2"><div id="my-ads-list" class="space-y-3"><div class="text-center text-gray-400 text-sm mt-10">Yükleniyor...</div></div></div>
-                    <div class="mt-4 pt-4 border-t text-xs text-gray-400 text-center">Toplam <span id="my-ads-count" class="font-bold text-black">0</span> ilanınız yayında.</div>
-                </div>
+        <h3 class="section-title">Vitrindekiler</h3>
+        <div class="product-grid" id="productList">
             </div>
-        </div>
+    </div>
 
-        <div id="page-admin" class="section-hidden">
-            <div class="bg-gray-900 text-white p-6 rounded-xl mb-6 shadow-xl">
-                <div class="flex justify-between items-center mb-6"><h2 class="text-3xl font-bold text-red-500 flex items-center gap-2"><i class="fa-solid fa-user-secret"></i> Yönetici Paneli</h2><button onclick="app.router('home')" class="text-sm underline">Çıkış</button></div>
-                <div class="grid grid-cols-3 gap-4 text-center">
-                    <div class="bg-gray-800 p-4 rounded-lg"><div class="text-gray-400 text-xs uppercase">Kasa</div><div id="admin-kasa" class="text-3xl font-black text-green-400">0 TL</div></div>
-                    <div class="bg-gray-800 p-4 rounded-lg"><div class="text-gray-400 text-xs uppercase">İlan</div><div id="admin-ilan-sayisi" class="text-3xl font-bold text-yellow-400">0</div></div>
-                    <div class="bg-gray-800 p-4 rounded-lg"><div class="text-gray-400 text-xs uppercase">Üye</div><div class="text-3xl font-bold text-blue-400">1,204</div></div>
+    <div id="listingModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('listingModal')">&times;</span>
+            <h2>İlan Ver</h2>
+            <div id="listingStep1" class="step active">
+                <div class="form-group">
+                    <label>Kategori Seçin</label>
+                    <select id="newCat">
+                        <option>Elektronik</option>
+                        <option>Vasıta</option>
+                        <option>Emlak</option>
+                    </select>
                 </div>
+                <div class="price-opt">
+                    <strong>Kurumsal Üyelik Fırsatı</strong><br>
+                    <small>Sınırsız ilan ve mağaza özellikleri aylık sadece 400 TL!</small>
+                </div>
+                <button class="btn btn-primary" onclick="nextStep(2)" style="width:100%; margin-top:15px;">Devam Et</button>
             </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-black text-green-400 p-4 rounded-xl h-96 overflow-y-auto font-mono text-xs border border-gray-700"><h3 class="text-white border-b border-gray-700 pb-2 mb-2 font-bold">CANLI LOGLAR</h3><div id="admin-logs"></div></div>
-                <div class="bg-white p-4 rounded-xl shadow h-96 overflow-y-auto"><h3 class="font-bold border-b pb-2 mb-2">Tüm İlanlar</h3><table class="w-full text-xs text-left"><thead class="bg-gray-100"><tr><th class="p-2">ID</th><th class="p-2">Başlık</th><th class="p-2">Sahibi</th><th class="p-2">İşlem</th></tr></thead><tbody id="admin-ads-table"></tbody></table></div>
+
+            <div id="listingStep2" class="step">
+                <div class="form-group">
+                    <label>İlan Başlığı</label>
+                    <input type="text" id="newTitle" placeholder="Örn: Temiz iPhone 13">
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea id="newDesc" rows="4" placeholder="Ürünü detaylı anlatın..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Fiyat (Günlük/Haftalık)</label>
+                    <input type="number" id="newPrice">
+                </div>
+                <div class="form-group">
+                    <label>Teslimat Yöntemi</label>
+                    <select>
+                        <option>Elden Teslim</option>
+                        <option>Kargo ile Güvenli Teslimat</option>
+                        <option>Her İkisi</option>
+                    </select>
+                </div>
+                <button class="btn btn-outline" onclick="prevStep(1)">Geri</button>
+                <button class="btn btn-primary" onclick="submitListing()">İlanı Gönder</button>
             </div>
         </div>
     </div>
 
-    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t flex justify-around py-2 z-50 text-[10px] text-gray-500 font-bold shadow-lg">
-        <button onclick="app.router('home')" class="flex flex-col items-center gap-1 focus:text-yellow-600"><i class="fa-solid fa-store text-lg"></i> Vitrin</button>
-        <button onclick="app.checkLoginForAd()" class="flex flex-col items-center -mt-6"><div class="bg-yellow-400 w-14 h-14 rounded-full flex items-center justify-center border-4 border-white shadow-lg text-black"><i class="fa-solid fa-plus text-2xl"></i></div> İlan Ver</button>
-        <button onclick="app.router('profile')" class="flex flex-col items-center gap-1 focus:text-yellow-600"><i class="fa-solid fa-user text-lg"></i> Profil</button>
-    </nav>
-
-    <div id="modal-corporate" class="section-hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[75] backdrop-blur-sm">
-        <div class="bg-white p-6 rounded-xl w-full max-w-md relative shadow-2xl">
-            <button onclick="app.closeAllModals()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="fa-solid fa-times text-xl"></i></button>
-            <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-shop text-yellow-500"></i> Kurumsal Mağaza Başvurusu</h3>
-            <p class="text-xs text-gray-500 mb-4 bg-yellow-50 p-2 rounded border border-yellow-200">
-                Lütfen vergi levhanızdaki bilgileri eksiksiz giriniz. Başvurunuz otomatik olarak onaylanacaktır.
-            </p>
-            <form onsubmit="event.preventDefault(); app.submitCorporate()">
-                <div class="space-y-3 mb-6">
-                    <input id="corp-name" type="text" placeholder="Mağaza / Şirket Adı" class="w-full border p-2 rounded text-sm" required>
-                    <div class="grid grid-cols-2 gap-2">
-                        <input id="corp-tax-no" type="text" placeholder="Vergi No" class="w-full border p-2 rounded text-sm" required>
-                        <input id="corp-tax-off" type="text" placeholder="Vergi Dairesi" class="w-full border p-2 rounded text-sm" required>
-                    </div>
-                    <textarea id="corp-address" placeholder="Şirket Adresi" class="w-full border p-2 rounded text-sm h-20" required></textarea>
+    <div id="cartModal" class="modal">
+        <div class="modal-content cart-modal-content">
+            <span class="close-modal" onclick="closeModal('cartModal')">&times;</span>
+            <h3>Sepetim</h3>
+            <div id="cartItems">
+                <p style="text-align:center; color:#999; margin: 20px;">Sepetiniz boş.</p>
+            </div>
+            <div class="secure-badge">
+                <i class="fas fa-shield-alt"></i>
+                <div>
+                    <strong>Güvenli Ödeme (Havuz Sistemi)</strong>
+                    <br>Ödemeniz siz onaylayana kadar BiKirala havuzunda tutulur.
                 </div>
-                <div class="flex gap-2">
-                    <button type="button" onclick="app.closeAllModals()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded font-bold text-sm">İptal</button>
-                    <button class="flex-1 bg-yellow-400 text-black py-2 rounded font-bold text-sm hover:bg-yellow-500">Başvuruyu Tamamla</button>
-                </div>
-            </form>
+            </div>
+            <button class="btn btn-primary" style="width:100%; margin-top:15px;" onclick="checkout()">Ödeme Yap ve Kirala</button>
         </div>
     </div>
 
-    <div id="modal-contract" class="section-hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[75] backdrop-blur-sm">
-        <div class="bg-white p-6 rounded-xl w-full max-w-lg relative shadow-2xl m-4">
-            <h3 class="text-xl font-bold mb-4 border-b pb-2">Dijital Kira Sözleşmesi</h3>
-            <div class="h-64 overflow-y-auto bg-gray-50 p-4 rounded border text-xs text-gray-600 mb-4 text-justify"><p class="font-bold mb-2">1. TARAFLAR</p><p class="mb-2">İşbu sözleşme...</p><p class="font-bold mb-2">2. KONU</p><p class="mb-2">KİRACI...</p></div>
-            <label class="flex items-center gap-2 mb-4 cursor-pointer"><input type="checkbox" id="contract-check" class="w-5 h-5 text-yellow-500 rounded"><span class="text-sm font-bold">Okudum, onaylıyorum.</span></label>
-            <div class="flex gap-2"><button onclick="app.closeAllModals()" class="flex-1 border py-2 rounded font-bold text-gray-500">Vazgeç</button><button onclick="app.confirmRent()" class="flex-1 bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700">Onayla ve Kirala</button></div>
+    <div id="msgModal" class="modal">
+        <div class="modal-content cart-modal-content">
+            <span class="close-modal" onclick="closeModal('msgModal')">&times;</span>
+            <h3>Satıcıya Mesaj Gönder</h3>
+            <textarea style="width:100%; height:100px; padding:10px; margin-top:10px; border-radius:5px; border:1px solid #ddd;" placeholder="Merhaba, ürün hala müsait mi?"></textarea>
+            <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="alert('Mesaj gönderildi!')">Gönder</button>
         </div>
     </div>
-
-    <div id="modal-login" class="section-hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60] backdrop-blur-sm"><div class="bg-white p-8 rounded-2xl w-full max-w-sm relative shadow-2xl"><button onclick="app.closeAllModals()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="fa-solid fa-times text-xl"></i></button><h2 class="text-3xl font-bold mb-6 text-center">Giriş Yap</h2><form onsubmit="event.preventDefault(); app.login()"><input id="in-email" type="email" placeholder="E-posta" class="w-full border p-3 rounded-lg mb-4 outline-none" required><input id="in-pass" type="password" placeholder="Şifre" class="w-full border p-3 rounded-lg mb-2 outline-none" required><div onclick="app.modal('forgot')" class="text-right text-xs text-blue-600 cursor-pointer hover:underline mb-6">Şifremi Unuttum?</div><button class="w-full bk-yellow p-3 rounded-lg font-bold hover:bg-yellow-400">Giriş Yap</button></form></div></div>
-    <div id="modal-register" class="section-hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60] backdrop-blur-sm"><div class="bg-white p-8 rounded-2xl w-full max-w-sm relative shadow-2xl"><button onclick="app.closeAllModals()" class="absolute top-4 right-4 text-gray-400"><i class="fa-solid fa-times text-xl"></i></button><h2 class="text-3xl font-bold mb-6 text-center">Kayıt Ol</h2><form onsubmit="event.preventDefault(); app.register()"><div class="flex gap-2 mb-4"><input id="reg-name" type="text" placeholder="Ad" class="w-full border p-3 rounded-lg" required><input id="reg-surname" type="text" placeholder="Soyad" class="w-full border p-3 rounded-lg" required></div><input id="reg-email" type="email" placeholder="E-posta" class="w-full border p-3 rounded-lg mb-4" required><input id="reg-phone" type="tel" placeholder="Telefon" class="w-full border p-3 rounded-lg mb-4" required><input type="password" placeholder="Şifre" class="w-full border p-3 rounded-lg mb-6" required><button class="w-full bg-gray-900 text-white p-3 rounded-lg font-bold">Kayıt Ol</button></form></div></div>
-    <div id="modal-forgot" class="section-hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[65]"><div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center"><i class="fa-solid fa-lock text-4xl text-yellow-400 mb-4"></i><h3 class="text-xl font-bold mb-2">Şifre Sıfırlama</h3><input id="forgot-email" type="email" placeholder="E-posta" class="w-full border p-3 rounded-lg mb-4 outline-none"><div class="flex gap-2"><button onclick="app.closeAllModals()" class="flex-1 bg-gray-200 py-2 rounded-lg font-bold">İptal</button><button onclick="app.sendResetLink()" class="flex-1 bg-black text-white py-2 rounded-lg font-bold">Gönder</button></div></div></div>
-    <div id="modal-create-ad" class="section-hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[60] overflow-y-auto py-10"><div class="bg-white rounded-2xl w-11/12 max-w-4xl relative overflow-hidden shadow-2xl"><div class="bg-gray-100 px-6 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-lg">Yeni İlan Oluştur</h3><button onclick="app.closeAllModals()" class="text-gray-500 hover:text-red-500"><i class="fa-solid fa-times text-xl"></i></button></div><form id="form-create-ad" onsubmit="event.preventDefault(); app.initPayment()" class="p-6"><div class="grid grid-cols-1 md:grid-cols-2 gap-8"><div class="space-y-4"><input id="ad-title" type="text" placeholder="İlan Başlığı" class="w-full border p-3 rounded-lg outline-none focus:border-yellow-400" required><select id="ad-cat-select" class="w-full border p-3 rounded-lg bg-white" required></select><div class="flex gap-2"><input id="ad-price" type="number" placeholder="Fiyat" class="w-full border p-3 rounded-lg" required><select class="border p-3 rounded-lg bg-white"><option>Günlük</option><option>Aylık</option></select></div><input id="ad-loc" type="text" placeholder="Konum" class="w-full border p-3 rounded-lg" required><textarea id="ad-desc" placeholder="Açıklama..." class="w-full border p-3 rounded-lg h-32 resize-none" required></textarea></div><div class="space-y-4"><div onclick="document.getElementById('ad-file-input').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 cursor-pointer hover:bg-yellow-50 transition hover:border-yellow-400 group"><i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-2 group-hover:text-yellow-500 transition"></i><p class="text-sm font-bold text-gray-500 group-hover:text-gray-800">Dokun ve Fotoğraf Seç</p><input id="ad-file-input" type="file" multiple class="hidden" onchange="if(this.files.length>0)Swal.fire({toast:true,position:'top-end',icon:'success',title:this.files.length+' foto seçildi',timer:1500,showConfirmButton:false})"></div><div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4"><h4 class="font-bold mb-3 text-sm">Öne Çıkar (Doping)</h4><label class="flex items-center p-3 bg-white border rounded mb-2 cursor-pointer"><input type="radio" name="doping" value="none" checked class="mr-2"> <span class="text-sm">Standart (Ücretsiz)</span></label><label class="flex items-center p-3 bg-white border border-yellow-400 rounded mb-2 cursor-pointer shadow-sm"><input type="radio" name="doping" value="vitrin" class="mr-2"> <span class="text-sm font-bold">Vitrin (150 TL)</span></label><label class="flex items-center p-3 bg-white border border-red-500 rounded cursor-pointer shadow-sm"><input type="radio" name="doping" value="acil" class="mr-2"> <span class="text-sm font-bold text-red-600">ACİL (75 TL)</span></label></div></div></div><button class="w-full bg-black text-white font-bold py-4 rounded-lg mt-6 text-lg hover:bg-gray-800">Devam Et</button></form></div></div>
-    <div id="modal-payment" class="section-hidden fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[70] backdrop-blur-md"><div id="pay-step-1" class="bg-white p-6 rounded-2xl w-96 relative shadow-2xl"><h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fa-solid fa-credit-card text-blue-600"></i> Güvenli Ödeme</h3><div class="bg-blue-50 text-blue-800 p-3 rounded mb-4 flex justify-between font-bold"><span>Tutar:</span><span id="pay-amount">0 TL</span></div><input type="text" placeholder="Kart Sahibi" class="w-full border p-3 rounded-lg mb-3 bg-gray-50"><input id="card-no" type="text" placeholder="Kart No" class="w-full border p-3 rounded-lg mb-3 bg-gray-50" maxlength="16"><div class="flex gap-3 mb-4"><input type="text" placeholder="AA/YY" class="w-1/2 border p-3 rounded-lg bg-gray-50"><input type="text" placeholder="CVC" class="w-1/2 border p-3 rounded-lg bg-gray-50"></div><div class="flex gap-2"><button onclick="app.closeAllModals()" class="flex-1 border py-2 rounded-lg font-bold text-gray-500">İptal</button><button onclick="app.start3D()" class="flex-1 bg-green-600 text-white py-2 rounded-lg font-bold">Öde</button></div></div><div id="pay-step-2" class="hidden bg-white p-8 rounded-2xl w-80 text-center shadow-2xl"><h3 class="font-bold text-lg">3D Secure</h3><p class="text-xs text-gray-500 mb-6">SMS Kodunu Giriniz</p><input type="text" placeholder="SMS Kodu" class="w-full border-b-2 border-gray-300 text-center text-2xl tracking-[0.5em] mb-6 focus:border-black outline-none pb-2"><button onclick="app.finalizePayment()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold">Onayla</button></div></div>
 
     <script>
-        const app = {
-            data: { user: null, isAdmin: false, balance: 0, logs: [], ads: [], favorites: [] },
-            categories: ["Emlak", "Vasıta", "Yedek Parça", "Telefon", "Bilgisayar", "Tablet", "Müzik Aleti", "Teknolojik Aletler", "Spor", "Kamp", "Diğer"],
-            defaultAds: [
-                { id: 101, title: "Lüks Villa Kiralık", cat: "Emlak", price: 5000, loc: "İstanbul, Sarıyer", img: "https://images.unsplash.com/photo-1600596542815-60c375043302?w=500&q=80", owner: "Emlak Dünyası", ownerImg: "https://i.pravatar.cc/150?img=3", vitrin: true, acil: false, desc: "Deniz manzaralı.", verified: true, rating: 4.8, reviewCount: 12, store: true },
-                { id: 102, title: "1967 Mustang", cat: "Vasıta", price: 2500, loc: "Ankara", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=500&q=80", owner: "Mehmet", ownerImg: "https://i.pravatar.cc/150?img=12", vitrin: true, acil: true, desc: "Klip çekimi için.", verified: false, rating: 3.5, reviewCount: 4, store: false }
-            ],
+        // --- ÖRNEK VERİLER ---
+        const products = [
+            { id: 1, title: "Profesyonel Fotoğraf Makinesi", price: 500, loc: "İstanbul, Kadıköy", img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400" },
+            { id: 2, title: "Kamp Çadırı (4 Kişilik)", price: 200, loc: "İzmir, Bornova", img: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=400" },
+            { id: 3, title: "Elektrikli Scooter", price: 350, loc: "Ankara, Çankaya", img: "https://images.unsplash.com/photo-1555596899-d634352a926d?w=400" }
+        ];
 
-            init: function() { this.loadData(); this.renderCategories(); this.renderAds(); this.renderStories(); this.updateUI(); console.log("BiKirala v5.5 Hazır!"); },
-            saveData: function() { localStorage.setItem('bk_data', JSON.stringify(this.data)); },
-            loadData: function() {
-                const stored = localStorage.getItem('bk_data');
-                if (stored) { this.data = JSON.parse(stored); if(!this.data.favorites) this.data.favorites=[]; } 
-                else { this.data.ads = this.defaultAds; this.saveData(); }
-            },
+        let cart = [];
 
-            // --- KURUMSAL MAĞAZA (YENİ) ---
-            submitCorporate: function() {
-                const name = document.getElementById('corp-name').value;
-                const tax = document.getElementById('corp-tax-no').value;
-                
-                this.data.user.isCorporate = true;
-                this.data.user.storeName = name;
-                this.data.user.taxNo = tax;
-                this.data.user.name = name; // Kullanıcı adını mağaza adı yap
-                
-                this.saveData();
-                this.closeAllModals();
-                this.updateUI();
-                Swal.fire({
-                    title: 'Tebrikler!',
-                    text: 'Kurumsal Mağazanız açıldı. Artık ilanlarınız ücretsiz! (Kiralama başı %10 komisyon)',
-                    icon: 'success'
-                });
-                this.log(`Yeni Kurumsal Mağaza: ${name}`);
-            },
-
-            // --- AUTH ---
-            login: function(){
-                const e=document.getElementById('in-email').value; const p=document.getElementById('in-pass').value;
-                if(e==="emeebabaoglu61@gmail.com"&&p==="babaemre61"){this.data.user={name:"Patron",surname:"Yönetici",email:e,avatar:"https://cdn-icons-png.flaticon.com/512/295/295128.png", verified:true};this.data.isAdmin=true;Swal.fire({icon:'success',title:'Yönetici Girişi'});} 
-                else {this.data.isAdmin=false; if(!this.data.user) this.data.user={name:"Ahmet",surname:"Yılmaz",email:e,avatar:"https://i.pravatar.cc/150?img=68",phone:"0532 000", verified:false, verPending:false, isCorporate:false}; Swal.fire({icon:'success',title:'Hoşgeldin '+this.data.user.name});}
-                this.saveData(); this.updateUI(); this.closeAllModals();
-            },
-            logout: function(){this.data.user=null; this.data.isAdmin=false; this.saveData(); this.updateUI(); this.router('home'); Swal.fire('Çıkış','','info');},
-            updateUI: function(){
-                if(this.data.user){
-                    document.getElementById('nav-guest').classList.add('hidden');document.getElementById('nav-user').classList.remove('hidden');document.getElementById('nav-user').classList.add('flex');document.getElementById('user-display-name').innerText=this.data.user.name;document.getElementById('user-display-img').src=this.data.user.avatar;
-                    if(this.data.isAdmin) document.getElementById('btn-admin').classList.remove('hidden'); else document.getElementById('btn-admin').classList.add('hidden');
-                    
-                    const badge = document.getElementById('user-badge-icon');
-                    if(this.data.user.isCorporate) { badge.className = "fa-solid fa-store text-yellow-500 ml-1"; badge.title="Kurumsal Mağaza"; badge.classList.remove('hidden'); }
-                    else if(this.data.user.verified) { badge.className = "fa-solid fa-circle-check text-blue-500 ml-1"; badge.title="Onaylı"; badge.classList.remove('hidden'); }
-                    else { badge.classList.add('hidden'); }
-
-                    // Profil
-                    document.getElementById('p-name').value=this.data.user.name; document.getElementById('p-email').value=this.data.user.email;
-                    if(this.data.user.isCorporate) {
-                        document.getElementById('corporate-apply-area').classList.add('hidden');
-                        document.getElementById('p-account-type').innerHTML = '<i class="fa-solid fa-store text-yellow-500"></i> Kurumsal Mağaza (Resmi)';
-                        document.getElementById('verification-area').classList.add('hidden');
-                    } else {
-                        document.getElementById('corporate-apply-area').classList.remove('hidden');
-                        document.getElementById('p-account-type').innerText = 'Bireysel Hesap';
-                    }
-                } else {document.getElementById('nav-guest').classList.remove('hidden');document.getElementById('nav-user').classList.add('hidden');document.getElementById('btn-admin').classList.add('hidden');}
-            },
-
-            // --- AD POSTING LOGIC (UPDATED FOR CORPORATE) ---
-            initPayment: function(){
-                const t=document.getElementById('ad-title').value;const d=document.querySelector('input[name="doping"]:checked').value;
-                this.pendingAd={id:Date.now(),title:t,cat:document.getElementById('ad-cat-select').value,price:document.getElementById('ad-price').value,loc:document.getElementById('ad-loc').value,desc:document.getElementById('ad-desc').value,img:"https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=500&q=80",owner:this.data.user.name,ownerImg:this.data.user.avatar,vitrin:(d==='vitrin'),acil:(d==='acil'),verified:this.data.user.verified,store:this.data.user.isCorporate,rating:0,reviewCount:0};
-                
-                // KURUMSAL ÜYE İSE STANDART İLAN ÜCRETSİZ
-                if(this.data.user.isCorporate && d === 'none') {
-                    Swal.fire({title: 'Kurumsal İlan', text: 'Kurumsal üye olduğunuz için ilan ücreti alınmadı. Kiralamadan %10 komisyon düşülecektir.', icon: 'info'}).then(() => this.finishAd(false));
-                } 
-                else if(d === 'none') {
-                    this.finishAd(false);
-                } else {
-                    const a=(d==='vitrin')?150:75;document.getElementById('pay-amount').innerText=a+" TL";this.modal('payment');document.getElementById('pay-step-1').classList.remove('hidden');document.getElementById('pay-step-2').classList.add('hidden');
-                }
-            },
-
-            // --- STANDART FONKSİYONLAR ---
-            router: function(pid) {
-                if((pid==='profile'||pid==='messages'||pid==='favorites')&&!this.data.user){Swal.fire('Giriş Yap','','warning');this.modal('login');return;}
-                if(pid==='admin'&&!this.data.isAdmin){Swal.fire('Hata','Yetkisiz','error');return;}
-                document.querySelectorAll('[id^="page-"]').forEach(el=>{el.classList.add('section-hidden');el.classList.remove('section-visible');});
-                const t=document.getElementById('page-'+pid); if(t){t.classList.remove('section-hidden');t.classList.add('section-visible');window.scrollTo(0,0);}
-                if(pid==='home') {this.renderAds(); this.renderStories();} if(pid==='admin')this.renderAdmin(); if(pid==='profile')this.renderMyAds();
-            },
-            modal: function(n){this.closeAllModals();const e=document.getElementById('modal-'+n);if(e)e.classList.remove('section-hidden');},
-            closeAllModals: function(){document.querySelectorAll('[id^="modal-"]').forEach(el=>el.classList.add('section-hidden'));},
-            register: function(){const n=document.getElementById('reg-name').value;this.data.user={name:n,surname:document.getElementById('reg-surname').value,email:document.getElementById('reg-email').value,avatar:"https://cdn-icons-png.flaticon.com/512/149/149071.png",verified:false,isCorporate:false};this.saveData(); this.closeAllModals(); Swal.fire('Kayıt Başarılı','','success'); this.updateUI();},
-            renderCategories: function(){const l=document.getElementById('category-list');const s=document.getElementById('ad-cat-select');l.innerHTML='';s.innerHTML='';this.categories.forEach(c=>{l.innerHTML+=`<li onclick="app.renderAds('${c}')" class="p-3 border-b hover:bg-yellow-50 cursor-pointer flex justify-between items-center group"><span class="group-hover:font-bold">${c}</span><i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i></li>`;s.innerHTML+=`<option value="${c}">${c}</option>`;});},
-            renderStories: function() {const c = document.getElementById('stories-wrapper');if(!c) return;c.innerHTML = '';const stories = this.data.ads.filter(a => a.vitrin || a.acil).slice(0, 8);stories.forEach(s => {const border = s.acil ? 'border-red-500' : 'border-yellow-400';c.innerHTML += `<div onclick="app.detail(${s.id})" class="flex flex-col items-center gap-1 cursor-pointer shrink-0"><div class="w-16 h-16 rounded-full p-0.5 border-2 ${border}"><img src="${s.img}" class="w-full h-full rounded-full object-cover border border-white"></div><span class="text-[10px] font-bold truncate w-16 text-center">${s.title}</span></div>`;});},
-            renderAds: function(cat=null,q=null, min=null, max=null){
-                const v=document.getElementById('vitrin-container');const l=document.getElementById('ads-list-body');v.innerHTML='';l.innerHTML='';
-                let d=[...this.data.ads];
-                if(cat){d=d.filter(x=>x.cat===cat);document.getElementById('result-text').innerText=cat;}
-                if(q){d=d.filter(x=>x.title.toLowerCase().includes(q.toLowerCase()));document.getElementById('result-text').innerText="Arama Sonuçları";}
-                if(min) d=d.filter(x=>x.price >= min);
-                if(max) d=d.filter(x=>x.price <= max);
-                if(d.length===0)document.getElementById('no-data').classList.remove('hidden');else document.getElementById('no-data').classList.add('hidden');
-                d.forEach(ad=>{
-                    let starHtml = ad.rating > 0 ? `<span class="text-yellow-500 font-bold text-xs"><i class="fa-solid fa-star"></i> ${ad.rating}</span>` : `<span class="text-gray-400 text-[10px]">Yeni</span>`;
-                    let storeHtml = ad.store ? `<span class="bg-yellow-400 text-black text-[9px] px-1 rounded font-bold mr-1">MAĞAZA</span>` : '';
-                    if(ad.vitrin) v.innerHTML+=`<div onclick="app.detail(${ad.id})" class="bg-white border rounded-xl shadow-sm hover:shadow-xl transition cursor-pointer overflow-hidden relative group">${ad.acil?'<div class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded z-10 animate-pulse">ACİL</div>':''}<img src="${ad.img}" class="w-full h-40 object-cover group-hover:scale-105 transition duration-500"><div class="p-3"><h3 class="font-bold text-gray-800 truncate">${ad.title}</h3><div class="flex justify-between mt-2 items-center"><span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">${storeHtml}${ad.cat}</span><div class="flex flex-col items-end"><span class="font-bold text-blue-600">${ad.price} TL</span>${starHtml}</div></div></div></div>`;
-                    l.innerHTML+=`<tr onclick="app.detail(${ad.id})" class="border-b hover:bg-yellow-50 cursor-pointer transition ${ad.acil?'bg-red-50':''}"><td class="p-3"><img src="${ad.img}" class="w-16 h-12 object-cover rounded border"></td><td class="p-3"><div class="font-bold text-gray-800">${ad.title}</div><div class="md:hidden text-xs">${storeHtml}${starHtml}</div></td><td class="p-3 text-xs text-gray-500">${ad.cat}</td><td class="p-3 font-bold">${ad.price} TL</td><td class="p-3 hidden md:table-cell text-xs text-gray-500"><i class="fa-solid fa-location-dot"></i> ${ad.loc}</td></tr>`;
-                });
-                if(this.data.isAdmin) this.renderAdmin();
-            },
-            detail: function(id){
-                const ad=this.data.ads.find(x=>x.id===id); this.router('detail');
-                document.getElementById('d-img').src=ad.img;document.getElementById('d-title').innerText=ad.title;document.getElementById('d-price').innerText=ad.price+" TL";document.getElementById('d-desc').innerText=ad.desc;document.getElementById('d-loc-text').innerText=ad.loc;document.getElementById('d-cat').innerText=ad.cat;
-                let ratingDisplay = ad.rating === 0 ? `<span class="text-xs font-bold text-gray-500">Yeni Satıcı</span>` : `<span class="text-xs font-bold text-yellow-800">Puan</span><span class="font-bold text-yellow-600 flex items-center gap-1"><i class="fa-solid fa-star"></i> ${ad.rating}</span>`;
-                let badge = ad.store ? '<i class="fa-solid fa-store text-yellow-500" title="Mağaza"></i>' : (ad.verified ? '<i class="fa-solid fa-circle-check text-blue-500" title="Doğrulanmış"></i>' : '');
-                document.getElementById('owner-card').innerHTML = `<div class="flex items-center gap-3 mb-3"><img src="${ad.ownerImg}" class="w-12 h-12 rounded-full border"><div><div class="font-bold flex items-center gap-1">${ad.owner} ${badge}</div><div class="text-xs text-green-600 font-bold">${ad.store ? 'Kurumsal Mağaza' : 'Aktif Üye'}</div></div></div><div class="flex items-center justify-between bg-yellow-50 p-2 rounded border border-yellow-100 mb-2">${ratingDisplay}</div><button onclick="app.rateSeller(${ad.id})" class="w-full border border-yellow-400 text-yellow-700 text-xs font-bold py-1 rounded hover:bg-yellow-100 transition">⭐ Puan Ver</button>`;
-                const del=document.getElementById('btn-delete-ad');if(this.data.user && (this.data.isAdmin || ad.owner === this.data.user.name)){del.classList.remove('hidden');del.onclick=()=>this.deleteAd(ad.id);}else del.classList.add('hidden');
-                const fav=document.getElementById('d-fav-btn');if(this.data.favorites && this.data.favorites.includes(id)) fav.innerHTML='<i class="fa-solid fa-heart text-red-500"></i> Favorilerden Çıkar'; else fav.innerHTML='<i class="fa-regular fa-heart"></i> Favorile'; fav.onclick=()=>this.toggleFav(id);
-            },
-            rateSeller: function(id) {
-                if(!this.data.user) { this.modal('login'); return; }
-                const ad = this.data.ads.find(x => x.id === id); if(ad.owner === this.data.user.name) { Swal.fire('Hata','Kendine puan veremezsin!','error'); return; }
-                Swal.fire({title:'Puanla',input:'range',inputAttributes:{min:1,max:5,step:1},inputValue:5,showCancelButton:true}).then((r)=>{if(r.isConfirmed){ ad.reviewCount = (ad.reviewCount || 0) + 1; ad.rating = ((ad.rating * (ad.reviewCount-1)) + parseInt(r.value)) / ad.reviewCount; ad.rating = ad.rating.toFixed(1); this.saveData(); this.detail(id); Swal.fire('Teşekkürler','','success'); }});
-            },
-            renderMyAds: function() {
-                const c = document.getElementById('my-ads-list'); const cnt = document.getElementById('my-ads-count'); if(!c || !this.data.user) return; c.innerHTML = '';
-                const my = this.data.ads.filter(a => a.owner === this.data.user.name); if(cnt) cnt.innerText = my.length; if(my.length === 0) { c.innerHTML = '<div class="text-center text-gray-400 text-sm mt-4">İlanınız yok.</div>'; return; }
-                my.forEach(ad => {c.innerHTML += `<div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border hover:border-yellow-400 transition"><div class="flex items-center gap-3"><img src="${ad.img}" class="w-12 h-12 rounded object-cover border"><div><div class="font-bold text-sm text-gray-800 cursor-pointer" onclick="app.detail(${ad.id})">${ad.title}</div><div class="text-xs text-gray-500">${ad.price} TL</div></div></div><button onclick="app.deleteAd(${ad.id})" class="text-red-500 hover:bg-red-100 p-2 rounded-full transition"><i class="fa-solid fa-trash"></i></button></div>`;});
-            },
-            deleteAd: function(id){Swal.fire({title:'Silinsin mi?',icon:'warning',showCancelButton:true}).then(r=>{if(r.isConfirmed){this.data.ads=this.data.ads.filter(x=>x.id!==id);this.saveData();this.renderAds();if(document.getElementById('page-profile').classList.contains('section-visible'))this.renderMyAds();else this.router('home');Swal.fire('Silindi','','success');}});},
-            checkLoginForAd: function(){if(!this.data.user){Swal.fire('Giriş Yapmalısın','','info');this.modal('login');}else this.modal('create-ad');},
-            start3D: function(){if(document.getElementById('card-no').value.length<16){Swal.fire('Hata','Kart No Eksik','error');return;}Swal.showLoading();setTimeout(()=>{Swal.close();document.getElementById('pay-step-1').classList.add('hidden');document.getElementById('pay-step-2').classList.remove('hidden');},1500);},
-            finalizePayment: function(){const a=this.pendingAd.vitrin?150:75;this.data.balance+=a;this.saveData();this.modal('create-ad');this.closeAllModals();this.finishAd(true);},
-            finishAd: function(p){this.data.ads.unshift(this.pendingAd);this.saveData();this.renderAds();this.renderStories();this.router('home');document.getElementById('form-create-ad').reset();this.closeAllModals();this.log(`Yeni İlan: ${this.pendingAd.title}`);Swal.fire('Tebrikler!','İlan yayında.','success');this.sendNotif("İlanınız yayınlandı.");},
-            toggleDarkMode: function() {document.body.classList.toggle('dark-mode');},
-            toggleNotif: function() {const el=document.getElementById('notif-dropdown');el.classList.toggle('hidden');document.getElementById('notif-badge').classList.add('hidden');},
-            toggleFav: function(id){if(!this.data.user){this.modal('login');return;}if(!this.data.favorites) this.data.favorites=[]; if(this.data.favorites.includes(id))this.data.favorites=this.data.favorites.filter(x=>x!==id);else this.data.favorites.push(id);this.saveData();this.detail(id);},
-            search: function(v){if(!v)this.renderAds();else this.renderAds(null,v);},
-            applyFilter: function() {const min=document.getElementById('filter-min').value;const max=document.getElementById('filter-max').value;this.renderAds(null,null,min,max);},
-            resetFilter: function() {document.getElementById('filter-min').value='';document.getElementById('filter-max').value='';this.renderAds();},
-            sendResetLink: function(){this.closeAllModals();Swal.fire('Bağlantı Gönderildi','','success');},
-            requestVerification: function(){this.data.user.verPending=true;this.saveData();this.updateUI();Swal.fire('Başvuru Alındı','','success');},
-            changeProfilePic: function(input){if(input.files&&input.files[0]){var r=new FileReader();r.onload=(e)=>{this.data.user.avatar=e.target.result;this.saveData();this.updateUI();};r.readAsDataURL(input.files[0]);}},
-            saveProfile: function(){this.data.user.name=document.getElementById('p-name').value;this.saveData();this.updateUI();Swal.fire('Kaydedildi','','success');},
-            showPhone: function(){Swal.fire('İletişim','0532 555 44 33','info');},
-            openContract: function() {if(!this.data.user) { this.modal('login'); return; } this.modal('contract');},
-            confirmRent: function() {if(!document.getElementById('contract-check').checked) { Swal.fire('Uyarı','Sözleşmeyi onaylamanız gerekmektedir.','warning'); return; } this.closeAllModals(); Swal.fire({title:'İşlem Başlatıldı', text:'Satıcıya bildirim gönderildi.', icon:'success'});},
-            openWhatsapp: function(){const t=document.getElementById('d-title').innerText;window.open(`https://wa.me/905320000000?text=Merhaba, ${t} ilanı için yazıyorum.`,'_blank');},
-            renderAdmin: function(){document.getElementById('admin-kasa').innerText=this.data.balance+" TL";document.getElementById('admin-ilan-sayisi').innerText=this.data.ads.length;const t=document.getElementById('admin-ads-table');t.innerHTML='';this.data.ads.forEach(ad=>{t.innerHTML+=`<tr class="border-b"><td class="p-2">${ad.id}</td><td class="p-2 font-bold">${ad.title}</td><td class="p-2">${ad.owner}</td><td class="p-2"><button onclick="app.deleteAd(${ad.id})" class="text-red-600 font-bold hover:underline">Sil</button></td></tr>`;});},
-            log: function(m){const t=new Date().toLocaleTimeString();this.data.logs.unshift(`[${t}] ${m}`);if(this.data.isAdmin)this.renderAdmin();}
+        // --- SAYFA YÜKLENİNCE ---
+        window.onload = function() {
+            renderProducts(products);
         };
-        window.onload=()=>app.init();
+
+        // --- ÜRÜNLERİ LİSTELEME ---
+        function renderProducts(list) {
+            const container = document.getElementById("productList");
+            container.innerHTML = "";
+            list.forEach(p => {
+                container.innerHTML += `
+                    <div class="product-card">
+                        <img src="${p.img}" class="product-img" alt="${p.title}">
+                        <div class="product-info">
+                            <div class="price">${p.price} TL / Gün</div>
+                            <div class="title">${p.title}</div>
+                            <div class="location"><i class="fas fa-map-marker-alt"></i> ${p.loc}</div>
+                            <div class="actions">
+                                <button class="btn btn-sm btn-outline" onclick="openMsgModal()"><i class="far fa-envelope"></i> Mesaj</button>
+                                <button class="btn btn-sm btn-cart" onclick="addToCart(${p.id})"><i class="fas fa-shopping-cart"></i> Kirala</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- SIRALAMA MANTIĞI ---
+        function sortListings(type) {
+            let sorted = [...products];
+            if(type === 'price-asc') sorted.sort((a,b) => a.price - b.price);
+            if(type === 'price-desc') sorted.sort((a,b) => b.price - a.price);
+            renderProducts(sorted); // Sıralanmış listeyi çiz
+        }
+
+        // --- SEPET & ESCROW SİSTEMİ ---
+        function addToCart(id) {
+            const item = products.find(p => p.id === id);
+            if (!cart.find(c => c.id === id)) {
+                cart.push(item);
+                updateCartUI();
+                alert("Ürün sepete eklendi! Güvenli ödeme ile kiralayabilirsiniz.");
+            } else {
+                alert("Bu ürün zaten sepetinizde.");
+            }
+        }
+
+        function updateCartUI() {
+            document.getElementById("cartCount").innerText = cart.length;
+            document.getElementById("cartCount").style.display = cart.length > 0 ? "block" : "none";
+            
+            const cartContainer = document.getElementById("cartItems");
+            if(cart.length === 0) {
+                cartContainer.innerHTML = '<p style="text-align:center; color:#999; margin: 20px;">Sepetiniz boş.</p>';
+                return;
+            }
+            cartContainer.innerHTML = "";
+            cart.forEach(item => {
+                cartContainer.innerHTML += `
+                    <div class="cart-item">
+                        <div>
+                            <strong>${item.title}</strong><br>
+                            <small>${item.price} TL</small>
+                        </div>
+                        <i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="removeFromCart(${item.id})"></i>
+                    </div>
+                `;
+            });
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(c => c.id !== id);
+            updateCartUI();
+        }
+
+        function checkout() {
+            if(cart.length === 0) return alert("Sepetiniz boş!");
+            alert("Sistem: Ödeme alındı ve BiKirala Havuz Hesabına aktarıldı.\nSatıcıya kargo/teslimat onayı gönderildi.\nÜrünü teslim alıp onaylayınca para satıcıya geçecek.");
+            cart = [];
+            updateCartUI();
+            closeModal('cartModal');
+        }
+
+        // --- OTO-MODERASYON VE İLAN VERME ---
+        function submitListing() {
+            const title = document.getElementById("newTitle").value;
+            const desc = document.getElementById("newDesc").value;
+            const price = document.getElementById("newPrice").value;
+            
+            // 1. KÜFÜR FİLTRESİ
+            const badWords = ["küfür", "aptal", "dolandırıcı", "kaçak"]; // Örnek yasaklı kelimeler
+            const combinedText = (title + " " + desc).toLowerCase();
+            
+            for (let word of badWords) {
+                if (combinedText.includes(word)) {
+                    alert("UYARI: İlanınızda yasaklı kelimeler veya uygunsuz içerik tespit edildi. Lütfen düzenleyin.");
+                    return; // İlanı gönderme
+                }
+            }
+
+            // 2. BOŞ ALAN KONTROLÜ
+            if(title === "" || price === "") {
+                alert("Lütfen gerekli alanları doldurun.");
+                return;
+            }
+
+            // 3. İLAN EKLEME (Simülasyon)
+            products.unshift({
+                id: Date.now(),
+                title: title,
+                price: parseInt(price),
+                loc: "İstanbul, Merkez (Yeni)",
+                img: "https://via.placeholder.com/400x300?text=Yeni+İlan"
+            });
+            
+            renderProducts(products);
+            closeModal('listingModal');
+            alert("İlanınız moderasyon sisteminden geçti ve başarıyla yayınlandı!");
+            
+            // Formu temizle
+            document.getElementById("newTitle").value = "";
+            document.getElementById("newDesc").value = "";
+        }
+
+        // --- MODAL YÖNETİMİ ---
+        function openListingModal() { 
+            document.getElementById("listingModal").style.display = "flex"; 
+            document.getElementById("listingStep1").style.display = "block";
+            document.getElementById("listingStep2").style.display = "none";
+        }
+        function openCart() { document.getElementById("cartModal").style.display = "flex"; }
+        function openMsgModal() { document.getElementById("msgModal").style.display = "flex"; }
+        function closeModal(id) { document.getElementById(id).style.display = "none"; }
+        
+        function nextStep(step) {
+            if(step === 2) {
+                document.getElementById("listingStep1").style.display = "none";
+                document.getElementById("listingStep2").style.display = "block";
+            }
+        }
+        function prevStep(step) {
+            if(step === 1) {
+                document.getElementById("listingStep2").style.display = "none";
+                document.getElementById("listingStep1").style.display = "block";
+            }
+        }
+
+        // Dışarı tıklayınca kapatma
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = "none";
+            }
+        }
     </script>
 </body>
 </html>
