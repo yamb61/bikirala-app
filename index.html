@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - V25 Final Professional</title>
+    <title>BiKirala - V26 Final Professional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -203,9 +203,7 @@
                 <h3 class="font-bold text-sm text-gray-500 mb-2">AÇIKLAMA</h3>
                 <p id="d-desc" class="text-sm text-gray-600 mb-6 flex-1 whitespace-pre-wrap leading-relaxed">...</p>
                 <div id="d-actions" class="space-y-3 mt-auto pb-safe">
-                    <button onclick="app.addToCart(state.currentAdId)" class="w-full border-2 border-primary text-primary font-bold py-3 rounded-xl mb-2 hover:bg-yellow-50 transition"><i class="fa-solid fa-cart-plus"></i> Sepete Ekle</button>
-                    <button onclick="app.openMsgModal()" class="w-full border-2 border-accent text-accent font-bold py-3 rounded-xl mb-2 hover:bg-blue-50">Mesaj At</button>
-                </div>
+                    </div>
             </div>
         </div>
     </div>
@@ -331,7 +329,7 @@
     </div>
 
     <div id="cart-modal" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-lg rounded-2xl p-0 overflow-hidden relative shadow-float modal-enter max-h-[90vh] overflow-y-auto">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-0 overflow-hidden relative shadow-float modal-enter max-h-[90vh] overflow-y-auto dark:bg-gray-800">
             <div class="p-5 border-b bg-white sticky top-0 z-10 flex justify-between items-center dark:bg-gray-900 dark:border-gray-800">
                 <h2 class="text-xl font-bold">Sepetim</h2>
                 <button onclick="app.modal('cart-modal', false)" class="text-2xl text-gray-400 hover:text-danger">&times;</button>
@@ -345,7 +343,7 @@
                     <p>Sepetin şu an boş.</p>
                 </div>
 
-                <div id="cart-summary" class="bg-gray-50 p-4 rounded-xl border border-gray-200 dark:bg-gray-800 dark:border-gray-700 hidden">
+                <div id="cart-summary" class="bg-gray-50 p-4 rounded-xl border border-gray-200 dark:bg-gray-900 dark:border-gray-700 hidden">
                     <div class="flex justify-between text-sm mb-2"><span>Ürün Toplamı:</span><span id="cart-total-price">0 TL</span></div>
                     <div class="flex justify-between text-sm mb-3 border-b pb-2 border-gray-300 dark:border-gray-700"><span>Hizmet Bedeli (%10):</span><span id="cart-fee-price" class="text-danger">0 TL</span></div>
                     <div class="flex justify-between text-xl font-bold"><span>Genel Toplam:</span><span id="cart-grand-total">0 TL</span></div>
@@ -447,15 +445,15 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'bk_v25_';
+        const STORAGE_KEY = 'bk_v26_';
         const state = {
             user: JSON.parse(localStorage.getItem(STORAGE_KEY + 'user')) || null,
             ads: JSON.parse(localStorage.getItem(STORAGE_KEY + 'ads')) || [],
             messages: JSON.parse(localStorage.getItem(STORAGE_KEY + 'msgs')) || [],
             favorites: JSON.parse(localStorage.getItem(STORAGE_KEY + 'favs')) || [],
-            cart: JSON.parse(localStorage.getItem(STORAGE_KEY + 'cart')) || [], // Yeni Sepet
-            orders: JSON.parse(localStorage.getItem(STORAGE_KEY + 'orders')) || [], // Yeni Siparişler (Alıcı)
-            profileData: JSON.parse(localStorage.getItem(STORAGE_KEY + 'profile')) || { phone: '', address: '' }, // Yeni Profil Bilgileri
+            cart: JSON.parse(localStorage.getItem(STORAGE_KEY + 'cart')) || [],
+            orders: JSON.parse(localStorage.getItem(STORAGE_KEY + 'orders')) || [],
+            profileData: JSON.parse(localStorage.getItem(STORAGE_KEY + 'profile')) || { name: '', email: '', phone: '', address: '' },
             cats: [
                 {name:'Emlak', icon:'fa-house-chimney', color:'text-orange-500', specs: [{name: 'm²', type: 'number'}, {name: 'Oda Sayısı', type: 'select', options: ['1+0', '1+1', '2+1', '3+1', '4+1+']}]},
                 {name:'Vasıta', icon:'fa-car-side', color:'text-red-500', specs: [{name: 'Yıl', type: 'number'}, {name: 'KM', type: 'number'}, {name: 'Yakıt', type: 'select', options: ['Benzin', 'Dizel', 'LPG', 'Hibrit']}, {name: 'Vites', type: 'select', options: ['Otomatik', 'Manuel']}]},
@@ -464,7 +462,7 @@
                 {name:'Giyim', icon:'fa-shirt', color:'text-purple-500', specs: [{name: 'Beden', type: 'select', options: ['S', 'M', 'L', 'XL']}]},
                 {name:'Diğer', icon:'fa-layer-group', color:'text-green-500', specs: []}
             ],
-            tempImages: [], // Çoklu resim
+            tempImages: [],
             currentAdId: null,
             dopingTotal: 0,
             selectedDopings: [],
@@ -520,7 +518,7 @@
             },
             completeReg: () => {
                 state.user = state.tempRegData; 
-                state.profileData.name = state.user.name; // Profili başlangıçta doldur
+                state.profileData.name = state.user.name;
                 state.profileData.email = state.user.email;
                 app.save(); app.modal('register-modal', false); ui.renderHeader(); ui.toast('Kayıt Başarıyla Tamamlandı!', 'success');
             },
@@ -559,11 +557,10 @@
                     state.tempImages = []; state.dopingTotal = 0; state.selectedDopings = [];
                     document.getElementById('upload-grid').innerHTML = ''; document.getElementById('doping-total').innerText = '0 TL';
                     document.querySelectorAll('.doping-card').forEach(c => c.classList.remove('selected'));
-                    app.renderCatSpecs(document.getElementById('p-cat').value); // Özellikleri yenile
+                    app.renderCatSpecs(document.getElementById('p-cat').value);
                 }
             },
 
-            // --- ÇOKLU FOTOĞRAF YÜKLEME ---
             handleImageUpload: (input) => {
                 const files = input.files;
                 if(files.length + state.tempImages.length > 10) { ui.toast('Maksimum 10 fotoğraf yükleyebilirsiniz.', 'error'); return; }
@@ -573,7 +570,7 @@
                     r.onload = (e) => { state.tempImages.push(e.target.result); app.renderUploadGrid(); };
                     r.readAsDataURL(f);
                 });
-                input.value = ''; // Inputu temizle
+                input.value = '';
             },
             renderUploadGrid: () => {
                 const grid = document.getElementById('upload-grid');
@@ -592,7 +589,6 @@
                 app.renderUploadGrid();
             },
 
-            // --- DİNAMİK KATEGORİ ÖZELLİKLERİ ---
             renderCatSpecs: (catName) => {
                 const fieldsDiv = document.getElementById('cat-specific-fields');
                 const cat = state.cats.find(c => c.name === catName);
@@ -616,13 +612,18 @@
                 });
             },
 
-            // İlan Finalize
+            toggleDoping: (el, type, price) => {
+                el.classList.toggle('selected');
+                if(state.selectedDopings.includes(type)) { state.selectedDopings = state.selectedDopings.filter(t => t !== type); state.dopingTotal -= price;
+                } else { state.selectedDopings.push(type); state.dopingTotal += price; }
+                document.getElementById('doping-total').innerText = state.dopingTotal + ' TL';
+            },
+
             submitAdFlow: () => {
                 const t = document.getElementById('p-title').value; const p = document.getElementById('p-price').value; const c = document.getElementById('p-cat').value;
                 const loc = document.getElementById('p-location').value;
                 if(!t || !p || !c || state.tempImages.length === 0) return ui.toast('Başlık, Fiyat, Kategori ve en az 1 Resim zorunludur.', 'error');
                 
-                // Özellikleri topla
                 const adSpecs = {};
                 const currentCat = state.cats.find(cat => cat.name === c);
                 if(currentCat) {
@@ -645,15 +646,14 @@
                     id: Date.now(), title: title, price: parseInt(price), cat: cat, location: location,
                     owner: state.user.name, isStore: state.user.isStore, 
                     image: state.tempImages[0], 
-                    images: state.tempImages, // Tüm resimleri kaydet
-                    specs: specs, // Özellikleri kaydet
+                    images: state.tempImages,
+                    specs: specs,
                     vitrin: state.selectedDopings.includes('vitrin'), 
                     dopings: state.selectedDopings 
                 });
                 app.save(); app.modal('post-ad-modal', false); ui.renderAds(state.ads); ui.renderVitrin(); ui.toast('İlan Yayında!', 'success');
             },
 
-            // --- PROFİL GÜNCELLEME ---
             updateProfile: () => {
                 state.profileData.name = document.getElementById('edit-name').value;
                 state.profileData.phone = document.getElementById('edit-phone').value;
@@ -664,9 +664,8 @@
                 ui.toast('Profil Bilgileri Güncellendi', 'success');
             },
 
-            // --- SİPARİŞ TAKİP ---
             confirmDelivery: (orderId) => {
-                const order = state.orders.find(o => o.id === orderId);
+                const order = state.orders.find(o => o.id === orderId && !o.isSeller);
                 if (!order || order.status !== 'Kargoda') return;
 
                 if (confirm(`${order.title} ürününü teslim aldığınızı onaylıyor musunuz? Onaylarsanız ödeme satıcıya aktarılacaktır.`)) {
@@ -713,11 +712,11 @@
                 const date = new Date().toLocaleDateString();
                 state.cart.forEach(item => {
                     const orderId = Date.now() + item.id;
-                    const orderItem = { id: orderId, adId: item.id, title: item.title, price: item.price, image: item.image, date: date, status: 'Kargoda', isSeller: false };
-                    const salesItem = { ...orderItem, status: 'Kargoda', buyer: state.user.name, isSeller: true };
+                    const orderItem = { id: orderId, adId: item.id, title: item.title, price: item.price, image: item.image, date: date, status: 'Kargoda', isSeller: false, buyer: state.user.name };
+                    const salesItem = { ...orderItem, status: 'Kargoda', isSeller: true, owner: item.owner };
 
                     state.orders.unshift(orderItem);
-                    state.orders.unshift(salesItem); // Satıcı için kopyasını ekle
+                    state.orders.unshift(salesItem);
                 });
 
                 state.cart = [];
@@ -729,9 +728,39 @@
                 const totalPrice = state.cart.reduce((sum, item) => sum + item.price, 0);
                 const fee = totalPrice * 0.10;
                 const grandTotal = totalPrice + fee;
-                return { totalPrice: totalPrice, fee: fee.toFixed(2), grandTotal: grandTotal.toFixed(2) };
+                return { totalPrice: totalPrice, fee: fee.toFixed(2), grandTotal: grandTotal };
             },
+            
+            // --- İLAN DETAYINDAN DOĞRUDAN ÖDEME (GÜNCELLENDİ) ---
+            buyProductDirect: (adId) => {
+                if(!state.user) return app.modal('login-modal', true);
 
+                const ad = state.ads.find(a => a.id === adId);
+                if (!ad) return ui.toast('Ürün bulunamadı.', 'error');
+                if (ad.owner === state.user.name) return ui.toast('Kendi ilanınızı satın alamazsınız.', 'error');
+                
+                app.modal('detail-modal', false);
+
+                const price = ad.price;
+                const fee = price * 0.10;
+                const total = price + fee;
+
+                payment.open(total, 
+                    'Güvenli Satın Alma (Tek Ürün)', 
+                    `${ad.title} (${price.toLocaleString('tr-TR')} TL) + ${fee.toFixed(2)} TL Hizmet Bedeli`, 
+                    () => {
+                        const date = new Date().toLocaleDateString();
+                        const orderId = Date.now();
+                        const orderItem = { id: orderId, adId: ad.id, title: ad.title, price: ad.price, image: ad.image, date: date, status: 'Kargoda', isSeller: false, buyer: state.user.name };
+                        const salesItem = { ...orderItem, status: 'Kargoda', isSeller: true, owner: ad.owner };
+
+                        state.orders.unshift(orderItem);
+                        state.orders.unshift(salesItem);
+                        app.save();
+                        ui.toast('Sipariş başarıyla oluşturuldu ve kargoya verildi.', 'success');
+                    }
+                );
+            },
 
             openDetail: (id) => {
                 state.currentAdId = id;
@@ -755,11 +784,11 @@
                 } else {
                     acts.innerHTML = `
                         <button onclick="app.addToCart(${a.id})" class="w-full border-2 border-primary text-primary font-bold py-3 rounded-xl mb-2 hover:bg-yellow-50 transition"><i class="fa-solid fa-cart-plus"></i> Sepete Ekle</button>
-                        <button onclick="app.openMsgModal()" class="w-full border-2 border-accent text-accent font-bold py-3 rounded-xl mb-2 hover:bg-blue-50">Mesaj At</button>
+                        <button onclick="app.buyProductDirect(${a.id})" class="w-full bg-accent text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition"><i class="fa-solid fa-lock"></i> Güvenli Al (${a.price.toLocaleString('tr-TR')} TL)</button>
+                        <button onclick="app.openMsgModal()" class="w-full border-2 border-accent text-accent font-bold py-3 rounded-xl mb-2 mt-2 hover:bg-blue-50">Mesaj At</button>
                     `;
                 }
 
-                // Galeri ve Özellikler
                 app.renderDetailGallery(a.images);
                 app.renderDetailSpecs(a.specs);
                 app.modal('detail-modal', true);
@@ -805,8 +834,6 @@
                 } else { state.selectedDopings.push(type); state.dopingTotal += price; }
                 document.getElementById('doping-total').innerText = state.dopingTotal + ' TL';
             },
-
-            // Mesajlar, Arama, Filtreleme, Profil Geri kalanı aynı kalacak
 
             toggleFavorite: (id) => {
                 if(!state.user) return ui.toast('Giriş yapmalısın', 'error');
@@ -884,7 +911,6 @@
                 document.getElementById('p-type').innerText = state.user.isStore ? 'Kurumsal Mağaza' : 'Bireysel Hesap';
                 document.getElementById('p-type').className = state.user.isStore ? 'text-[10px] bg-accent text-white px-2 py-1 rounded-full' : 'text-[10px] bg-gray-200 px-2 py-1 rounded-full text-gray-600';
                 
-                // Profil Bilgilerini Yükle
                 document.getElementById('edit-name').value = state.profileData.name || state.user.name;
                 document.getElementById('edit-phone').value = state.profileData.phone || '';
                 document.getElementById('edit-address').value = state.profileData.address || '';
@@ -954,7 +980,6 @@
                 });
             },
             
-            // --- SEPET RENDER ---
             renderCart: () => {
                 const itemsDiv = document.getElementById('cart-items');
                 const summaryDiv = document.getElementById('cart-summary');
@@ -988,12 +1013,11 @@
                 `).join('');
             },
 
-            // --- SİPARİŞ TAKİP RENDER ---
             renderOrderLists: () => {
                 const ordersList = document.getElementById('orders-list');
                 const salesList = document.getElementById('sales-list');
-                const userOrders = state.orders.filter(o => !o.isSeller); // Alıcı siparişleri
-                const userSales = state.orders.filter(o => o.isSeller && o.title !== 'Sohbet'); // Satıcı satışları
+                const userOrders = state.orders.filter(o => !o.isSeller && o.buyer === state.user.name);
+                const userSales = state.orders.filter(o => o.isSeller && o.owner === state.user.name);
                 
                 const getStatusColor = (status) => {
                     if (status === 'Teslim Edildi' || status === 'Ödeme Yapıldı') return 'bg-green-100 text-green-700';
@@ -1007,7 +1031,7 @@
                         <img src="${order.image}" class="w-16 h-16 object-cover rounded-lg">
                         <div class="flex-1">
                             <div class="font-bold text-sm">${order.title}</div>
-                            <div class="text-xs text-gray-500 mb-1">Sipariş No: ${order.id}</div>
+                            <div class="text-xs text-gray-500 mb-1">Satıcı: ${order.owner}</div>
                             <div class="font-bold text-accent">${order.price.toLocaleString('tr-TR')} TL</div>
                         </div>
                         <div class="text-right">
@@ -1028,7 +1052,7 @@
                         </div>
                         <div class="text-right">
                             <span class="text-xs font-bold ${getStatusColor(sale.status)} px-3 py-1 rounded-full">${sale.status}</span>
-                            ${sale.status === 'Ödeme Yapıldı' ? `<div class="text-xs text-green-600 mt-1">Ödeme Hesabınıza Geçti</div>` : `<div class="text-xs text-gray-500 mt-1">Alıcı Onayını Bekliyor</div>`}
+                            ${sale.status === 'Ödeme Yapıldı' ? `<div class="text-xs text-green-600 mt-1">Ödeme Hesabınıza Geçti (${sale.paymentDate})</div>` : `<div class="text-xs text-gray-500 mt-1">Alıcı Onayını Bekliyor</div>`}
                         </div>
                     </div>
                 `).join('');
