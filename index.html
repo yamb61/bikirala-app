@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - V34 Son Düzeltme (Tıklama)</title>
+    <title>AI Yazarım - Anlık İçerik Üretici</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -13,24 +13,12 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#FFD700',       
-                        accent: '#2962FF',        
-                        danger: '#ff3f55',        
-                        dark: '#1a1a1a',          
-                        surface: '#ffffff',       
-                        graybg: '#f1f2f6',
+                        primary: '#10B981', // Emerald Yeşil
+                        dark: '#1f2937', 
+                        graybg: '#f3f4f6'
                     },
                     boxShadow: {
-                        'float': '0 10px 40px rgba(0,0,0,0.1)',
-                        'card': '0 2px 10px rgba(0,0,0,0.05)'
-                    },
-                    animation: {
-                        'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
-                        'slide-in': 'slideIn 0.3s ease-out forwards'
-                    },
-                    keyframes: {
-                        pop: { '0%': { transform: 'scale(0.95)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
-                        slideIn: { '0%': { transform: 'translateX(100%)', opacity: '0' }, '100%': { transform: 'translateX(0)', opacity: '1' } }
+                        'soft': '0 4px 15px rgba(0,0,0,0.08)',
                     }
                 }
             }
@@ -38,1206 +26,211 @@
     </script>
     <style>
         body { font-family: 'Segoe UI', system-ui, sans-serif; transition: background-color 0.3s, color 0.3s; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .bk-input { width: 100%; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 8px; outline: none; transition: 0.2s; font-size: 14px; background: white; }
-        .bk-input:focus { border-color: #2962FF; box-shadow: 0 0 0 3px rgba(41, 98, 255, 0.1); }
-        .modal-enter { animation: pop 0.3s forwards; }
-        
-        /* Z-INDEX SADELEŞTİRMESİ - Tıklama Sorunu İçin Tek Çözüm */
-        header, nav { z-index: 90; } 
-        .fixed:not(header):not(nav) { z-index: 50; } 
-        .modal { z-index: 100; } 
-        #toast-container { z-index: 1000; }
-        
-        /* İlan Kartı Tıklama Alanını Genişlet */
-        .ilan-kart-link { display: block; position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 10; cursor: pointer; }
+        .bk-input { padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; transition: all 0.2s; background: white; color: #1f2937; }
+        .bk-input:focus { border-color: #10B981; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
+        .dark body { background-color: #111; color: #eee; }
+        .dark .bg-white { background-color: #1f2937; border-color: #374151; color: #eee; }
+        .dark .bk-input { background-color: #374151; border-color: #4b5563; color: #eee; }
+        .dark .bg-gray-50 { background-color: #252525; }
+        .dark .shadow-soft { box-shadow: 0 4px 15px rgba(255,255,255,0.08); }
     </style>
 </head>
-<body class="bg-graybg text-dark pb-24 md:pb-0">
+<body class="bg-graybg dark:bg-dark transition-colors">
 
-    <div id="toast-container" class="fixed top-24 right-5 z-[1000] flex flex-col gap-3 pointer-events-none"></div>
-
-    <header class="fixed top-0 w-full bg-white z-[90] h-20 shadow-sm border-b flex items-center justify-between px-4 md:px-8 transition-colors">
-        <div class="flex items-center gap-1 cursor-pointer select-none" onclick="app.goHome()">
-            <div class="bg-primary px-3 py-1 rounded text-dark font-black text-2xl transform -skew-x-12 shadow-sm">Bi</div>
-            <div class="text-2xl font-bold text-accent tracking-tight">Kirala</div>
-        </div>
-
-        <div class="hidden md:flex flex-1 max-w-2xl mx-12 relative group">
-            <input type="text" oninput="app.search(this.value)" placeholder="Kelime, ilan no veya mağaza adı ile ara..." class="bk-input bg-gray-50 border-gray-200 rounded-full pl-12 h-12 focus:bg-white transition-all">
-            <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-400"></i>
-            <button class="absolute right-2 top-2 h-8 px-4 bg-primary text-dark font-bold text-xs rounded-full hover:bg-yellow-400 transition">ARA</button>
-        </div>
-
-        <div class="flex items-center gap-4 z-[91]">
-            <button onclick="document.documentElement.classList.toggle('dark')" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-yellow-400 transition"><i class="fa-solid fa-moon"></i></button>
-            <button onclick="app.modal('cart-modal', true)" id="cart-btn" class="relative w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-white transition hover:text-accent">
-                <i class="fa-solid fa-shopping-cart text-lg"></i>
-                <span id="cart-count" class="absolute top-0 right-0 w-5 h-5 bg-danger text-white text-[10px] font-bold rounded-full flex items-center justify-center hidden">0</span>
-            </button>
-            <div id="header-auth-area" class="flex items-center gap-3"></div>
-        </div>
-    </header>
-
-    <div class="container mx-auto mt-32 md:mt-24 px-4 flex gap-8 min-h-screen">
-        
-        <aside class="hidden md:block w-72 flex-shrink-0 space-y-4">
-            <div class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden">
-                <div class="p-4 border-b bg-gray-50 font-bold text-xs text-gray-500 uppercase">Kategoriler</div>
-                <ul id="category-list" class="flex flex-col"></ul>
+    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
+        <header class="flex justify-between items-center py-6 border-b border-gray-200 dark:border-gray-700 mb-8">
+            <h1 class="text-3xl font-extrabold text-primary flex items-center gap-2">
+                <i class="fa-solid fa-robot"></i> AI YAZARIM
+            </h1>
+            <div class="flex items-center gap-4">
+                <button onclick="document.documentElement.classList.toggle('dark')" class="w-10 h-10 rounded-full bg-white dark:bg-dark flex items-center justify-center text-gray-700 dark:text-yellow-400 border border-gray-300 dark:border-gray-700 transition">
+                    <i class="fa-solid fa-moon" id="theme-icon"></i>
+                </button>
             </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <div class="bg-white rounded-xl shadow-card border border-gray-100 p-4">
-                <div class="font-bold text-xs text-gray-500 uppercase mb-3">Fiyat Aralığı</div>
-                <div class="flex gap-2 mb-3">
-                    <input type="number" id="min-price" placeholder="Min" class="bk-input text-sm">
-                    <input type="number" id="max-price" placeholder="Max" class="bk-input text-sm">
-                </div>
-                <button onclick="app.filterPrice()" class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 text-dark font-bold py-2 rounded-lg text-sm transition">Uygula</button>
-            </div>
-        </aside>
-
-        <main class="flex-1 w-full">
-            <div class="bg-white rounded-xl shadow-card border border-gray-100 p-5 mb-6 relative overflow-hidden">
-                <div class="absolute top-0 right-0 bg-gradient-to-r from-primary to-yellow-500 text-dark text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm">SPONSORLU</div>
-                <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-dark"><i class="fa-solid fa-star text-primary"></i> Vitrin İlanları</h3>
-                <div id="vitrin-area" class="flex gap-4 overflow-x-auto hide-scroll pb-2"></div>
-            </div>
-
-            <div class="flex justify-between items-center mb-5">
-                <h1 class="text-2xl font-bold text-dark tracking-tight" id="page-title">Tüm İlanlar</h1>
-                <select onchange="app.sort(this.value)" class="bk-input w-auto py-2 px-4 h-10 border-gray-200 text-sm shadow-sm cursor-pointer">
-                    <option value="new">En Yeni</option>
-                    <option value="price-asc">Fiyat (Artan)</option>
-                    <option value="price-desc">Fiyat (Azalan)</option>
-                </select>
-            </div>
-
-            <div id="ads-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
-            
-            <div id="empty-state" class="hidden py-24 text-center text-gray-400">
-                <i class="fa-solid fa-filter-circle-xmark text-6xl mb-4 opacity-20"></i>
-                <p>Bu kriterlerde ilan bulunamadı.</p>
-                <button onclick="app.goHome()" class="mt-4 text-accent font-bold hover:underline">Filtreleri Temizle</button>
-            </div>
-        </main>
-    </div>
-
-    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t h-16 flex justify-around items-center z-[90] text-gray-400 pb-safe shadow-[0_-5px_15px_rgba(0,0,0,0.03)] dark:bg-black dark:border-gray-800">
-        <div onclick="app.goHome()" class="flex flex-col items-center gap-1 text-accent cursor-pointer"><i class="fa-solid fa-house text-xl"></i><span class="text-[10px]">Vitrin</span></div>
-        <div onclick="app.checkAuth('favs')" class="flex flex-col items-center gap-1 cursor-pointer"><i class="fa-solid fa-heart text-xl"></i><span class="text-[10px]">Favoriler</span></div>
-        <div onclick="app.checkAuth('post')" class="relative -top-6 cursor-pointer">
-            <div class="w-14 h-14 bg-gradient-to-tr from-danger to-orange-500 rounded-full flex items-center justify-center text-white shadow-float border-4 border-white transform active:scale-95 transition">
-                <i class="fa-solid fa-plus text-2xl"></i>
-            </div>
-        </div>
-        <div onclick="app.openPanel('msgs')" class="flex flex-col items-center gap-1 cursor-pointer"><i class="fa-regular fa-comment-dots text-xl"></i><span class="text-[10px]">Mesajlar</span></div>
-        <div onclick="app.openPanel('info')" class="flex flex-col items-center gap-1 cursor-pointer"><i class="fa-regular fa-user text-xl"></i><span class="text-[10px]">Hesabım</span></div>
-    </nav>
-
-    <div id="detail-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm modal">
-        <div class="bg-white w-full max-w-6xl h-[95vh] md:h-[90vh] rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-2xl modal-enter relative">
-            <button onclick="app.modal('detail-modal', false)" class="absolute top-4 right-4 z-[150] bg-white/90 w-10 h-10 rounded-full flex items-center justify-center shadow hover:bg-gray-100 text-dark"><i class="fa-solid fa-xmark text-xl"></i></button>
-            
-            <div class="w-full md:w-2/3 bg-black flex flex-col relative group">
-                <div class="flex-1 flex items-center justify-center p-4 overflow-hidden">
-                    <img id="d-main-img" src="" class="max-h-full max-w-full object-contain transition duration-300">
-                </div>
-                <div id="d-gallery" class="h-24 bg-black/80 flex items-center gap-3 px-4 overflow-x-auto hide-scroll pb-safe">
+            <div class="lg:col-span-1 bg-white dark:bg-dark p-6 rounded-xl shadow-soft h-fit sticky top-4">
+                <h2 class="text-xl font-bold mb-4 border-b pb-2">İçerik Oluştur</h2>
+                <form onsubmit="event.preventDefault(); app.generateContent()">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1">Konu Başlığı</label>
+                        <input type="text" id="topic" class="bk-input w-full" placeholder="Örn: Yapay zeka ile SEO">
                     </div>
-            </div>
-
-            <div class="w-full md:w-1/3 bg-white p-6 flex flex-col overflow-y-auto">
-                <div class="flex justify-between items-start mb-2">
-                    <h1 id="d-title" class="text-xl font-bold text-dark leading-tight">Başlık</h1>
-                    <button id="d-fav-btn" onclick="" class="text-gray-300 hover:text-red-500 transition text-2xl"><i class="fa-solid fa-heart"></i></button>
-                </div>
-                <div id="d-price-area">
-                    <div id="d-price" class="text-3xl font-black text-accent mb-2 tracking-tight">0 TL</div>
-                    <div id="rental-slider" class="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg mb-4 hidden">
-                        <label for="days-slider" class="font-bold flex justify-between mb-2">Kiralama Süresi: <span id="current-days">1 Gün</span></label>
-                        <input type="range" id="days-slider" min="1" max="30" value="1" step="1" class="w-full h-1 bg-accent rounded-lg appearance-none cursor-pointer" oninput="app.updateRentalPrice(this.value)">
-                        <div class="flex justify-between mt-1 text-[10px]"><span>1 Gün</span><span>30 Gün</span></div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1">Anahtar Kelimeler (Virgülle ayır)</label>
+                        <input type="text" id="keywords" class="bk-input w-full" placeholder="Örn: AI, SEO, içerik üretimi">
                     </div>
-                </div>
-                
-                <div class="text-sm text-gray-500 mb-6 flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> <span id="d-location">İstanbul</span></div>
-
-                <div class="mb-6">
-                    <h3 class="font-bold text-sm text-gray-500 mb-2 uppercase">Teknik Özellikler</h3>
-                    <div id="d-specs" class="border rounded-lg overflow-hidden text-sm">
-                        </div>
-                </div>
-
-                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-4 border border-gray-100 dark:border-gray-700">
-                    <div class="relative">
-                         <div id="d-avatar" class="w-12 h-12 bg-white border rounded-full flex items-center justify-center font-bold text-gray-500 text-lg shadow-sm">A</div>
-                         <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800" title="Şimdi Aktif"></div>
-                    </div>
-                    <div>
-                        <div id="d-owner" class="font-bold text-sm text-dark">Satıcı</div>
-                        <div class="text-xs text-yellow-500 flex items-center gap-1"><i class="fa-solid fa-star"></i> <span>4.8 (Satıcı Puanı)</span></div>
-                    </div>
-                </div>
-
-                <div class="border border-green-200 bg-green-50 p-3 rounded-xl mb-4 flex items-center gap-3">
-                    <i class="fa-solid fa-shield-halved text-green-600 text-2xl"></i>
-                    <div>
-                        <div class="text-green-800 font-bold text-sm">Güvenli Ödeme</div>
-                        <div class="text-[10px] text-green-700">Para havuzda tutulur, ürün teslim edilince satıcıya aktarılır.</div>
-                    </div>
-                </div>
-
-                <h3 class="font-bold text-sm text-gray-500 mb-2">AÇIKLAMA</h3>
-                <div id="d-desc-area" class="relative">
-                    <p id="d-desc" class="text-sm text-gray-600 mb-2 leading-relaxed h-20 overflow-hidden relative">...</p>
-                    <button id="desc-toggle" class="text-accent text-sm font-bold hover:underline" onclick="app.toggleDescription()">Daha Fazla Oku</button>
-                </div>
-                
-                <div id="d-actions" class="space-y-3 mt-auto pb-safe">
-                    </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="post-ad-modal" class="fixed inset-0 bg-white z-[100] hidden overflow-y-auto modal">
-        <div class="max-w-3xl mx-auto min-h-screen bg-white pb-20">
-            <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10 shadow-sm"><h2 class="text-xl font-bold">İlan Ver</h2><button onclick="app.modal('post-ad-modal', false)" class="text-2xl text-gray-400 hover:text-danger">&times;</button></div>
-            <div class="p-6 space-y-6">
-                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-accent transition bg-gray-50 dark:bg-gray-800">
-                    <div id="upload-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-4">
-                        </div>
-                    <label class="cursor-pointer block">
-                        <input type="file" id="p-image-input" class="hidden" accept="image/*" multiple onchange="app.handleImageUpload(this)">
-                        <div class="p-4 border rounded-lg bg-white shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                            <i class="fa-solid fa-images text-2xl text-accent mb-2"></i>
-                            <p class="text-sm font-bold text-gray-600 dark:text-gray-200">Fotoğraf Ekle (Max 10)</p>
-                        </div>
-                    </label>
-                </div>
-
-                <div class="space-y-4">
-                    <input type="text" id="p-title" class="bk-input text-lg font-bold" placeholder="İlan Başlığı">
-                    <div class="grid grid-cols-3 gap-4">
-                        <input type="number" id="p-price" class="bk-input" placeholder="Fiyat (TL)" required>
-                        <input type="number" id="p-stock" class="bk-input" placeholder="Stok Adedi" value="1" required min="1">
-                        <select id="p-cat" class="bk-input bg-white cursor-pointer" onchange="app.renderCatSpecs(this.value)" required>
-                             <option value="">Kategori Seç</option>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1">Yazı Tonu</label>
+                        <select id="tone" class="bk-input w-full cursor-pointer">
+                            <option value="profesyonel">Profesyonel</option>
+                            <option value="eğlenceli">Eğlenceli ve Samimi</option>
+                            <option value="akademik">Akademik</option>
                         </select>
                     </div>
-                    <input type="text" id="p-location" class="bk-input" placeholder="Şehir / İlçe (Örn: İstanbul, Kadıköy)">
-                    
-                    <div id="cat-specific-fields" class="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-xl border hidden dark:bg-gray-800 dark:border-gray-700">
-                        </div>
-
-                    <textarea id="p-desc" rows="5" class="bk-input" placeholder="İlan açıklaması..."></textarea>
-                </div>
-
-                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fa-solid fa-rocket text-danger"></i> Hızlı Satış & Doping</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div class="doping-card bg-white p-4 rounded-xl shadow-sm" onclick="app.toggleDoping(this, 'vitrin', 150)">
-                            <div class="font-bold text-primary flex justify-between">Vitrin <span class="text-dark">150 TL</span></div>
-                            <div class="text-xs text-gray-500 mt-1">Ana sayfada en üstte.</div>
-                        </div>
-                        <div class="doping-card bg-white p-4 rounded-xl shadow-sm" onclick="app.toggleDoping(this, 'acil', 75)">
-                            <div class="font-bold text-danger flex justify-between">Acil <span class="text-dark">75 TL</span></div>
-                            <div class="text-xs text-gray-500 mt-1">Kırmızı "Acil" etiketi.</div>
-                        </div>
-                    </div>
-                    <div class="mt-4 text-right pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <span class="text-sm text-gray-500">Ekstra Tutar:</span>
-                        <span class="text-2xl font-bold text-dark ml-2" id="doping-total">0 TL</span>
-                    </div>
-                </div>
-                <button onclick="app.submitAdFlow()" class="w-full bg-accent text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition text-lg">YAYINLA</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="profile-panel" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm modal">
-        <div class="bg-white w-full max-w-5xl h-[85vh] rounded-2xl shadow-float overflow-hidden flex flex-col md:flex-row relative modal-enter">
-            <button onclick="app.modal('profile-panel', false)" class="absolute top-4 right-4 text-2xl z-[150] md:hidden">&times;</button>
-            <div class="w-full md:w-64 bg-gray-50 border-r flex flex-col p-4 dark:bg-gray-900 dark:border-gray-800">
-                <div class="text-center mb-6">
-                    <img id="p-avatar" src="" class="w-24 h-24 rounded-full mx-auto border-4 border-white shadow-sm mb-3 object-cover">
-                    <h3 id="p-name" class="font-bold text-dark text-lg truncate">Kullanıcı</h3>
-                    <span id="p-type" class="text-[10px] bg-gray-200 px-2 py-1 rounded-full text-gray-600">Bireysel</span>
-                </div>
-                <nav class="flex-1 space-y-1">
-                    <button onclick="ui.switchDash('info')" id="nav-info" class="w-full text-left p-3 rounded-lg text-sm font-bold text-accent bg-white shadow-sm">Bilgilerim</button>
-                    <button onclick="ui.switchDash('favs')" id="nav-favs" class="w-full text-left p-3 rounded-lg text-sm text-gray-600 hover:bg-white">Favorilerim</button>
-                    <button onclick="ui.switchDash('orders')" id="nav-orders" class="w-full text-left p-3 rounded-lg text-sm text-gray-600 hover:bg-white">Siparişlerim</button>
-                    <button onclick="ui.switchDash('sales')" id="nav-sales" class="w-full text-left p-3 rounded-lg text-sm text-gray-600 hover:bg-white">Satışlarım</button>
-                    <button onclick="ui.switchDash('msgs')" id="nav-msgs" class="w-full text-left p-3 rounded-lg text-sm text-gray-600 hover:bg-white">Mesajlarım</button>
-                </nav>
-                <button onclick="auth.logout()" class="w-full text-left p-3 text-danger font-bold hover:bg-red-50 rounded-lg mt-4">Çıkış Yap</button>
-            </div>
-            <div class="flex-1 bg-white p-0 md:p-8 overflow-y-auto relative h-full">
-                <button onclick="app.modal('profile-panel', false)" class="hidden md:block absolute top-4 right-4 text-2xl text-gray-400 hover:text-dark z-[150]"><i class="fa-solid fa-xmark"></i></button>
-                
-                <div id="dash-info" class="block p-8">
-                    <h2 class="text-2xl font-bold mb-6">Hesap Bilgileri</h2>
-                    <form onsubmit="event.preventDefault(); app.updateProfile()">
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div><label class="text-xs font-bold text-gray-500 mb-1 block">Ad Soyad</label><input id="edit-name" class="bk-input" required></div>
-                            <div><label class="text-xs font-bold text-gray-500 mb-1 block">Telefon</label><input id="edit-phone" class="bk-input" value="5xx xxx xx xx"></div>
-                        </div>
-                        <div class="mb-4"><label class="text-xs font-bold text-gray-500 mb-1 block">E-Posta</label><input id="edit-email" class="bk-input bg-gray-100 dark:bg-gray-800 cursor-not-allowed" disabled></div>
-                        <div class="mb-4"><label class="text-xs font-bold text-gray-500 mb-1 block">Şehir / Adres</label><input id="edit-address" class="bk-input" placeholder="İstanbul, Kadıköy"></div>
-                        <button class="bg-accent text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition">Bilgileri Güncelle</button>
-                    </form>
-                </div>
-
-                <div id="dash-favs" class="hidden p-8"><h2 class="text-2xl font-bold mb-6">Favorilerim</h2><div id="fav-list" class="grid grid-cols-2 gap-4"></div></div>
-                
-                <div id="dash-orders" class="hidden p-8"><h2 class="text-2xl font-bold mb-6">Siparişlerim <span class="text-base text-gray-500">(Alıcı)</span></h2><div id="orders-list" class="space-y-4"></div></div>
-                
-                <div id="dash-sales" class="hidden p-8"><h2 class="text-2xl font-bold mb-6">Satışlarım <span class="text-base text-gray-500">(Satıcı)</span></h2><div id="sales-list" class="space-y-4"></div></div>
-                
-                <div id="dash-msgs" class="hidden h-full flex">
-                    <div class="w-1/3 border-r h-full flex flex-col bg-gray-50 dark:bg-gray-900">
-                        <div class="p-4 border-b font-bold text-gray-700 dark:text-gray-200">Sohbetler</div>
-                        <div id="chat-list" class="flex-1 overflow-y-auto"></div>
-                    </div>
-                    <div class="w-2/3 flex flex-col h-full bg-white relative">
-                        <div id="chat-header" class="p-4 border-b font-bold flex items-center gap-3 bg-white z-10 hidden">
-                            <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">A</div>
-                            <span id="chat-user-name">Kullanıcı</span>
-                        </div>
-                        <div id="chat-area" class="flex-1 overflow-y-auto p-4 flex flex-col bg-gray-50/50 dark:bg-gray-800">
-                            <div class="h-full flex items-center justify-center text-gray-400 flex-col">
-                                <i class="fa-regular fa-comments text-4xl mb-3 opacity-30"></i>
-                                <p>Bir sohbet seçin</p>
-                            </div>
-                        </div>
-                        <div id="chat-input-area" class="p-4 border-t bg-white hidden">
-                            <div class="flex gap-2">
-                                <input type="text" id="chat-input" class="bk-input rounded-full bg-gray-100 dark:bg-gray-700" placeholder="Bir mesaj yazın...">
-                                <button onclick="app.sendChatMessage()" class="w-12 h-12 bg-accent text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition shadow-lg"><i class="fa-solid fa-paper-plane"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="cart-modal" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm modal">
-        <div class="bg-white w-full max-w-lg rounded-2xl p-0 overflow-hidden relative shadow-float modal-enter max-h-[90vh] overflow-y-auto dark:bg-gray-800">
-            <div class="p-5 border-b bg-white sticky top-0 z-10 flex justify-between items-center dark:bg-gray-900 dark:border-gray-800">
-                <h2 class="text-xl font-bold">Sepetim</h2>
-                <button onclick="app.modal('cart-modal', false)" class="text-2xl text-gray-400 hover:text-danger">&times;</button>
-            </div>
-            <div class="p-6">
-                <div id="cart-items" class="space-y-4 mb-6">
-                    </div>
-
-                <div id="cart-empty" class="text-center py-10 text-gray-500 hidden">
-                    <i class="fa-solid fa-shopping-cart text-5xl mb-4 opacity-30"></i>
-                    <p>Sepetin şu an boş.</p>
-                </div>
-
-                <div id="cart-summary" class="bg-gray-50 p-4 rounded-xl border border-gray-200 dark:bg-gray-900 dark:border-gray-700 hidden">
-                    <div class="flex justify-between text-sm mb-2"><span>Ürün Toplamı:</span><span id="cart-total-price">0 TL</span></div>
-                    <div class="flex justify-between text-sm mb-3 border-b pb-2 border-gray-300 dark:border-gray-700"><span>Hizmet Bedeli (%10):</span><span id="cart-fee-price" class="text-danger">0 TL</span></div>
-                    <div class="flex justify-between text-xl font-bold"><span>Genel Toplam:</span><span id="cart-grand-total">0 TL</span></div>
-                </div>
-                
-                <button onclick="app.checkout()" id="checkout-btn" class="w-full bg-accent text-white font-bold py-3.5 mt-6 rounded-xl hover:bg-blue-700 transition shadow-lg hidden">Güvenli Ödeme Yap</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="login-modal" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm modal">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-8 relative shadow-float modal-enter dark:bg-gray-800">
-            <button onclick="app.modal('login-modal', false)" class="absolute top-4 right-4 text-2xl text-gray-400 hover:text-dark">&times;</button>
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-black text-accent mb-1 tracking-tight">BiKirala</h2>
-                <p class="text-sm font-medium text-gray-500">Türkiye'nin Platformu Hoşgeldiniz!</p>
-            </div>
-            <form onsubmit="event.preventDefault(); auth.login()">
-                <input type="text" id="l-email" placeholder="E-Posta" class="bk-input mb-4" required>
-                <input type="password" id="l-pass" placeholder="Şifre" class="bk-input mb-2" required>
-                <div class="text-right mb-4"><a href="#" onclick="app.modal('login-modal', false); app.modal('forgot-modal', true)" class="text-xs font-bold text-accent hover:underline">Şifremi Unuttum?</a></div>
-                <button class="w-full bg-accent text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 shadow-lg">Giriş Yap</button>
-            </form>
-            <div class="mt-6 text-center text-sm text-gray-600">Hesabın yok mu? <a href="#" onclick="app.modal('login-modal', false); app.modal('register-modal', true)" class="font-bold text-danger hover:underline">Hemen Kayıt Ol</a></div>
-        </div>
-    </div>
-
-    <div id="payment-modal" class="fixed inset-0 bg-black/80 hidden z-[150] flex items-center justify-center p-4 backdrop-blur-sm modal">
-        <div class="bg-white w-full max-w-md rounded-2xl p-0 overflow-hidden relative shadow-float modal-enter dark:bg-gray-800">
-            <div class="bg-gray-50 p-4 border-b flex justify-between items-center dark:bg-gray-900 dark:border-gray-700">
-                <div class="font-bold text-gray-500 text-xs tracking-widest">PAYTR GÜVENLİ ÖDEME</div>
-                <div class="font-bold text-lg text-dark" id="pay-amount">0.00 TL</div>
-            </div>
-            <div class="p-6">
-                <h3 class="font-bold text-lg mb-1" id="pay-title">Başlık</h3>
-                <p class="text-sm text-gray-500 mb-6" id="pay-desc">Açıklama</p>
-                <div class="bg-gradient-to-br from-gray-800 to-black text-white p-5 rounded-xl mb-6 shadow-2xl relative overflow-hidden transform transition hover:scale-105">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                    <div class="flex justify-between mb-8"><i class="fa-solid fa-chip text-3xl text-yellow-400 opacity-90"></i><span class="font-bold italic text-lg opacity-80">PayTR</span></div>
-                    <div class="font-mono text-xl tracking-widest mb-6">**** **** **** 4242</div>
-                    <div class="flex justify-between font-bold text-sm tracking-wide"><span id="card-name-prev">AD SOYAD</span><span>12/28</span></div>
-                </div>
-                <div class="space-y-3">
-                    <input type="text" class="bk-input" placeholder="Kart Üzerindeki İsim" oninput="document.getElementById('card-name-prev').innerText = this.value.toUpperCase() || 'AD SOYAD'">
-                    <input type="text" class="bk-input" placeholder="Kart Numarası (4543...)" value="4543 **** **** 4242">
-                    <div class="flex gap-3"><input type="text" class="bk-input" placeholder="AA/YY" value="12/28"><input type="text" class="bk-input" placeholder="CVC" value="***"></div>
-                </div>
-                <button onclick="payment.process()" class="w-full bg-green-600 text-white font-bold py-4 mt-6 rounded-xl shadow-lg hover:bg-green-700 transition flex items-center justify-center gap-2"><i class="fa-solid fa-lock"></i> <span>Güvenli Öde ve Onayla</span></button>
-            </div>
-            <button onclick="app.modal('payment-modal', false)" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
-        </div>
-    </div>
-    
-    <div id="forgot-modal" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm modal">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-8 relative shadow-float modal-enter dark:bg-gray-800">
-            <button onclick="app.modal('forgot-modal', false)" class="absolute top-4 right-4 text-2xl text-gray-400">&times;</button>
-            <h3 class="font-bold text-xl mb-4 text-center">Şifre Sıfırlama</h3>
-            <input type="email" class="bk-input mb-4" placeholder="E-posta Adresi">
-            <button onclick="ui.toast('Sıfırlama bağlantısı gönderildi.', 'success'); app.modal('forgot-modal', false)" class="w-full bg-dark text-white font-bold py-3 rounded-xl">Gönder</button>
-        </div>
-    </div>
-    <div id="register-modal" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm modal">
-        <div class="bg-white w-full max-w-lg rounded-2xl p-0 overflow-hidden relative shadow-float modal-enter max-h-[90vh] overflow-y-auto dark:bg-gray-800">
-            <div class="p-5 border-b bg-white sticky top-0 z-10 flex justify-between items-center dark:bg-gray-900 dark:border-gray-700">
-                <h2 class="text-xl font-bold">Aramıza Katıl</h2>
-                <button onclick="app.modal('register-modal', false)" class="text-2xl text-gray-400 hover:text-dark">&times;</button>
-            </div>
-            <div class="p-6">
-                <div class="flex bg-gray-100 p-1.5 rounded-xl mb-6 dark:bg-gray-700">
-                    <button onclick="auth.setRegType('ind')" id="btn-ind" class="flex-1 py-2.5 rounded-lg bg-white shadow-sm text-sm font-bold text-accent transition dark:bg-gray-800">Bireysel</button>
-                    <button onclick="auth.setRegType('corp')" id="btn-corp" class="flex-1 py-2.5 rounded-lg text-gray-500 text-sm font-bold transition">Kurumsal</button>
-                </div>
-                <form onsubmit="event.preventDefault(); auth.preRegister()">
-                    <div class="grid grid-cols-2 gap-3 mb-3"><input type="text" id="r-name" placeholder="Ad" class="bk-input"><input type="text" id="r-surname" placeholder="Soyad" class="bk-input"></div>
-                    <input type="email" id="r-email" placeholder="E-Posta" class="bk-input mb-3">
-                    <input type="password" id="r-pass" placeholder="Şifre" class="bk-input mb-3">
-                    <div id="corp-fields" class="hidden bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3 mt-2 dark:bg-blue-900/30 dark:border-blue-900">
-                        <input type="text" id="r-store" placeholder="Mağaza Adı" class="bk-input bg-white dark:bg-gray-700">
-                        <input type="text" id="r-tax" placeholder="Vergi Numarası" class="bk-input bg-white dark:bg-gray-700">
-                        <input type="text" id="r-tax-addr" placeholder="Vergi Dairesi/Adresi" class="bk-input bg-white dark:bg-gray-700">
-                        <div class="flex items-center gap-2 text-xs text-blue-800 bg-blue-100 p-2 rounded dark:bg-blue-900 dark:text-blue-200"><i class="fa-solid fa-wallet"></i> <span>Kurumsal Üyelik Bedeli: <strong>450.00 TL / Ay</strong></span></div>
-                    </div>
-                    <button class="w-full bg-dark text-white font-bold py-4 mt-6 rounded-xl hover:bg-black transition shadow-lg">Ücretsiz Kayıt Ol</button>
+                    <button type="submit" class="w-full bg-primary text-white font-bold py-3 rounded-lg hover:opacity-90 transition shadow-md mt-2">
+                        <i class="fa-solid fa-magic"></i> Oluştur
+                    </button>
                 </form>
             </div>
-        </div>
-    </div>
-    <div id="send-msg-modal" class="fixed inset-0 bg-black/60 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm modal">
-        <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-float modal-enter dark:bg-gray-800">
-            <button onclick="app.modal('send-msg-modal', false)" class="absolute top-4 right-4 text-gray-400 hover:text-dark"><i class="fa-solid fa-xmark text-xl"></i></button>
-            <h3 class="font-bold text-lg mb-4">Mesaj Gönder</h3>
-            <div class="bg-gray-50 p-3 rounded-lg mb-4 flex gap-3 items-center border dark:bg-gray-900 dark:border-gray-700">
-                <i class="fa-regular fa-envelope text-gray-400 text-xl"></i>
-                <div><div class="text-xs text-gray-500">Alıcı</div><div class="font-bold text-sm" id="msg-to-name">Satıcı</div></div>
+
+            <div class="lg:col-span-2 space-y-6">
+                
+                <div id="seo-metrics" class="bg-white dark:bg-dark p-4 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 hidden">
+                    <h3 class="text-lg font-bold text-primary mb-3"><i class="fa-solid fa-chart-line"></i> SEO Analizi</h3>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p class="text-2xl font-black text-dark dark:text-white" id="word-count">0</p>
+                            <p class="text-xs text-gray-500 mt-1">Kelime Sayısı</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-black text-dark dark:text-white" id="keyword-density">0%</p>
+                            <p class="text-xs text-gray-500 mt-1">Anahtar Kelime Yoğunluğu</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-black text-dark dark:text-white" id="readability-score">0</p>
+                            <p class="text-xs text-gray-500 mt-1">Okunabilirlik Skoru</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-dark p-6 rounded-xl shadow-soft min-h-[300px] relative">
+                    <h2 class="text-xl font-bold mb-4">Üretilen İçerik</h2>
+                    
+                    <button onclick="app.copyContent()" id="copy-btn" class="absolute top-6 right-6 text-gray-400 hover:text-primary transition disabled:opacity-50" disabled>
+                        <i class="fa-regular fa-copy"></i> Kopyala
+                    </button>
+
+                    <div id="content-output" class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
+                        <p class="text-gray-500 dark:text-gray-400 mt-10 text-center">Oluştur butonuna basarak ilk içeriğinizi üretin.</p>
+                    </div>
+                </div>
             </div>
-            <textarea id="msg-content" rows="4" class="bk-input mb-4" placeholder="Mesajınız..."></textarea>
-            <button onclick="app.sendMessage()" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition flex justify-center gap-2 items-center"><i class="fa-solid fa-paper-plane"></i> Gönder</button>
         </div>
     </div>
 
     <script>
-        const STORAGE_KEY = 'bk_v28_'; 
-        const AUTO_CONFIRM_DAYS = 7;
-
-        const state = {
-            user: JSON.parse(localStorage.getItem(STORAGE_KEY + 'user')) || null,
-            ads: JSON.parse(localStorage.getItem(STORAGE_KEY + 'ads')) || [],
-            messages: JSON.parse(localStorage.getItem(STORAGE_KEY + 'msgs')) || [],
-            favorites: JSON.parse(localStorage.getItem(STORAGE_KEY + 'favs')) || [],
-            cart: JSON.parse(localStorage.getItem(STORAGE_KEY + 'cart')) || [],
-            orders: JSON.parse(localStorage.getItem(STORAGE_KEY + 'orders')) || [],
-            profileData: JSON.parse(localStorage.getItem(STORAGE_KEY + 'profile')) || { name: '', email: '', phone: '', address: '' },
-            cats: [
-                {name:'Emlak', icon:'fa-house-chimney', color:'text-orange-500', specs: [{name: 'm²', type: 'number'}, {name: 'Oda Sayısı', type: 'select', options: ['1+0', '1+1', '2+1', '3+1', '4+1+']}]},
-                {name:'Vasıta', icon:'fa-car-side', color:'text-red-500', specs: [{name: 'Yıl', type: 'number'}, {name: 'KM', type: 'number'}, {name: 'Yakıt', type: 'select', options: ['Benzin', 'Dizel', 'LPG', 'Hibrit']}, {name: 'Vites', type: 'select', options: ['Otomatik', 'Manuel']}]},
-                {name:'Telefon', icon:'fa-mobile-screen', color:'text-blue-500', specs: [{name: 'Marka', type: 'text'}, {name: 'Hafıza', type: 'select', options: ['64 GB', '128 GB', '256 GB', '512 GB']}]},
-                {name:'Elektronik', icon:'fa-laptop', color:'text-gray-600', specs: [{name: 'Marka', type: 'text'}, {name: 'Garanti Durumu', type: 'select', options: ['Var', 'Yok']}]},
-                {name:'Giyim', icon:'fa-shirt', color:'text-purple-500', specs: [{name: 'Beden', type: 'select', options: ['S', 'M', 'L', 'XL']}]},
-                {name:'Diğer', icon:'fa-layer-group', color:'text-green-500', specs: []}
-            ],
-            tempImages: [],
-            currentAdId: null,
-            dopingTotal: 0,
-            selectedDopings: [],
-            tempRegData: null,
-            activeChatUser: null,
-            basePrice: 0 
-        };
-
-        const payment = {
-            callback: null,
-            open: (amount, title, desc, cb) => {
-                payment.callback = cb;
-                document.getElementById('pay-amount').innerText = amount.toFixed(2) + ' TL';
-                document.getElementById('pay-title').innerText = title;
-                document.getElementById('pay-desc').innerText = desc;
-                app.modal('payment-modal', true);
-            },
-            process: () => {
-                ui.toast('Ödeme İşleniyor...', 'info');
-                setTimeout(() => {
-                    app.modal('payment-modal', false);
-                    ui.toast('Ödeme Başarılı!', 'success');
-                    if(payment.callback) payment.callback();
-                }, 2000);
-            }
-        };
-
-        const auth = {
-            regType: 'ind',
-            setRegType: (t) => {
-                auth.regType = t;
-                const f = document.getElementById('corp-fields');
-                const btn = document.getElementById('reg-btn');
-                const btns = {ind: document.getElementById('btn-ind'), corp: document.getElementById('btn-corp')};
-                
-                if(t === 'corp') { f.classList.remove('hidden'); btn.innerText = 'Ödeme Yap ve Kaydı Tamamla'; btns.corp.className = 'flex-1 py-2.5 rounded-lg bg-white shadow-sm text-sm font-bold text-accent transition dark:bg-gray-800'; btns.ind.className = 'flex-1 py-2.5 rounded-lg text-gray-500 text-sm font-bold transition';
-                } else { f.classList.add('hidden'); btn.innerText = 'Ücretsiz Kayıt Ol'; btns.ind.className = 'flex-1 py-2.5 rounded-lg bg-white shadow-sm text-sm font-bold text-accent transition dark:bg-gray-800'; btns.corp.className = 'flex-1 py-2.5 rounded-lg text-gray-500 text-sm font-bold transition'; }
-            },
-            preRegister: () => {
-                const name = document.getElementById('r-name').value;
-                const surname = document.getElementById('r-surname').value;
-                const email = document.getElementById('r-email').value;
-                if(!name || !email) return ui.toast('Eksik bilgi girdiniz.', 'error');
-
-                state.tempRegData = { id: Date.now(), name: auth.regType === 'corp' ? document.getElementById('r-store').value : (name + ' ' + surname), email: email, isStore: auth.regType === 'corp', avatar: (name[0]).toUpperCase() };
-
-                if(auth.regType === 'corp') {
-                    const tax = document.getElementById('r-tax').value;
-                    const store = document.getElementById('r-store').value;
-                    if(!tax || !store) return ui.toast('Kurumsal bilgiler eksik.', 'error');
-                    app.modal('register-modal', false);
-                    payment.open(450, 'Kurumsal Üyelik', 'Yıllık 450 TL Abonelik Bedeli', auth.completeReg);
-                } else { auth.completeReg(); }
-            },
-            completeReg: () => {
-                state.user = state.tempRegData; 
-                state.profileData.name = state.user.name;
-                state.profileData.email = state.user.email;
-                app.save(); app.modal('register-modal', false); ui.renderHeader(); ui.toast('Kayıt Başarıyla Tamamlandı!', 'success');
-            },
-            login: () => {
-                const e = document.getElementById('l-email').value; if(!e) return ui.toast('E-Posta gerekli', 'error');
-                state.user = { id: 999, name: 'Demo Kullanıcı', email: e, avatar: 'D', isStore: false };
-                state.profileData.name = state.user.name;
-                state.profileData.email = state.user.email;
-                app.save(); app.modal('login-modal', false); ui.renderHeader(); ui.toast('Giriş Yapıldı', 'success');
-            },
-            logout: () => { state.user = null; app.save(); location.reload(); }
-        };
-
         const app = {
-            init: () => { 
-                if(state.ads.length === 0) app.seed(); 
-                app.checkAutoConfirm();
-                ui.render(); 
-                document.body.addEventListener('click', app.handleGlobalClick);
-            },
-            save: () => {
-                localStorage.setItem(STORAGE_KEY + 'user', JSON.stringify(state.user));
-                localStorage.setItem(STORAGE_KEY + 'ads', JSON.stringify(state.ads));
-                localStorage.setItem(STORAGE_KEY + 'msgs', JSON.stringify(state.messages));
-                localStorage.setItem(STORAGE_KEY + 'favs', JSON.stringify(state.favorites));
-                localStorage.setItem(STORAGE_KEY + 'cart', JSON.stringify(state.cart));
-                localStorage.setItem(STORAGE_KEY + 'orders', JSON.stringify(state.orders));
-                localStorage.setItem(STORAGE_KEY + 'profile', JSON.stringify(state.profileData));
-            },
-            seed: () => {
-                state.ads = [
-                    { id: 101, title: 'BMW 520i M Sport', price: 3250000, cat: 'Vasıta', stock: 1, owner: 'OtoGaleri', isStore: true, vitrin: true, dopings: ['vitrin', 'bold'], image: 'https://images.unsplash.com/photo-1555215696-b9776f188899?w=500', location: 'İstanbul, Kadıköy', images: ['https://images.unsplash.com/photo-1555215696-b9776f188899?w=500', 'https://images.unsplash.com/photo-1558231015-3733a1e9484b?w=500'], specs: {Yıl: 2020, KM: '45000', Yakıt: 'Benzin', Vites: 'Otomatik'}, description: 'Bu araç 2020 model olup, 45 bin kilometrededir. Günlük kiralama için uygundur. Detaylı bilgi için mesaj atın. Temiz kullanılmıştır.' },
-                    { id: 102, title: 'iPhone 14 Pro', price: 52000, cat: 'Telefon', stock: 5, owner: 'Mert', isStore: false, vitrin: false, dopings: [], image: 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=500', location: 'Ankara, Çankaya', images: ['https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=500'], specs: {Marka: 'Apple', Hafıza: '128 GB'}, description: 'Sıfır ayarında, çiziksiz iPhone 14 Pro günlük veya haftalık kiralanır. Kutu ve aksesuarları tamdır. Uzun süreli kiralama indirimi için sorunuz.' }
-                ];
-                app.save();
-            },
-            
-            modal: (id, show) => {
-                document.getElementById(id).style.display = show ? 'flex' : 'none';
-                if(id === 'post-ad-modal' && show) {
-                    state.tempImages = []; state.dopingTotal = 0; state.selectedDopings = [];
-                    document.getElementById('upload-grid').innerHTML = ''; document.getElementById('doping-total').innerText = '0 TL';
-                    document.querySelectorAll('.doping-card').forEach(c => c.classList.remove('selected'));
-                    app.renderCatSpecs(document.getElementById('p-cat').value);
-                }
-            },
-            
-            // YENİ: Global Tıklama Yakalama ve Yönlendirme (Düzeltme)
-            handleGlobalClick: (e) => {
-                // Modallar açıksa, dışarı tıklanmayı kontrol et
-                const modalElements = document.querySelectorAll('.modal');
-                let isModalOpen = false;
-                modalElements.forEach(modal => {
-                    if (modal.style.display === 'flex') {
-                        isModalOpen = true;
-                        // Modalin dışına tıklanıp tıklanmadığını kontrol et
-                        if (e.target.classList.contains('modal')) {
-                            app.modal(modal.id, false);
-                        }
-                    }
-                });
+            generateContent: () => {
+                const topic = document.getElementById('topic').value.trim();
+                const keywords = document.getElementById('keywords').value.trim().split(',').map(k => k.trim()).filter(k => k.length > 0);
+                const tone = document.getElementById('tone').value;
 
-                if (isModalOpen) return; // Modal açıksa sadece modal dışı tıklamaları dinle
-
-                // İlan Kartı Tıklaması
-                const adCard = e.target.closest('#ads-grid > div');
-                if (adCard) {
-                    // Bu div'in onclick özelliğindeki ID'yi al
-                    const onclickAttr = adCard.getAttribute('onclick');
-                    const idMatch = onclickAttr ? onclickAttr.match(/\d+/) : null;
-                    if (idMatch) {
-                        const id = parseInt(idMatch[0]);
-                        app.openDetail(id);
-                        return;
-                    }
-                }
-                
-                // Header Profil Butonu (Çünkü mobil nav üzerindeki tıklamalar da buraya geliyor)
-                const headerAuthAreaButton = e.target.closest('#header-auth-area button');
-                if(headerAuthAreaButton) {
-                    headerAuthAreaButton.click(); // HTML'deki onclick'i tetikle
+                if (!topic) {
+                    alert("Lütfen bir konu başlığı girin.");
                     return;
                 }
-            },
-            
-            checkAutoConfirm: () => {
-                const now = new Date().getTime();
-                let changesMade = false;
 
-                state.orders.forEach(order => {
-                    if (order.status === 'Kargoda' && order.shipDate && !order.isSeller) {
-                        const shipDate = new Date(order.shipDate).getTime();
-                        const sevenDaysMs = AUTO_CONFIRM_DAYS * 24 * 60 * 60 * 1000;
-
-                        if (now - shipDate >= sevenDaysMs) {
-                            order.status = 'Teslim Edildi';
-                            
-                            const correspondingSale = state.orders.find(o => o.id === order.id && o.isSeller);
-                            if (correspondingSale) {
-                                correspondingSale.status = 'Ödeme Yapıldı';
-                                correspondingSale.paymentDate = new Date().toLocaleDateString();
-                            }
-                            changesMade = true;
-                        }
-                    }
-                });
-
-                if (changesMade) {
-                    app.save();
-                    ui.toast('Teslimat süresi dolan siparişler otomatik onaylandı!', 'info');
-                }
-            },
-
-            handleImageUpload: (input) => {
-                const files = input.files;
-                if(files.length + state.tempImages.length > 10) { ui.toast('Maksimum 10 fotoğraf yükleyebilirsiniz.', 'error'); return; }
+                // Simülasyon Fonksiyonu
+                const generatedText = app.simulateAI(topic, keywords, tone);
                 
-                Array.from(files).forEach(f => {
-                    const r = new FileReader();
-                    r.onload = (e) => { state.tempImages.push(e.target.result); app.renderUploadGrid(); };
-                    r.readAsDataURL(f);
-                });
-                input.value = '';
-            },
-            renderUploadGrid: () => {
-                const grid = document.getElementById('upload-grid');
-                grid.innerHTML = '';
-                state.tempImages.forEach((img, index) => {
-                    grid.innerHTML += `
-                        <div class="relative group">
-                            <img src="${img}" class="w-full h-20 object-cover rounded-lg border shadow-sm">
-                            <button onclick="app.removeImage(${index})" class="absolute top-1 right-1 w-5 h-5 bg-danger text-white rounded-full text-xs opacity-80 hover:opacity-100 flex items-center justify-center">&times;</button>
-                        </div>
-                    `;
-                });
-            },
-            removeImage: (index) => {
-                state.tempImages.splice(index, 1);
-                app.renderUploadGrid();
-            },
-
-            renderCatSpecs: (catName) => {
-                const fieldsDiv = document.getElementById('cat-specific-fields');
-                const cat = state.cats.find(c => c.name === catName);
-                if (!cat || cat.specs.length === 0) { fieldsDiv.classList.add('hidden'); return; }
-
-                fieldsDiv.classList.remove('hidden');
-                fieldsDiv.innerHTML = '<h4 class="font-bold text-sm col-span-2">Kategoriye Özgü Detaylar</h4>';
-
-                cat.specs.forEach(spec => {
-                    let inputHtml;
-                    const id = 'spec-' + spec.name.replace(/\s/g, '');
-
-                    if (spec.type === 'select') {
-                        const options = spec.options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
-                        inputHtml = `<select id="${id}" class="bk-input bg-white cursor-pointer"><option value="">Seçiniz</option>${options}</select>`;
-                    } else {
-                        inputHtml = `<input type="${spec.type}" id="${id}" class="bk-input" placeholder="${spec.name}">`;
-                    }
-                    
-                    fieldsDiv.innerHTML += `<div><label class="text-xs font-bold text-gray-500 mb-1 block">${spec.name}</label>${inputHtml}</div>`;
-                });
-            },
-
-            toggleDoping: (el, type, price) => {
-                el.classList.toggle('selected');
-                if(state.selectedDopings.includes(type)) { state.selectedDopings = state.selectedDopings.filter(t => t !== type); state.dopingTotal -= price;
-                } else { state.selectedDopings.push(type); state.dopingTotal += price; }
-                document.getElementById('doping-total').innerText = state.dopingTotal + ' TL';
-            },
-
-            submitAdFlow: () => {
-                const t = document.getElementById('p-title').value; const p = document.getElementById('p-price').value; const c = document.getElementById('p-cat').value;
-                const loc = document.getElementById('p-location').value; const stock = parseInt(document.getElementById('p-stock').value) || 1;
-                const desc = document.getElementById('p-desc').value;
-                if(!t || !p || !c || state.tempImages.length === 0 || stock < 1) return ui.toast('Başlık, Fiyat, Kategori, Resim ve Stok (min 1) zorunludur.', 'error');
+                // DOM'a Yazma
+                document.getElementById('content-output').innerHTML = generatedText;
                 
-                const adSpecs = {};
-                const currentCat = state.cats.find(cat => cat.name === c);
-                if(currentCat) {
-                    currentCat.specs.forEach(spec => {
-                        const id = 'spec-' + spec.name.replace(/\s/g, '');
-                        const value = document.getElementById(id)?.value;
-                        if(value) adSpecs[spec.name] = value;
-                    });
-                }
-
-                if(state.dopingTotal > 0) {
-                    app.modal('post-ad-modal', false);
-                    payment.open(state.dopingTotal, 'Doping Ödemesi', 'Seçilen İlan Özellikleri', () => app.finalizeAd(t, p, c, loc, stock, adSpecs, desc));
-                } else {
-                    app.finalizeAd(t, p, c, loc, stock, adSpecs, desc);
-                }
-            },
-            finalizeAd: (title, price, cat, location, stock, specs, description) => {
-                state.ads.unshift({ 
-                    id: Date.now(), title: title, price: parseInt(price), cat: cat, location: location, stock: stock, description: description,
-                    owner: state.user.name, isStore: state.user.isStore, 
-                    image: state.tempImages[0], 
-                    images: state.tempImages,
-                    specs: specs,
-                    vitrin: state.selectedDopings.includes('vitrin'), 
-                    dopings: state.selectedDopings 
-                });
-                app.save(); app.modal('post-ad-modal', false); ui.renderAds(state.ads); ui.renderVitrin(); ui.toast('İlan Yayında!', 'success');
-            },
-
-            updateProfile: () => {
-                state.profileData.name = document.getElementById('edit-name').value;
-                state.profileData.phone = document.getElementById('edit-phone').value;
-                state.profileData.address = document.getElementById('edit-address').value;
-                state.user.name = state.profileData.name;
-                app.save(); 
-                ui.renderHeader();
-                ui.toast('Profil Bilgileri Güncellendi', 'success');
-            },
-
-            toggleDescription: () => {
-                const descEl = document.getElementById('d-desc');
-                const toggleBtn = document.getElementById('desc-toggle');
-                const isExpanded = descEl.classList.contains('h-auto');
-
-                if (isExpanded) {
-                    descEl.classList.remove('h-auto', 'overflow-visible');
-                    descEl.classList.add('h-20', 'overflow-hidden');
-                    toggleBtn.innerText = 'Daha Fazla Oku';
-                } else {
-                    descEl.classList.add('h-auto', 'overflow-visible');
-                    descEl.classList.remove('h-20', 'overflow-hidden');
-                    toggleBtn.innerText = 'Daha Az Oku';
-                }
-            },
-
-            updateRentalPrice: (days) => {
-                const currentAd = state.ads.find(a => a.id === state.currentAdId);
-                if (!currentAd) return;
-
-                const basePrice = currentAd.price;
-                const newPrice = basePrice * days;
+                // SEO Metriklerini Hesapla ve Göster
+                app.calculateSEO(generatedText, keywords);
                 
-                document.getElementById('current-days').innerText = `${days} Gün`;
-                document.getElementById('d-price').innerText = `${newPrice.toLocaleString('tr-TR')} TL`;
+                document.getElementById('seo-metrics').classList.remove('hidden');
+                document.getElementById('copy-btn').disabled = false;
+            },
+
+            simulateAI: (topic, keywords, tone) => {
+                const keywordList = keywords.length > 0 ? keywords.join(', ') : 'yapay zeka, içerik pazarlaması';
                 
-                document.querySelector('#d-actions button.bg-accent').innerText = `Güvenli Al (${newPrice.toLocaleString('tr-TR')} TL)`;
-            },
-
-            confirmDelivery: (orderId) => {
-                const order = state.orders.find(o => o.id === orderId && !o.isSeller && o.buyer === state.user.name);
-                if (!order || order.status !== 'Kargoda') return;
-
-                if (confirm(`${order.title} ürününü teslim aldığınızı onaylıyor musunuz? Ödeme satıcıya aktarılacaktır.`)) {
-                    order.status = 'Teslim Edildi';
-                    const sellerOrder = state.orders.find(o => o.id === orderId && o.isSeller);
-                    if (sellerOrder) {
-                        sellerOrder.status = 'Ödeme Yapıldı';
-                        sellerOrder.paymentDate = new Date().toLocaleDateString();
-                    }
-                    app.save();
-                    ui.renderOrderLists();
-                    ui.toast('Teslimat onaylandı. Ödeme satıcıya aktarıldı!', 'success');
-                }
-            },
-            
-            confirmShipment: (orderId) => {
-                const order = state.orders.find(o => o.id === orderId && o.isSeller && o.owner === state.user.name);
-                if (!order || order.status !== 'Hazırlanıyor') return;
-
-                if (confirm(`${order.title} ürününü kargoya verdiğinizi onaylıyor musunuz?`)) {
-                    const shipDate = new Date();
-                    order.status = 'Kargoda';
-                    order.shipDate = shipDate.toLocaleDateString();
-
-                    const buyerOrder = state.orders.find(o => o.id === orderId && !o.isSeller);
-                    if (buyerOrder) {
-                        buyerOrder.status = 'Kargoda';
-                        buyerOrder.shipDate = order.shipDate;
-                    }
-                    app.save();
-                    ui.renderOrderLists();
-                    ui.toast('Ürün kargoya verildi olarak işaretlendi.', 'success');
-                }
-            },
-
-            addToCart: (adId) => {
-                if(!state.user) return app.modal('login-modal', true);
-                
-                const ad = state.ads.find(a => a.id === adId);
-                if (!ad) return;
-                if (ad.owner === state.user.name) { ui.toast('Kendi ilanınızı sepete ekleyemezsiniz.', 'error'); return; }
-                if (ad.stock < 1) { ui.toast('Ürün stokta kalmadı!', 'error'); return; }
-                if (state.cart.some(item => item.id === adId)) { ui.toast('Bu ürün zaten sepette!', 'info'); return; }
-                
-                state.cart.push({ id: adId, title: ad.title, price: ad.price, image: ad.image, owner: ad.owner });
-                app.save();
-                ui.renderCart();
-                ui.toast('Sepete eklendi!', 'success');
-            },
-            removeFromCart: (adId) => {
-                state.cart = state.cart.filter(item => item.id !== adId);
-                app.save();
-                ui.renderCart();
-                ui.toast('Sepetten çıkarıldı.');
-            },
-            checkout: () => {
-                if(state.cart.length === 0) return ui.toast('Sepet boş.', 'error');
-                
-                const summary = app.calculateCartSummary();
-                app.modal('cart-modal', false);
-
-                payment.open(summary.grandTotal, 'Sepet Ödemesi', `${summary.totalPrice} TL Ürün + ${summary.fee} TL Hizmet Bedeli`, app.finalizeOrder);
-            },
-            finalizeOrder: () => {
-                const date = new Date().toLocaleDateString();
-                
-                state.cart.forEach(item => {
-                    const orderId = Date.now() + item.id;
-                    const orderItem = { id: orderId, adId: item.id, title: item.title, price: item.price, image: item.image, date: date, status: 'Hazırlanıyor', isSeller: false, buyer: state.user.name, owner: item.owner };
-                    const salesItem = { ...orderItem, status: 'Hazırlanıyor', isSeller: true, owner: item.owner };
-                    
-                    const adIndex = state.ads.findIndex(a => a.id === item.id);
-                    if (adIndex !== -1 && state.ads[adIndex].stock > 0) {
-                        state.ads[adIndex].stock -= 1;
-                    }
-
-                    state.orders.unshift(orderItem);
-                    state.orders.unshift(salesItem);
-                });
-
-                state.cart = [];
-                app.save();
-                ui.renderCart();
-                ui.renderAds(state.ads);
-                ui.toast('Siparişleriniz başarıyla oluşturuldu.', 'success');
-            },
-            calculateCartSummary: () => {
-                const totalPrice = state.cart.reduce((sum, item) => sum + item.price, 0);
-                const fee = totalPrice * 0.10;
-                const grandTotal = totalPrice + fee;
-                return { totalPrice: totalPrice, fee: fee.toFixed(2), grandTotal: grandTotal };
-            },
-            
-            buyProductDirect: (adId) => {
-                if(!state.user) return app.modal('login-modal', true);
-
-                const ad = state.ads.find(a => a.id === adId);
-                const days = parseInt(document.getElementById('days-slider')?.value || 1);
-                const finalPrice = ad.price * days;
-                
-                if (!ad) return ui.toast('Ürün bulunamadı.', 'error');
-                if (ad.owner === state.user.name) return ui.toast('Kendi ilanınızı satın alamazsınız.', 'error');
-                if (ad.stock < 1) return ui.toast('Ürün stokta kalmadı!', 'error');
-
-                app.modal('detail-modal', false);
-
-                const price = finalPrice;
-                const fee = price * 0.10;
-                const total = price + fee;
-
-                payment.open(total, 
-                    `Güvenli Satın Alma (${days} Gün)`, 
-                    `${ad.title} (${price.toLocaleString('tr-TR')} TL) + ${fee.toFixed(2)} TL Hizmet Bedeli`, 
-                    () => {
-                        const date = new Date().toLocaleDateString();
-                        
-                        const orderId = Date.now();
-                        const orderItem = { id: orderId, adId: ad.id, title: `${ad.title} (${days} Gün)`, price: price, image: ad.image, date: date, status: 'Hazırlanıyor', isSeller: false, buyer: state.user.name, owner: ad.owner };
-                        const salesItem = { ...orderItem, status: 'Hazırlanıyor', isSeller: true, owner: ad.owner };
-
-                        const adIndex = state.ads.findIndex(a => a.id === adId);
-                        if (adIndex !== -1 && state.ads[adIndex].stock > 0) {
-                            state.ads[adIndex].stock -= 1;
-                        }
-
-                        state.orders.unshift(orderItem);
-                        state.orders.unshift(salesItem);
-                        app.save();
-                        ui.renderAds(state.ads);
-                        ui.toast('Sipariş başarıyla oluşturuldu.', 'success');
-                    }
-                );
-            },
-
-            openDetail: (id) => {
-                state.currentAdId = id;
-                const a = state.ads.find(x => x.id === id);
-                state.basePrice = a.price;
-                
-                document.getElementById('d-title').innerText = a.title;
-                document.getElementById('d-desc').innerText = a.description || 'Açıklama girilmemiştir.';
-                document.getElementById('d-main-img').src = a.images[0];
-                document.getElementById('d-owner').innerText = a.owner;
-                document.getElementById('d-avatar').innerText = a.owner[0].toUpperCase();
-                document.getElementById('d-location').innerText = a.location || 'Bilinmiyor';
-
-                document.getElementById('d-price').innerText = a.price.toLocaleString('tr-TR') + ' TL';
-                const sliderDiv = document.getElementById('rental-slider');
-                sliderDiv.classList.remove('hidden');
-                document.getElementById('days-slider').value = 1;
-                document.getElementById('current-days').innerText = '1 Gün';
-
-                // Okunabilirlik Ayarı
-                const descEl = document.getElementById('d-desc');
-                const toggleBtn = document.getElementById('desc-toggle');
-                
-                if ((a.description || '').length > 100) {
-                    descEl.classList.remove('h-auto', 'overflow-visible');
-                    descEl.classList.add('h-20', 'overflow-hidden');
-                    toggleBtn.style.display = 'block';
-                    toggleBtn.innerText = 'Daha Fazla Oku';
-                } else {
-                    descEl.classList.remove('h-20', 'overflow-hidden');
-                    descEl.classList.add('h-auto', 'overflow-visible');
-                    toggleBtn.style.display = 'none';
-                }
-                
-                const isFav = state.favorites.includes(id);
-                const favBtn = document.getElementById('d-fav-btn');
-                favBtn.innerHTML = isFav ? '<i class="fa-solid fa-heart text-danger"></i>' : '<i class="fa-regular fa-heart"></i>';
-                favBtn.onclick = () => app.toggleFavorite(id);
-
-                const acts = document.getElementById('d-actions');
-                const isOutOfStock = a.stock < 1;
-
-                if(state.user && state.user.name === a.owner) {
-                    acts.innerHTML = `<button onclick="app.deleteAd(${a.id})" class="w-full bg-red-100 text-danger font-bold py-3 rounded-xl hover:bg-red-200">İlanı Sil</button>`;
-                } else if (isOutOfStock) {
-                    acts.innerHTML = `<div class="text-center py-4 text-danger font-bold">Stok Tükendi!</div>`;
-                } else {
-                    acts.innerHTML = `
-                        <button onclick="app.addToCart(${a.id})" class="w-full border-2 border-primary text-primary font-bold py-3 rounded-xl mb-2 hover:bg-yellow-50 transition"><i class="fa-solid fa-cart-plus"></i> Sepete Ekle</button>
-                        <button onclick="app.buyProductDirect(${a.id})" class="w-full bg-accent text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition"><i class="fa-solid fa-lock"></i> Güvenli Al (${a.price.toLocaleString('tr-TR')} TL)</button>
-                        <button onclick="app.openMsgModal()" class="w-full border-2 border-accent text-accent font-bold py-3 rounded-xl mb-2 mt-2 hover:bg-blue-50">Mesaj At</button>
-                    `;
-                }
-
-                app.renderDetailGallery(a.images);
-                app.renderDetailSpecs(a.specs);
-                app.modal('detail-modal', true);
-            },
-
-            // Diğer fonksiyonlar...
-            toggleFavorite: (id) => {
-                if(!state.user) return ui.toast('Giriş yapmalısın', 'error');
-                if(state.favorites.includes(id)) { state.favorites = state.favorites.filter(fid => fid !== id); ui.toast('Favorilerden çıkarıldı'); } 
-                else { state.favorites.push(id); ui.toast('Favorilere eklendi', 'success'); }
-                app.save(); app.openDetail(id);
-            },
-
-            openMsgModal: () => {
-                if(!state.user) return app.modal('login-modal', true);
-                const a = state.ads.find(x => x.id === state.currentAdId);
-                document.getElementById('msg-to-name').innerText = a.owner;
-                document.getElementById('msg-content').value = `Merhaba, ${a.title} ilanı için yazıyorum.`;
-                app.modal('detail-modal', false);
-                app.modal('send-msg-modal', true);
-            },
-            sendMessage: () => {
-                const content = document.getElementById('msg-content').value;
-                if(!content) return ui.toast('Mesaj boş olamaz', 'error');
-                const a = state.ads.find(x => x.id === state.currentAdId);
-                state.messages.unshift({ id: Date.now(), adTitle: a.title, with: a.owner, content: content, date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), fromMe: true });
-                app.save(); app.modal('send-msg-modal', false); ui.toast('Mesaj Gönderildi!', 'success');
-            },
-            
-            openChat: (withUser) => {
-                state.activeChatUser = withUser;
-                document.getElementById('chat-header').classList.remove('hidden');
-                document.getElementById('chat-input-area').classList.remove('hidden');
-                document.getElementById('chat-user-name').innerText = withUser;
-                app.renderChatMessages();
-            },
-            renderChatMessages: () => {
-                const area = document.getElementById('chat-area');
-                area.innerHTML = '';
-                const msgs = state.messages.filter(m => m.with === state.activeChatUser).reverse();
-                if(msgs.length === 0) { area.innerHTML = '<div class="h-full flex items-center justify-center text-gray-400 flex-col"><i class="fa-regular fa-comments text-4xl mb-3 opacity-30"></i><p>Sohbet geçmişi yok.</p></div>'; return; }
-                
-                msgs.forEach(m => {
-                    const bubble = document.createElement('div');
-                    bubble.className = `chat-bubble ${m.fromMe ? 'me' : 'you'}`;
-                    bubble.innerHTML = `${m.content} <div class="chat-time text-xs">${m.date}</div>`;
-                    area.appendChild(bubble);
-                });
-                area.scrollTop = area.scrollHeight;
-            },
-            sendChatMessage: () => {
-                const input = document.getElementById('chat-input');
-                const val = input.value;
-                if(!val.trim()) return;
-                
-                state.messages.unshift({ id: Date.now(), adTitle: 'Sohbet', with: state.activeChatUser, content: val, date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), fromMe: true });
-                app.save();
-                input.value = '';
-                app.renderChatMessages();
-            },
-
-            search: (val) => ui.renderAds(state.ads.filter(a => a.title.toLowerCase().includes(val.toLowerCase()) || a.cat.toLowerCase().includes(val.toLowerCase()))),
-            filterPrice: () => {
-                const min = document.getElementById('min-price').value || 0;
-                const max = document.getElementById('max-price').value || 999999999;
-                const filtered = state.ads.filter(a => a.price >= min && a.price <= max);
-                ui.renderAds(filtered); ui.toast(`${filtered.length} ilan bulundu.`);
-            },
-            
-            checkAuth: (action) => {
-                if(!state.user) { app.modal('login-modal', true); return; }
-                if(action === 'post') app.modal('post-ad-modal', true);
-                if(action === 'favs') { app.openPanel('info'); ui.switchDash('favs'); }
-            },
-            
-            openPanel: (tab) => {
-                if(!state.user) return app.modal('login-modal', true);
-                document.getElementById('p-name').innerText = state.user.name; 
-                document.getElementById('p-avatar').src = `https://ui-avatars.com/api/?name=${state.user.name}&background=random`; 
-                document.getElementById('p-type').innerText = state.user.isStore ? 'Kurumsal Mağaza' : 'Bireysel Hesap';
-                document.getElementById('p-type').className = state.user.isStore ? 'text-[10px] bg-accent text-white px-2 py-1 rounded-full' : 'text-[10px] bg-gray-200 px-2 py-1 rounded-full text-gray-600';
-                
-                document.getElementById('edit-name').value = state.profileData.name || state.user.name;
-                document.getElementById('edit-phone').value = state.profileData.phone || '';
-                document.getElementById('edit-address').value = state.profileData.address || '';
-                document.getElementById('edit-email').value = state.profileData.email || state.user.email;
-
-
-                ui.switchDash(tab); app.modal('profile-panel', true);
-            },
-            goHome: () => { window.scrollTo(0,0); ui.renderAds(state.ads); document.getElementById('page-title').innerText = 'Tüm İlanlar'; }
-        };
-
-        const ui = {
-            render: () => {
-                ui.renderHeader(); ui.renderCats(); ui.renderAds(state.ads); ui.renderVitrin();
-                const s = document.getElementById('p-cat'); s.innerHTML='<option value="">Kategori Seç</option>'; state.cats.forEach(c=>s.innerHTML+=`<option>${c.name}</option>`);
-                ui.renderCart();
-            },
-            renderHeader: () => {
-                const d = document.getElementById('header-auth-area');
-                if(state.user) {
-                    d.innerHTML = `
-                        <div onclick="app.openPanel('info')" class="flex items-center gap-2 cursor-pointer hover:bg-gray-100 p-2 rounded-lg">
-                            <img src="https://ui-avatars.com/api/?name=${state.user.name}&background=random" class="w-9 h-9 rounded-full border">
-                            <span class="font-bold text-sm hidden md:block">${state.user.name}</span>
-                        </div>
-                        <button onclick="app.modal('post-ad-modal', true)" class="bg-danger text-white px-5 py-2.5 rounded-lg font-bold shadow hover:bg-red-600 hidden md:block transition">İlan Ver</button>
-                    `;
-                } else d.innerHTML = `<button onclick="app.modal('login-modal',true)" class="font-bold text-gray-600 hover:text-accent mr-2">Giriş Yap</button><button onclick="app.modal('register-modal',true)" class="bg-accent text-white px-5 py-2.5 rounded-lg font-bold shadow hover:bg-blue-700 transition">Kayıt Ol</button>`;
-            },
-            renderCats: () => {
-                const l = document.getElementById('category-list'); l.innerHTML='';
-                state.cats.forEach(c => l.innerHTML += `
-                    <li onclick="app.search('${c.name}')" class="flex items-center justify-between p-3.5 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0 transition">
-                        <div class="flex items-center gap-3"><i class="fa-solid ${c.icon} ${c.color} w-5"></i><span class="text-sm font-semibold text-gray-700">${c.name}</span></div>
-                    </li>
-                `);
-            },
-            renderAds: (list) => {
-                const g = document.getElementById('ads-grid'); g.innerHTML='';
-                if(list.length===0) document.getElementById('empty-state').style.display='block'; else document.getElementById('empty-state').style.display='none';
-                list.forEach(ad => {
-                    const dopings = ad.dopings || [];
-                    let cardClass = "bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden cursor-pointer hover:shadow-float transition relative group";
-                    if(dopings.includes('dopamin')) cardClass = "bg-white rounded-xl shadow-float border-2 border-purple-200 overflow-hidden cursor-pointer transform scale-105 z-10 relative group";
-                    if(dopings.includes('acil')) cardClass += " border-danger border-2";
-
-                    g.innerHTML += `
-                        <div onclick="app.openDetail(${ad.id})" class="${cardClass}">
-                            <div class="aspect-square bg-gray-100 relative">
-                                <img src="${ad.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                                ${ad.vitrin ? '<span class="absolute top-2 left-2 bg-primary text-dark text-[10px] font-bold px-2 py-0.5 rounded shadow">VİTRİN</span>' : ''}
-                                ${dopings.includes('acil') ? '<span class="absolute top-2 right-2 bg-danger text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">ACİL</span>' : ''}
-                                ${ad.isStore ? '<span class="absolute bottom-0 w-full bg-dark/80 text-white text-[10px] text-center py-1 backdrop-blur-sm">KURUMSAL</span>' : ''}
-                                ${ad.stock < 1 ? '<span class="absolute inset-0 bg-black/50 text-white text-xl font-bold flex items-center justify-center">STOK BİTTİ</span>' : ''}
-                            </div>
-                            <div class="p-4">
-                                <div class="font-bold text-lg text-accent">${ad.price.toLocaleString()} TL</div>
-                                <div class="text-sm ${dopings.includes('bold') ? 'font-black' : 'font-bold'} text-dark truncate">${ad.title}</div>
-                                <div class="text-xs text-gray-400 mt-1 flex justify-between"><span>Stok: ${ad.stock}</span><span>${ad.owner}</span></div>
-                            </div>
-                        </div>`;
-                });
-            },
-            renderVitrin: () => {
-                const v = document.getElementById('vitrin-area'); v.innerHTML='';
-                state.ads.filter(a=>a.vitrin).forEach(ad => {
-                    v.innerHTML += `<div onclick="app.openDetail(${ad.id})" class="flex-shrink-0 w-24 flex flex-col items-center gap-2 cursor-pointer group"><div class="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-primary to-orange-500 group-hover:scale-105 transition"><img src="${ad.image}" class="w-full h-full rounded-full object-cover border-2 border-white"></div><span class="text-[10px] font-bold text-center truncate w-full text-dark group-hover:text-accent">${ad.title}</span></div>`;
-                });
-            },
-            
-            renderCart: () => {
-                const itemsDiv = document.getElementById('cart-items');
-                const summaryDiv = document.getElementById('cart-summary');
-                const emptyDiv = document.getElementById('cart-empty');
-                const checkoutBtn = document.getElementById('checkout-btn');
-                const cartCount = document.getElementById('cart-count');
-                const count = state.cart.length;
-
-                cartCount.innerText = count;
-                cartCount.classList.toggle('hidden', count === 0);
-                emptyDiv.classList.toggle('hidden', count > 0);
-                summaryDiv.classList.toggle('hidden', count === 0);
-                checkoutBtn.classList.toggle('hidden', count === 0);
-
-                if (count === 0) { itemsDiv.innerHTML = ''; return; }
-
-                const summary = app.calculateCartSummary();
-                document.getElementById('cart-total-price').innerText = summary.totalPrice.toLocaleString('tr-TR') + ' TL';
-                document.getElementById('cart-fee-price').innerText = summary.fee.toLocaleString('tr-TR') + ' TL';
-                document.getElementById('cart-grand-total').innerText = summary.grandTotal.toLocaleString('tr-TR') + ' TL';
-
-                itemsDiv.innerHTML = state.cart.map(item => `
-                    <div class="flex items-center gap-4 p-3 border rounded-xl dark:border-gray-700">
-                        <img src="${item.image}" class="w-16 h-16 object-cover rounded-lg">
-                        <div class="flex-1">
-                            <div class="font-bold text-sm">${item.title}</div>
-                            <div class="text-accent font-bold">${item.price.toLocaleString('tr-TR')} TL</div>
-                        </div>
-                        <button onclick="app.removeFromCart(${item.id})" class="text-danger hover:text-red-700"><i class="fa-solid fa-trash-alt"></i></button>
-                    </div>
-                `).join('');
-            },
-
-            renderOrderLists: () => {
-                const ordersList = document.getElementById('orders-list');
-                const salesList = document.getElementById('sales-list');
-                const userOrders = state.orders.filter(o => !o.isSeller && o.buyer === state.user.name);
-                const userSales = state.orders.filter(o => o.isSeller && o.owner === state.user.name);
-                
-                const getStatusColor = (status) => {
-                    if (status === 'Ödeme Yapıldı' || status === 'Teslim Edildi') return 'text-green-700 bg-green-100';
-                    if (status === 'Kargoda') return 'text-blue-700 bg-blue-100';
-                    if (status === 'Hazırlanıyor') return 'text-orange-700 bg-orange-100';
-                    return 'text-gray-700 bg-gray-100';
+                const getToneStyle = (text) => {
+                    if (tone === 'eğlenceli') return `**${text}**`;
+                    if (tone === 'akademik') return `*${text}*`;
+                    return text;
                 };
 
-                const getTimeline = (order) => {
-                    const steps = [
-                        { status: 'Sipariş Alındı', icon: 'fa-box-open', date: order.date, isCompleted: true },
-                        { status: 'Hazırlanıyor', icon: 'fa-cube', date: order.status !== 'Hazırlanıyor' && order.status !== 'Sipariş Alındı' && !order.shipDate ? order.date : null, isCompleted: order.status !== 'Hazırlanıyor' && order.status !== 'Sipariş Alındı' },
-                        { status: 'Kargoya Verildi', icon: 'fa-truck', date: order.shipDate, isCompleted: order.status !== 'Hazırlanıyor' },
-                        { status: 'Teslim Edildi', icon: 'fa-box', date: order.status === 'Teslim Edildi' || order.status === 'Ödeme Yapıldı' ? order.shipDate : null, isCompleted: order.status === 'Teslim Edildi' || order.status === 'Ödeme Yapıldı' },
-                    ];
-                    
-                    if (order.isSeller) {
-                        steps.shift();
-                        steps[0].status = 'Hazırlanıyor';
-                        steps[3].status = 'Ödeme Yapıldı';
-                        steps[3].icon = 'fa-wallet';
+                // Markdown formatında simüle edilmiş AI çıktısı
+                let content = `
+# ${getToneStyle(topic)}: Geleceğin Anahtarı
+
+<p>Günümüzde dijital pazarlama stratejilerinin merkezinde ${getToneStyle(keywords[0] || 'AI')} destekli çözümler bulunmaktadır. Özellikle ${getToneStyle('içerik üretimi')} süreçleri, bu teknolojiler sayesinde inanılmaz bir hız kazanmıştır. Bir zamanlar günler süren blog yazma işi, artık saniyeler içinde tamamlanabiliyor.</p>
+
+## Yapay Zeka ve SEO İlişkisi
+
+<p>Arama motoru optimizasyonu (SEO), artık sadece anahtar kelime doldurmaktan ibaret değil. Google, kullanıcı deneyimini ve içeriğin kalitesini ön planda tutmaktadır. İşte burada ${getToneStyle('Yapay Zeka')} devreye girer. AI, rakiplerinizin analizini yaparak ve ${getToneStyle(keywords[1] || 'SEO')} kurallarına tam uyum sağlayarak size özel metinler hazırlar.</p>
+
+### Neden AI Yazarım Kullanmalısınız?
+
+<ul>
+    <li>**Hız:** Yüksek hacimli içerik ihtiyacınızı saniyeler içinde karşılar.</li>
+    <li>**Optimizasyon:** Verilen ${getToneStyle(keywords[2] || 'anahtar kelimeler')} ile en uygun metin yapısını kurar.</li>
+    <li>**Verimlilik:** İnsan yazar maliyetlerini düşürür ve yayın akışınızı hızlandırır.</li>
+</ul>
+
+<p>Sonuç olarak, başarılı bir dijital varlık için ${getToneStyle('AI araçları')} vazgeçilmezdir. ${getToneStyle('Profesyonel')} tonumuz sayesinde markanızın güvenilirliğini artırırken, ${getToneStyle(keywords[0] || 'AI')} teknolojisinin sınırlarını zorlayabilirsiniz.</p>
+`;
+                return content;
+            },
+
+            calculateSEO: (text, keywords) => {
+                // 1. Kelime Sayısı
+                const strippedText = text.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+                const wordCount = strippedText.split(' ').length;
+
+                // 2. Anahtar Kelime Yoğunluğu (İlk 3 Anahtar Kelime Üzerinden)
+                let keywordOccurrences = 0;
+                keywords.slice(0, 3).forEach(kw => {
+                    const regex = new RegExp(`\\b${kw}\\b`, 'gi');
+                    const matches = strippedText.match(regex);
+                    if (matches) {
+                        keywordOccurrences += matches.length;
                     }
-                    
-                    let html = '<ul class="timeline text-xs">';
-                    steps.forEach((step, index) => {
-                        let stepStatus = step.isCompleted ? 'active' : 'passive';
-                        if (order.status === step.status && step.status !== 'Ödeme Yapıldı') stepStatus = 'pending';
-                        if (order.status === 'Kargoda' && step.status === 'Teslim Edildi' && !order.isSeller) stepStatus = 'passive';
-
-                        html += `
-                            <li class="timeline-item ${stepStatus}">
-                                <div class="timeline-icon ${stepStatus === 'active' ? 'active' : stepStatus === 'pending' ? 'pending' : ''}"><i class="fa-solid ${step.icon}"></i></div>
-                                <div class="font-bold text-gray-800 dark:text-gray-200">${step.status}</div>
-                                <div class="text-gray-500">${step.date || 'Tarih bekleniyor'}</div>
-                            </li>
-                        `;
-                    });
-                    html += '</ul>';
-                    return html;
-                };
-
-                // 1. Siparişlerim (Alıcı)
-                ordersList.innerHTML = userOrders.length === 0 ? '<p class="text-gray-400">Henüz siparişiniz yok.</p>' : userOrders.map(order => `
-                    <div class="p-4 border rounded-xl dark:border-gray-700 shadow-sm bg-white">
-                        <div class="flex items-center gap-4 mb-4 border-b pb-3 dark:border-gray-700">
-                            <img src="${order.image}" class="w-16 h-16 object-cover rounded-lg">
-                            <div class="flex-1">
-                                <div class="font-bold text-sm">${order.title}</div>
-                                <div class="text-xs text-gray-500">Satıcı: ${order.owner} | Sipariş No: ${order.id}</div>
-                                <div class="font-bold text-accent">${order.price.toLocaleString('tr-TR')} TL</div>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-xs font-bold ${getStatusColor(order.status)} px-3 py-1 rounded-full">${order.status}</span>
-                                ${order.status === 'Kargoda' ? `<button onclick="app.confirmDelivery(${order.id})" class="mt-2 text-xs font-bold bg-primary px-3 py-1 rounded-full hover:bg-yellow-400">Teslim Aldım</button>` : ''}
-                            </div>
-                        </div>
-                        ${getTimeline(order)}
-                    </div>
-                `).join('');
-
-                // 2. Satışlarım (Satıcı)
-                salesList.innerHTML = userSales.length === 0 ? '<p class="text-gray-400">Henüz satışınız yok.</p>' : userSales.map(sale => `
-                    <div class="p-4 border rounded-xl dark:border-gray-700 shadow-sm bg-white">
-                        <div class="flex items-center gap-4 mb-4 border-b pb-3 dark:border-gray-700">
-                            <img src="${sale.image}" class="w-16 h-16 object-cover rounded-lg">
-                            <div class="flex-1">
-                                <div class="font-bold text-sm">${sale.title}</div>
-                                <div class="text-xs text-gray-500">Alıcı: ${sale.buyer} | Sipariş No: ${sale.id}</div>
-                                <div class="font-bold text-accent">${sale.price.toLocaleString('tr-TR')} TL</div>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-xs font-bold ${getStatusColor(sale.status)} px-3 py-1 rounded-full">${sale.status}</span>
-                                ${sale.status === 'Hazırlanıyor' ? `<button onclick="app.confirmShipment(${sale.id})" class="mt-2 text-xs font-bold bg-green-500 text-white px-3 py-1 rounded-full hover:bg-green-600">Kargoya Ver</button>` : ''}
-                            </div>
-                        </div>
-                        ${getTimeline(sale)}
-                    </div>
-                `).join('');
+                });
+                const density = wordCount > 0 ? ((keywordOccurrences / wordCount) * 100).toFixed(2) : 0;
+                
+                // 3. Okunabilirlik Skoru (Basit Simülasyon)
+                // Kelime başına ortalama hece ve cümle uzunluğuna dayalıdır.
+                // Basitlik için kelime sayısına ve cümle sayısına göre manuel skor verelim.
+                const sentenceCount = (strippedText.match(/[.!?]/g) || []).length;
+                let readabilityScore = 50; // Başlangıç
+                if (wordCount > 150 && sentenceCount > 5) {
+                     readabilityScore = 75; // İyi okunabilirlik
+                } else if (wordCount > 50 && sentenceCount < 3) {
+                     readabilityScore = 40; // Çok kısa veya karmaşık
+                }
+                
+                // DOM'a Yansıtma
+                document.getElementById('word-count').innerText = wordCount.toLocaleString();
+                document.getElementById('keyword-density').innerText = `${density}%`;
+                document.getElementById('readability-score').innerText = readabilityScore;
+                
+                // Yoğunluk Uyarısı
+                const densityEl = document.getElementById('keyword-density');
+                densityEl.classList.remove('text-red-500', 'text-orange-500', 'text-primary');
+                if (density > 3) {
+                    densityEl.classList.add('text-red-500'); // Aşırı doldurma uyarısı
+                } else if (density > 1) {
+                    densityEl.classList.add('text-orange-500');
+                } else {
+                    densityEl.classList.add('text-primary'); // Optimal
+                }
             },
             
-            toast: (msg, type='info') => {
-                const c = document.getElementById('toast-container');
-                const d = document.createElement('div');
-                const i = type==='success'?'fa-check-circle':(type==='error'?'fa-triangle-exclamation':'fa-info-circle');
-                d.className = `toast-item ${type} flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg text-sm font-semibold min-w-[300px] animate-slide-in`;
-                d.innerHTML = `<i class="fa-solid ${i} text-lg"></i><span>${msg}</span>`;
-                c.appendChild(d);
-                setTimeout(() => { d.style.opacity='0'; setTimeout(()=>d.remove(),300); }, 3000);
+            copyContent: () => {
+                const output = document.getElementById('content-output');
+                const textToCopy = output.innerText;
+                
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    alert("İçerik başarıyla kopyalandı!");
+                }).catch(err => {
+                    console.error('Kopyalama hatası:', err);
+                    alert("Kopyalama başarısız oldu.");
+                });
             }
         };
 
-        // Kodu yüklendikten sonra çalıştır
+        // Dark mode başlangıç ayarı
         document.addEventListener('DOMContentLoaded', () => {
-             app.init();
-             // Ekstra güvenlik için body olay dinleyicisi eklenmiştir (Tıklama Sorununu çözmek için)
-             document.body.addEventListener('click', app.handleGlobalClick);
+            const topicInput = document.getElementById('topic');
+            const keywordsInput = document.getElementById('keywords');
+            topicInput.value = "Yapay Zeka ve E-ticaretin Geleceği";
+            keywordsInput.value = "AI, e-ticaret, yenilik, perakende";
         });
     </script>
 </body>
