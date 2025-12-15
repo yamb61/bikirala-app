@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - V18 Modern Interface</title>
+    <title>BiKirala - V19 Final Release</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -12,16 +12,30 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#FFD700',      // Marka Sarısı
-                        accent: '#2962FF',       // Kurumsal Mavi
-                        danger: '#ff3f55',       // Kırmızı
-                        dark: '#1a1a1a',         // Siyah Metin
-                        surface: '#ffffff',      // Beyaz Zemin
-                        graybg: '#f1f2f6'        // Arka Plan Grisi
+                        primary: '#FFD700',       // Marka Sarısı
+                        accent: '#2962FF',        // Kurumsal Mavi
+                        danger: '#ff3f55',        // Kırmızı
+                        dark: '#1a1a1a',          // Siyah Metin
+                        surface: '#ffffff',       // Beyaz Zemin
+                        graybg: '#f1f2f6'         // Arka Plan Grisi
                     },
                     boxShadow: {
                         'float': '0 10px 40px rgba(0,0,0,0.1)',
                         'card': '0 2px 10px rgba(0,0,0,0.05)'
+                    },
+                    animation: {
+                        'slide-in': 'slideIn 0.3s ease-out forwards',
+                        'fade-in': 'fadeIn 0.3s ease-out forwards'
+                    },
+                    keyframes: {
+                        slideIn: {
+                            '0%': { transform: 'translateX(100%)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        }
                     }
                 }
             }
@@ -47,11 +61,20 @@
         .doping-card:hover { border-color: #e5e7eb; }
         .doping-card.selected { border-color: #2962FF; background-color: #eff6ff; }
         
-        /* YENİ KATEGORİ STİLİ */
         .cat-item:hover .cat-icon-box { border-color: #2962FF; background-color: #eff6ff; transform: scale(1.05); }
         .cat-item:hover .cat-arrow { transform: translateX(4px); color: #2962FF; }
         .cat-icon-box { transition: all 0.3s ease; }
         .cat-arrow { transition: all 0.3s ease; }
+
+        /* MODERN TOAST STİLİ */
+        .toast-item {
+            background: rgba(25, 25, 25, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            border-left: 4px solid #2962FF;
+        }
+        .toast-item.success { border-left-color: #00d26a; }
+        .toast-item.error { border-left-color: #ff4757; }
     </style>
 </head>
 <body class="pb-24 md:pb-0" onclick="app.closeDropdown(event)">
@@ -211,7 +234,17 @@
         <div class="max-w-3xl mx-auto min-h-screen bg-white pb-20">
             <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10 shadow-sm"><h2 class="text-xl font-bold">İlan Ver</h2><button onclick="app.modal('post-ad-modal', false)" class="text-2xl text-gray-400 hover:text-danger">&times;</button></div>
             <div class="p-6 space-y-6">
-                <div class="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center hover:border-accent hover:bg-blue-50 cursor-pointer transition relative"><input type="file" class="absolute inset-0 opacity-0 cursor-pointer" onchange="ui.toast('Fotoğraf yüklendi (Simülasyon)', 'success')"><i class="fa-solid fa-camera text-4xl text-gray-300 mb-2"></i><p class="font-bold text-gray-500">Fotoğraf Yükle</p></div>
+                
+                <div id="upload-area" class="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center hover:border-accent hover:bg-blue-50 cursor-pointer transition relative bg-center bg-no-repeat bg-cover">
+                    <input type="file" id="p-image-input" class="absolute inset-0 opacity-0 cursor-pointer z-20" accept="image/*" onchange="app.handleImageUpload(this)">
+                    
+                    <div id="upload-placeholder" class="z-10 relative pointer-events-none">
+                        <i class="fa-solid fa-camera text-4xl text-gray-300 mb-2"></i>
+                        <p class="font-bold text-gray-500">Fotoğraf Yüklemek İçin Tıkla</p>
+                        <p class="text-xs text-gray-400 mt-1">PNG, JPG (Max 2MB)</p>
+                    </div>
+                </div>
+
                 <div class="space-y-4">
                     <input type="text" id="p-title" class="bk-input text-lg font-bold" placeholder="İlan Başlığı">
                     <div class="flex gap-4"><input type="number" id="p-price" class="bk-input" placeholder="Fiyat (TL)"><select id="p-cat" class="bk-input bg-white cursor-pointer"></select></div>
@@ -280,7 +313,9 @@
                 {name:'Giyim', icon:'fa-shirt', color:'text-purple-500'},
                 {name:'Diğer', icon:'fa-layer-group', color:'text-green-500'}
             ],
-            dopingTotal: 0, tempReg: null
+            dopingTotal: 0, 
+            tempReg: null,
+            tempImage: null // Fotoğraf için geçici hafıza
         };
 
         const auth = {
@@ -333,7 +368,15 @@
                 ];
                 app.save();
             },
-            modal: (id, show) => document.getElementById(id).style.display = show ? 'flex' : 'none',
+            modal: (id, show) => {
+                document.getElementById(id).style.display = show ? 'flex' : 'none';
+                if(show && id === 'post-ad-modal') {
+                    // Modal açılınca resim alanını sıfırla
+                    state.tempImage = null;
+                    document.getElementById('upload-area').style.backgroundImage = 'none';
+                    document.getElementById('upload-placeholder').classList.remove('hidden');
+                }
+            },
             
             toggleDropdown: (e) => {
                 e.stopPropagation(); const menu = document.getElementById('user-dropdown');
@@ -345,6 +388,31 @@
             toggleDoping: (el, price) => {
                 el.classList.toggle('selected'); state.dopingTotal += el.classList.contains('selected') ? price : -price; document.getElementById('doping-total').innerText = state.dopingTotal + ' TL';
             },
+
+            // --- YENİ: RESİM YÜKLEME ---
+            handleImageUpload: (input) => {
+                const file = input.files[0];
+                if (!file) return;
+
+                // Boyut Kontrolü (2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    ui.toast('Dosya boyutu çok büyük (Max 2MB)', 'error');
+                    input.value = ""; // Seçimi temizle
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    state.tempImage = e.target.result; // Base64 verisi
+                    // Önizleme Göster
+                    const area = document.getElementById('upload-area');
+                    area.style.backgroundImage = `url(${state.tempImage})`;
+                    document.getElementById('upload-placeholder').classList.add('hidden');
+                    ui.toast('Fotoğraf yüklendi', 'success');
+                }
+                reader.readAsDataURL(file);
+            },
+
             submitAdFlow: () => {
                 const t = document.getElementById('p-title').value; const p = document.getElementById('p-price').value;
                 if(!t || !p) return ui.toast('Eksik bilgi', 'error');
@@ -353,8 +421,26 @@
             },
             finalizeAd: () => {
                 const t = document.getElementById('p-title').value; const p = document.getElementById('p-price').value; const c = document.getElementById('p-cat').value;
-                state.ads.unshift({ id: Date.now(), title: t, price: parseInt(p), cat: c, owner: state.user.name, isStore: state.user.isStore, image: 'https://via.placeholder.com/500?text='+c, vitrin: state.dopingTotal > 100 });
-                app.save(); app.modal('post-ad-modal', false); ui.renderAds(state.ads); ui.renderVitrin(); ui.toast('İlan Yayında!', 'success');
+                
+                // Resmi kullan veya varsayılan ata
+                const finalImg = state.tempImage || ('https://via.placeholder.com/500?text='+c);
+
+                state.ads.unshift({ 
+                    id: Date.now(), 
+                    title: t, 
+                    price: parseInt(p), 
+                    cat: c, 
+                    owner: state.user.name, 
+                    isStore: state.user.isStore, 
+                    image: finalImg, 
+                    vitrin: state.dopingTotal > 100 
+                });
+                
+                app.save(); 
+                app.modal('post-ad-modal', false); 
+                ui.renderAds(state.ads); 
+                ui.renderVitrin(); 
+                ui.toast('İlan Yayında!', 'success');
             },
             
             openPanel: (tab) => {
@@ -368,7 +454,21 @@
                 if(my.length === 0) list.innerHTML = '<div class="text-gray-400 text-center py-10">İlanınız yok.</div>';
                 my.forEach(a => { list.innerHTML += `<div class="flex justify-between items-center border p-4 rounded-xl mb-3"><div class="flex items-center gap-3"><img src="${a.image}" class="w-12 h-12 rounded object-cover"><div class="font-bold text-sm">${a.title}<div class="text-accent">${a.price} TL</div></div></div><button onclick="app.deleteAd(${a.id})" class="text-danger font-bold text-sm bg-red-50 px-3 py-1 rounded">Sil</button></div>`; });
             },
-            deleteAd: (id) => { if(confirm('Silinsin mi?')) { state.ads = state.ads.filter(a => a.id !== id); app.save(); ui.renderMyAds(); ui.renderAds(state.ads); ui.toast('Silindi', 'success'); } },
+            
+            // --- GÜNCELLENEN SİLME İŞLEMİ (ANINDA YANSIYAN) ---
+            deleteAd: (id) => { 
+                if(confirm('Silinsin mi?')) { 
+                    state.ads = state.ads.filter(a => a.id !== id); 
+                    app.save(); 
+                    
+                    // Tüm listeleri anında güncelle (F5 gerekmez)
+                    ui.renderMyAds(); 
+                    ui.renderAds(state.ads); 
+                    ui.renderVitrin();
+                    
+                    ui.toast('Silindi', 'success'); 
+                } 
+            },
 
             openDetail: (id) => {
                 const a = state.ads.find(x => x.id === id); document.getElementById('d-title').innerText = a.title; document.getElementById('d-price').innerText = a.price.toLocaleString() + ' TL'; document.getElementById('d-owner').innerText = a.owner; document.getElementById('d-img').src = a.image;
@@ -442,9 +542,21 @@
                 document.getElementById('dash-'+t).style.display='block'; document.getElementById('nav-'+t).className = 'w-full text-left p-3 rounded-lg text-sm hover:bg-white flex items-center gap-3 transition font-bold text-accent bg-white shadow-sm';
                 if(t==='ads') app.renderMyAds();
             },
+            
+            // --- MODERN TOAST BİLDİRİMİ ---
             toast: (msg, type='info') => {
-                const d = document.createElement('div'); const c = type === 'success' ? 'bg-green-600' : (type === 'error' ? 'bg-danger' : 'bg-dark');
-                d.className = `${c} text-white px-4 py-3 rounded-lg shadow-lg text-sm font-bold flex items-center gap-2 animate-modal-pop`; d.innerHTML = `<i class="fa-solid fa-circle-info"></i> ${msg}`; document.getElementById('toast-container').appendChild(d); setTimeout(()=>d.remove(), 3000);
+                const container = document.getElementById('toast-container');
+                const d = document.createElement('div');
+                const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-info');
+                
+                d.className = `toast-item ${type} flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg text-sm font-semibold min-w-[300px] animate-slide-in`;
+                d.innerHTML = `<i class="fa-solid ${icon} text-lg"></i> <span>${msg}</span>`;
+                
+                container.appendChild(d);
+                setTimeout(() => {
+                    d.style.animation = 'fadeOut 0.3s ease-out forwards';
+                    d.addEventListener('animationend', () => d.remove());
+                }, 3000);
             }
         };
 
