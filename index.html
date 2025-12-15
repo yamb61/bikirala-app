@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - V27 E-Commerce Guard</title>
+    <title>BiKirala - V28 Kararlı Sürüm</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -74,16 +74,6 @@
         /* Tablo Stili */
         .spec-row:nth-child(odd) { background-color: rgba(0,0,0,0.02); }
         .dark .spec-row:nth-child(odd) { background-color: rgba(255,255,255,0.05); }
-
-        /* Trendyol Tarzı Timeline */
-        .timeline { list-style: none; padding: 0; position: relative; }
-        .timeline:before { content: ''; position: absolute; top: 0; bottom: 0; left: 10px; width: 2px; background-color: #e0e0e0; }
-        .timeline-item { position: relative; padding-left: 30px; margin-bottom: 20px; }
-        .timeline-icon { position: absolute; left: 0; top: 0; width: 20px; height: 20px; border-radius: 50%; background-color: #fff; border: 3px solid #ccc; z-index: 10; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; }
-        .timeline-item.active .timeline-icon { background-color: #27ae60; border-color: #27ae60; }
-        .timeline-item.active .timeline-icon i { color: white; }
-        .timeline-item.pending .timeline-icon { background-color: #f1c40f; border-color: #f1c40f; }
-        .timeline-item.pending .timeline-icon i { color: white; }
     </style>
 </head>
 <body class="bg-graybg text-dark pb-24 md:pb-0" onclick="app.closeDropdown(event)">
@@ -237,9 +227,11 @@
                 <div class="space-y-4">
                     <input type="text" id="p-title" class="bk-input text-lg font-bold" placeholder="İlan Başlığı">
                     <div class="grid grid-cols-3 gap-4">
-                        <input type="number" id="p-price" class="bk-input" placeholder="Fiyat (TL)">
-                        <input type="number" id="p-stock" class="bk-input" placeholder="Stok Adedi" value="1">
-                        <select id="p-cat" class="bk-input bg-white cursor-pointer" onchange="app.renderCatSpecs(this.value)"></select>
+                        <input type="number" id="p-price" class="bk-input" placeholder="Fiyat (TL)" required>
+                        <input type="number" id="p-stock" class="bk-input" placeholder="Stok Adedi" value="1" required min="1">
+                        <select id="p-cat" class="bk-input bg-white cursor-pointer" onchange="app.renderCatSpecs(this.value)" required>
+                             <option value="">Kategori Seç</option>
+                        </select>
                     </div>
                     <input type="text" id="p-location" class="bk-input" placeholder="Şehir / İlçe (Örn: İstanbul, Kadıköy)">
                     
@@ -456,8 +448,7 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'bk_v27_';
-        // Simülasyon için 7 günlük otomatik onay süresi
+        const STORAGE_KEY = 'bk_v28_';
         const AUTO_CONFIRM_DAYS = 7;
 
         const state = {
@@ -549,7 +540,7 @@
         const app = {
             init: () => { 
                 if(state.ads.length === 0) app.seed(); 
-                app.checkAutoConfirm(); // Otomatik onay kontrolü
+                app.checkAutoConfirm();
                 ui.render(); 
             },
             save: () => {
@@ -579,20 +570,19 @@
                 }
             },
 
-            // --- OTOMATİK ONAY KONTROLÜ ---
             checkAutoConfirm: () => {
                 const now = new Date().getTime();
                 let changesMade = false;
 
                 state.orders.forEach(order => {
-                    if (order.status === 'Kargoda') {
+                    if (order.status === 'Kargoda' && order.shipDate && !order.isSeller) { // Alıcı tarafı sipariş
                         const shipDate = new Date(order.shipDate).getTime();
                         const sevenDaysMs = AUTO_CONFIRM_DAYS * 24 * 60 * 60 * 1000;
 
                         if (now - shipDate >= sevenDaysMs) {
-                            order.status = 'Teslim Edildi'; // Alıcı tarafı
+                            order.status = 'Teslim Edildi';
                             
-                            // Satıcı tarafını da güncelle
+                            // Satıcı tarafını da güncelle ve ödemeyi yap
                             const correspondingSale = state.orders.find(o => o.id === order.id && o.isSeller);
                             if (correspondingSale) {
                                 correspondingSale.status = 'Ödeme Yapıldı';
@@ -712,7 +702,6 @@
                 ui.toast('Profil Bilgileri Güncellendi', 'success');
             },
 
-            // --- SİPARİŞ TAKİP AKSİYONLARI ---
             confirmDelivery: (orderId) => {
                 const order = state.orders.find(o => o.id === orderId && !o.isSeller && o.buyer === state.user.name);
                 if (!order || order.status !== 'Kargoda') return;
@@ -730,7 +719,26 @@
                 }
             },
             
-            // --- SEPET MANTIKLARI ---
+            confirmShipment: (orderId) => {
+                const order = state.orders.find(o => o.id === orderId && o.isSeller && o.owner === state.user.name);
+                if (!order || order.status !== 'Hazırlanıyor') return;
+
+                if (confirm(`${order.title} ürününü kargoya verdiğinizi onaylıyor musunuz?`)) {
+                    const shipDate = new Date();
+                    order.status = 'Kargoda';
+                    order.shipDate = shipDate.toLocaleDateString();
+
+                    const buyerOrder = state.orders.find(o => o.id === orderId && !o.isSeller);
+                    if (buyerOrder) {
+                        buyerOrder.status = 'Kargoda';
+                        buyerOrder.shipDate = order.shipDate;
+                    }
+                    app.save();
+                    ui.renderOrderLists();
+                    ui.toast('Ürün kargoya verildi olarak işaretlendi.', 'success');
+                }
+            },
+
             addToCart: (adId) => {
                 if(!state.user) return app.modal('login-modal', true);
                 
@@ -761,15 +769,12 @@
             },
             finalizeOrder: () => {
                 const date = new Date().toLocaleDateString();
-                const shipDate = new Date();
-                shipDate.setDate(shipDate.getDate() + 3); // Simülasyon: 3 gün sonra kargoya verildi
-
+                
                 state.cart.forEach(item => {
                     const orderId = Date.now() + item.id;
-                    const orderItem = { id: orderId, adId: item.id, title: item.title, price: item.price, image: item.image, date: date, status: 'Kargoda', shipDate: shipDate, isSeller: false, buyer: state.user.name, owner: item.owner };
-                    const salesItem = { ...orderItem, status: 'Hazırlanıyor', isSeller: true, shipDate: null }; // Satıcı başlangıçta Hazırlanıyor görür
+                    const orderItem = { id: orderId, adId: item.id, title: item.title, price: item.price, image: item.image, date: date, status: 'Hazırlanıyor', isSeller: false, buyer: state.user.name, owner: item.owner };
+                    const salesItem = { ...orderItem, isSeller: true, status: 'Hazırlanıyor' };
                     
-                    // Stok düşüşü
                     const adIndex = state.ads.findIndex(a => a.id === item.id);
                     if (adIndex !== -1 && state.ads[adIndex].stock > 0) {
                         state.ads[adIndex].stock -= 1;
@@ -782,6 +787,7 @@
                 state.cart = [];
                 app.save();
                 ui.renderCart();
+                ui.renderAds(state.ads);
                 ui.toast('Siparişleriniz başarıyla oluşturuldu.', 'success');
             },
             calculateCartSummary: () => {
@@ -791,7 +797,6 @@
                 return { totalPrice: totalPrice, fee: fee.toFixed(2), grandTotal: grandTotal };
             },
             
-            // --- İLAN DETAYINDAN DOĞRUDAN ÖDEME ---
             buyProductDirect: (adId) => {
                 if(!state.user) return app.modal('login-modal', true);
 
@@ -811,14 +816,11 @@
                     `${ad.title} (${price.toLocaleString('tr-TR')} TL) + ${fee.toFixed(2)} TL Hizmet Bedeli`, 
                     () => {
                         const date = new Date().toLocaleDateString();
-                        const shipDate = new Date();
-                        shipDate.setDate(shipDate.getDate() + 3);
-
+                        
                         const orderId = Date.now();
-                        const orderItem = { id: orderId, adId: ad.id, title: ad.title, price: ad.price, image: ad.image, date: date, status: 'Kargoda', shipDate: shipDate, isSeller: false, buyer: state.user.name, owner: ad.owner };
-                        const salesItem = { ...orderItem, status: 'Hazırlanıyor', isSeller: true, shipDate: null };
+                        const orderItem = { id: orderId, adId: ad.id, title: ad.title, price: ad.price, image: ad.image, date: date, status: 'Hazırlanıyor', isSeller: false, buyer: state.user.name, owner: ad.owner };
+                        const salesItem = { ...orderItem, status: 'Hazırlanıyor', isSeller: true, owner: ad.owner };
 
-                        // Stok düşüşü
                         const adIndex = state.ads.findIndex(a => a.id === adId);
                         if (adIndex !== -1 && state.ads[adIndex].stock > 0) {
                             state.ads[adIndex].stock -= 1;
@@ -827,30 +829,10 @@
                         state.orders.unshift(orderItem);
                         state.orders.unshift(salesItem);
                         app.save();
+                        ui.renderAds(state.ads);
                         ui.toast('Sipariş başarıyla oluşturuldu.', 'success');
                     }
                 );
-            },
-            
-            // Satıcının kargoya verme onayı
-            confirmShipment: (orderId) => {
-                const order = state.orders.find(o => o.id === orderId && o.isSeller && o.owner === state.user.name);
-                if (!order || order.status !== 'Hazırlanıyor') return;
-
-                if (confirm(`${order.title} ürününü kargoya verdiğinizi onaylıyor musunuz?`)) {
-                    order.status = 'Kargoda';
-                    order.shipDate = new Date().toLocaleDateString();
-
-                    // Alıcı tarafındaki siparişi de 'Kargoda' olarak işaretle
-                    const buyerOrder = state.orders.find(o => o.id === orderId && !o.isSeller);
-                    if (buyerOrder) {
-                        buyerOrder.status = 'Kargoda';
-                        buyerOrder.shipDate = order.shipDate;
-                    }
-                    app.save();
-                    ui.renderOrderLists();
-                    ui.toast('Ürün kargoya verildi olarak işaretlendi.', 'success');
-                }
             },
 
             openDetail: (id) => {
@@ -888,8 +870,8 @@
                 app.renderDetailSpecs(a.specs);
                 app.modal('detail-modal', true);
             },
-            
-            // Diğer fonksiyonlar (mesaj, arama vb.) V26'daki gibi kalacak...
+
+            // Diğer fonksiyonlar...
             toggleFavorite: (id) => {
                 if(!state.user) return ui.toast('Giriş yapmalısın', 'error');
                 if(state.favorites.includes(id)) { state.favorites = state.favorites.filter(fid => fid !== id); ui.toast('Favorilerden çıkarıldı'); } 
@@ -980,7 +962,7 @@
         const ui = {
             render: () => {
                 ui.renderHeader(); ui.renderCats(); ui.renderAds(state.ads); ui.renderVitrin();
-                const s = document.getElementById('p-cat'); s.innerHTML='<option>Kategori Seç</option>'; state.cats.forEach(c=>s.innerHTML+=`<option>${c.name}</option>`);
+                const s = document.getElementById('p-cat'); s.innerHTML='<option value="">Kategori Seç</option>'; state.cats.forEach(c=>s.innerHTML+=`<option>${c.name}</option>`);
                 ui.renderCart();
             },
             renderHeader: () => {
@@ -1084,31 +1066,27 @@
 
                 const getTimeline = (order) => {
                     const steps = [
-                        { status: 'Kargoya Verildi', icon: 'fa-truck', date: order.shipDate },
-                        { status: 'Teslim Edildi', icon: 'fa-box', date: order.status === 'Teslim Edildi' ? new Date().toLocaleDateString() : null },
+                        { status: 'Sipariş Alındı', icon: 'fa-box-open', date: order.date, isCompleted: true },
+                        { status: 'Hazırlanıyor', icon: 'fa-cube', date: order.status !== 'Hazırlanıyor' && order.status !== 'Sipariş Alındı' && !order.shipDate ? order.date : null, isCompleted: order.status !== 'Hazırlanıyor' && order.status !== 'Sipariş Alındı' },
+                        { status: 'Kargoya Verildi', icon: 'fa-truck', date: order.shipDate, isCompleted: order.status !== 'Hazırlanıyor' },
+                        { status: 'Teslim Edildi', icon: 'fa-box', date: order.status === 'Teslim Edildi' || order.status === 'Ödeme Yapıldı' ? order.shipDate : null, isCompleted: order.status === 'Teslim Edildi' || order.status === 'Ödeme Yapıldı' },
                     ];
                     
-                    if (order.isSeller) { // Satıcı için özel
-                        steps.unshift({ status: 'Hazırlanıyor', icon: 'fa-cube', date: order.date });
-                        steps.push({ status: 'Ödeme Yapıldı', icon: 'fa-wallet', date: order.paymentDate });
-                    } else { // Alıcı için
-                        steps.unshift({ status: 'Sipariş Alındı', icon: 'fa-check', date: order.date });
+                    if (order.isSeller) {
+                        steps.shift(); // Satıcı için "Sipariş Alındı" atla
+                        steps[0].status = 'Hazırlanıyor';
+                        steps[3].status = 'Ödeme Yapıldı';
+                        steps[3].icon = 'fa-wallet';
                     }
                     
-
                     let html = '<ul class="timeline text-xs">';
                     steps.forEach((step, index) => {
-                        let stepStatus = 'passive';
-                        if (step.date) {
-                            stepStatus = 'active';
-                        } else if (order.status === 'Kargoda' && step.status === 'Teslim Edildi') {
-                            stepStatus = 'pending';
-                        } else if (order.status === 'Hazırlanıyor' && step.status === 'Kargoya Verildi') {
-                             stepStatus = 'pending';
-                        }
-                        
+                        let stepStatus = step.isCompleted ? 'active' : 'passive';
+                        if (order.status === step.status && step.status !== 'Ödeme Yapıldı') stepStatus = 'pending';
+                        if (order.status === 'Kargoda' && step.status === 'Teslim Edildi' && !order.isSeller) stepStatus = 'passive'; // Alıcıda otomatik onay beklerken gri kalsın
+
                         html += `
-                            <li class="timeline-item ${stepStatus} ${order.status === step.status ? 'pending' : ''}">
+                            <li class="timeline-item ${stepStatus}">
                                 <div class="timeline-icon ${stepStatus === 'active' ? 'active' : stepStatus === 'pending' ? 'pending' : ''}"><i class="fa-solid ${step.icon}"></i></div>
                                 <div class="font-bold text-gray-800 dark:text-gray-200">${step.status}</div>
                                 <div class="text-gray-500">${step.date || 'Tarih bekleniyor'}</div>
@@ -1158,7 +1136,6 @@
                 `).join('');
             },
             
-            // Diğer render fonksiyonları
             toast: (msg, type='info') => {
                 const c = document.getElementById('toast-container');
                 const d = document.createElement('div');
