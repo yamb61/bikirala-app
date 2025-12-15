@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - V28 Kararlı Sürüm</title>
+    <title>BiKirala - V29 Ultimate UX Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -74,6 +74,13 @@
         /* Tablo Stili */
         .spec-row:nth-child(odd) { background-color: rgba(0,0,0,0.02); }
         .dark .spec-row:nth-child(odd) { background-color: rgba(255,255,255,0.05); }
+
+        /* Timeline (Gizli) */
+        .timeline-item.active .timeline-icon { background-color: #27ae60; border-color: #27ae60; }
+        .timeline-item.active .timeline-icon i { color: white; }
+        .timeline-item.pending .timeline-icon { background-color: #f1c40f; border-color: #f1c40f; }
+        .timeline-item.pending .timeline-icon i { color: white; }
+        .timeline-icon { position: absolute; left: 0; top: 0; width: 20px; height: 20px; border-radius: 50%; background-color: #fff; border: 3px solid #ccc; z-index: 10; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; }
     </style>
 </head>
 <body class="bg-graybg text-dark pb-24 md:pb-0" onclick="app.closeDropdown(event)">
@@ -92,7 +99,7 @@
             <button class="absolute right-2 top-2 h-8 px-4 bg-primary text-dark font-bold text-xs rounded-full hover:bg-yellow-400 transition">ARA</button>
         </div>
 
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 z-50">
             <button onclick="document.documentElement.classList.toggle('dark')" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-yellow-400 transition"><i class="fa-solid fa-moon"></i></button>
             <button onclick="app.modal('cart-modal', true)" id="cart-btn" class="relative w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-white transition hover:text-accent">
                 <i class="fa-solid fa-shopping-cart text-lg"></i>
@@ -175,7 +182,15 @@
                     <h1 id="d-title" class="text-xl font-bold text-dark leading-tight">Başlık</h1>
                     <button id="d-fav-btn" onclick="" class="text-gray-300 hover:text-red-500 transition text-2xl"><i class="fa-solid fa-heart"></i></button>
                 </div>
-                <div id="d-price" class="text-3xl font-black text-accent mb-4 tracking-tight">0 TL</div>
+                <div id="d-price-area">
+                    <div id="d-price" class="text-3xl font-black text-accent mb-2 tracking-tight">0 TL</div>
+                    <div id="rental-slider" class="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg mb-4 hidden">
+                        <label for="days-slider" class="font-bold flex justify-between mb-2">Kiralama Süresi: <span id="current-days">1 Gün</span></label>
+                        <input type="range" id="days-slider" min="1" max="30" value="1" step="1" class="w-full h-1 bg-accent rounded-lg appearance-none cursor-pointer" oninput="app.updateRentalPrice(this.value)">
+                        <div class="flex justify-between mt-1 text-[10px]"><span>1 Gün</span><span>30 Gün</span></div>
+                    </div>
+                </div>
+                
                 <div class="text-sm text-gray-500 mb-6 flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> <span id="d-location">İstanbul</span></div>
 
                 <div class="mb-6">
@@ -185,7 +200,10 @@
                 </div>
 
                 <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-4 border border-gray-100 dark:border-gray-700">
-                    <div id="d-avatar" class="w-12 h-12 bg-white border rounded-full flex items-center justify-center font-bold text-gray-500 text-lg shadow-sm">A</div>
+                    <div class="relative">
+                         <div id="d-avatar" class="w-12 h-12 bg-white border rounded-full flex items-center justify-center font-bold text-gray-500 text-lg shadow-sm">A</div>
+                         <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800" title="Şimdi Aktif"></div>
+                    </div>
                     <div>
                         <div id="d-owner" class="font-bold text-sm text-dark">Satıcı</div>
                         <div class="text-xs text-yellow-500 flex items-center gap-1"><i class="fa-solid fa-star"></i> <span>4.8 (Satıcı Puanı)</span></div>
@@ -201,7 +219,11 @@
                 </div>
 
                 <h3 class="font-bold text-sm text-gray-500 mb-2">AÇIKLAMA</h3>
-                <p id="d-desc" class="text-sm text-gray-600 mb-6 flex-1 whitespace-pre-wrap leading-relaxed">...</p>
+                <div id="d-desc-area" class="relative">
+                    <p id="d-desc" class="text-sm text-gray-600 mb-2 leading-relaxed h-20 overflow-hidden relative">...</p>
+                    <button id="desc-toggle" class="text-accent text-sm font-bold hover:underline" onclick="app.toggleDescription()">Daha Fazla Oku</button>
+                </div>
+                
                 <div id="d-actions" class="space-y-3 mt-auto pb-safe">
                     </div>
             </div>
@@ -448,7 +470,7 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'bk_v28_';
+        const STORAGE_KEY = 'bk_v28_'; // Yeni depolama anahtarı
         const AUTO_CONFIRM_DAYS = 7;
 
         const state = {
@@ -472,7 +494,8 @@
             dopingTotal: 0,
             selectedDopings: [],
             tempRegData: null,
-            activeChatUser: null
+            activeChatUser: null,
+            basePrice: 0 // Kiralama için temel fiyat
         };
 
         const payment = {
@@ -554,8 +577,8 @@
             },
             seed: () => {
                 state.ads = [
-                    { id: 101, title: 'BMW 520i M Sport', price: 3250000, cat: 'Vasıta', stock: 1, owner: 'OtoGaleri', isStore: true, vitrin: true, dopings: ['vitrin', 'bold'], image: 'https://images.unsplash.com/photo-1555215696-b9776f188899?w=500', location: 'İstanbul, Kadıköy', images: ['https://images.unsplash.com/photo-1555215696-b9776f188899?w=500', 'https://images.unsplash.com/photo-1558231015-3733a1e9484b?w=500'], specs: {Yıl: 2020, KM: '45000', Yakıt: 'Benzin', Vites: 'Otomatik'} },
-                    { id: 102, title: 'iPhone 14 Pro', price: 52000, cat: 'Telefon', stock: 5, owner: 'Mert', isStore: false, vitrin: false, dopings: [], image: 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=500', location: 'Ankara, Çankaya', images: ['https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=500'], specs: {Marka: 'Apple', Hafıza: '128 GB'} }
+                    { id: 101, title: 'BMW 520i M Sport', price: 3250000, cat: 'Vasıta', stock: 1, owner: 'OtoGaleri', isStore: true, vitrin: true, dopings: ['vitrin', 'bold'], image: 'https://images.unsplash.com/photo-1555215696-b9776f188899?w=500', location: 'İstanbul, Kadıköy', images: ['https://images.unsplash.com/photo-1555215696-b9776f188899?w=500', 'https://images.unsplash.com/photo-1558231015-3733a1e9484b?w=500'], specs: {Yıl: 2020, KM: '45000', Yakıt: 'Benzin', Vites: 'Otomatik'}, description: 'Bu araç 2020 model olup, 45 bin kilometrededir. Günlük kiralama için uygundur. Detaylı bilgi için mesaj atın. Temiz kullanılmıştır.' },
+                    { id: 102, title: 'iPhone 14 Pro', price: 52000, cat: 'Telefon', stock: 5, owner: 'Mert', isStore: false, vitrin: false, dopings: [], image: 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=500', location: 'Ankara, Çankaya', images: ['https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=500'], specs: {Marka: 'Apple', Hafıza: '128 GB'}, description: 'Sıfır ayarında, çiziksiz iPhone 14 Pro günlük veya haftalık kiralanır. Kutu ve aksesuarları tamdır. Uzun süreli kiralama indirimi için sorunuz.' }
                 ];
                 app.save();
             },
@@ -575,14 +598,13 @@
                 let changesMade = false;
 
                 state.orders.forEach(order => {
-                    if (order.status === 'Kargoda' && order.shipDate && !order.isSeller) { // Alıcı tarafı sipariş
+                    if (order.status === 'Kargoda' && order.shipDate && !order.isSeller) {
                         const shipDate = new Date(order.shipDate).getTime();
                         const sevenDaysMs = AUTO_CONFIRM_DAYS * 24 * 60 * 60 * 1000;
 
                         if (now - shipDate >= sevenDaysMs) {
                             order.status = 'Teslim Edildi';
                             
-                            // Satıcı tarafını da güncelle ve ödemeyi yap
                             const correspondingSale = state.orders.find(o => o.id === order.id && o.isSeller);
                             if (correspondingSale) {
                                 correspondingSale.status = 'Ödeme Yapıldı';
@@ -660,6 +682,7 @@
             submitAdFlow: () => {
                 const t = document.getElementById('p-title').value; const p = document.getElementById('p-price').value; const c = document.getElementById('p-cat').value;
                 const loc = document.getElementById('p-location').value; const stock = parseInt(document.getElementById('p-stock').value) || 1;
+                const desc = document.getElementById('p-desc').value;
                 if(!t || !p || !c || state.tempImages.length === 0 || stock < 1) return ui.toast('Başlık, Fiyat, Kategori, Resim ve Stok (min 1) zorunludur.', 'error');
                 
                 const adSpecs = {};
@@ -674,14 +697,14 @@
 
                 if(state.dopingTotal > 0) {
                     app.modal('post-ad-modal', false);
-                    payment.open(state.dopingTotal, 'Doping Ödemesi', 'Seçilen İlan Özellikleri', () => app.finalizeAd(t, p, c, loc, stock, adSpecs));
+                    payment.open(state.dopingTotal, 'Doping Ödemesi', 'Seçilen İlan Özellikleri', () => app.finalizeAd(t, p, c, loc, stock, adSpecs, desc));
                 } else {
-                    app.finalizeAd(t, p, c, loc, stock, adSpecs);
+                    app.finalizeAd(t, p, c, loc, stock, adSpecs, desc);
                 }
             },
-            finalizeAd: (title, price, cat, location, stock, specs) => {
+            finalizeAd: (title, price, cat, location, stock, specs, description) => {
                 state.ads.unshift({ 
-                    id: Date.now(), title: title, price: parseInt(price), cat: cat, location: location, stock: stock,
+                    id: Date.now(), title: title, price: parseInt(price), cat: cat, location: location, stock: stock, description: description,
                     owner: state.user.name, isStore: state.user.isStore, 
                     image: state.tempImages[0], 
                     images: state.tempImages,
@@ -702,6 +725,37 @@
                 ui.toast('Profil Bilgileri Güncellendi', 'success');
             },
 
+            // YENİ: Kiralama Fiyatı Güncelleme
+            updateRentalPrice: (days) => {
+                const currentAd = state.ads.find(a => a.id === state.currentAdId);
+                if (!currentAd) return;
+
+                const basePrice = currentAd.price;
+                const newPrice = basePrice * days;
+                
+                document.getElementById('current-days').innerText = `${days} Gün`;
+                document.getElementById('d-price').innerText = `${newPrice.toLocaleString('tr-TR')} TL`;
+                
+                // Bu fiyatı aksiyon butonuna da yansıt (Sepete ekle/Satın al)
+                document.querySelector('#d-actions button.bg-accent').innerText = `Güvenli Al (${newPrice.toLocaleString('tr-TR')} TL)`;
+            },
+
+            toggleDescription: () => {
+                const descEl = document.getElementById('d-desc');
+                const toggleBtn = document.getElementById('desc-toggle');
+                const isExpanded = descEl.classList.contains('h-auto');
+
+                if (isExpanded) {
+                    descEl.classList.remove('h-auto', 'overflow-visible');
+                    descEl.classList.add('h-20', 'overflow-hidden');
+                    toggleBtn.innerText = 'Daha Fazla Oku';
+                } else {
+                    descEl.classList.add('h-auto', 'overflow-visible');
+                    descEl.classList.remove('h-20', 'overflow-hidden');
+                    toggleBtn.innerText = 'Daha Az Oku';
+                }
+            },
+            
             confirmDelivery: (orderId) => {
                 const order = state.orders.find(o => o.id === orderId && !o.isSeller && o.buyer === state.user.name);
                 if (!order || order.status !== 'Kargoda') return;
@@ -773,7 +827,7 @@
                 state.cart.forEach(item => {
                     const orderId = Date.now() + item.id;
                     const orderItem = { id: orderId, adId: item.id, title: item.title, price: item.price, image: item.image, date: date, status: 'Hazırlanıyor', isSeller: false, buyer: state.user.name, owner: item.owner };
-                    const salesItem = { ...orderItem, isSeller: true, status: 'Hazırlanıyor' };
+                    const salesItem = { ...orderItem, status: 'Hazırlanıyor', isSeller: true, owner: item.owner };
                     
                     const adIndex = state.ads.findIndex(a => a.id === item.id);
                     if (adIndex !== -1 && state.ads[adIndex].stock > 0) {
@@ -801,24 +855,27 @@
                 if(!state.user) return app.modal('login-modal', true);
 
                 const ad = state.ads.find(a => a.id === adId);
+                const days = parseInt(document.getElementById('days-slider')?.value || 1); // Kiralama günü
+                const finalPrice = ad.price * days;
+                
                 if (!ad) return ui.toast('Ürün bulunamadı.', 'error');
                 if (ad.owner === state.user.name) return ui.toast('Kendi ilanınızı satın alamazsınız.', 'error');
                 if (ad.stock < 1) return ui.toast('Ürün stokta kalmadı!', 'error');
 
                 app.modal('detail-modal', false);
 
-                const price = ad.price;
+                const price = finalPrice;
                 const fee = price * 0.10;
                 const total = price + fee;
 
                 payment.open(total, 
-                    'Güvenli Satın Alma (Tek Ürün)', 
+                    `Güvenli Satın Alma (${days} Gün)`, 
                     `${ad.title} (${price.toLocaleString('tr-TR')} TL) + ${fee.toFixed(2)} TL Hizmet Bedeli`, 
                     () => {
                         const date = new Date().toLocaleDateString();
                         
                         const orderId = Date.now();
-                        const orderItem = { id: orderId, adId: ad.id, title: ad.title, price: ad.price, image: ad.image, date: date, status: 'Hazırlanıyor', isSeller: false, buyer: state.user.name, owner: ad.owner };
+                        const orderItem = { id: orderId, adId: ad.id, title: `${ad.title} (${days} Gün)`, price: price, image: ad.image, date: date, status: 'Hazırlanıyor', isSeller: false, buyer: state.user.name, owner: ad.owner };
                         const salesItem = { ...orderItem, status: 'Hazırlanıyor', isSeller: true, owner: ad.owner };
 
                         const adIndex = state.ads.findIndex(a => a.id === adId);
@@ -838,14 +895,37 @@
             openDetail: (id) => {
                 state.currentAdId = id;
                 const a = state.ads.find(x => x.id === id);
+                state.basePrice = a.price; // Temel fiyatı kaydet
+                
                 document.getElementById('d-title').innerText = a.title;
-                document.getElementById('d-price').innerText = a.price.toLocaleString() + ' TL';
-                document.getElementById('d-owner').innerText = a.owner;
+                document.getElementById('d-desc').innerText = a.description || 'Açıklama girilmemiştir.';
                 document.getElementById('d-main-img').src = a.images[0];
-                document.getElementById('d-desc').innerText = "Bu ürün hakkında detaylı bilgi için satıcı ile iletişime geçin.";
+                document.getElementById('d-owner').innerText = a.owner;
                 document.getElementById('d-avatar').innerText = a.owner[0].toUpperCase();
                 document.getElementById('d-location').innerText = a.location || 'Bilinmiyor';
 
+                // Fiyat ve Slider Ayarı
+                document.getElementById('d-price').innerText = a.price.toLocaleString('tr-TR') + ' TL';
+                const sliderDiv = document.getElementById('rental-slider');
+                sliderDiv.classList.remove('hidden'); // Slider'ı göster
+                document.getElementById('days-slider').value = 1;
+                document.getElementById('current-days').innerText = '1 Gün';
+
+                // Okunabilirlik Ayarı
+                const descEl = document.getElementById('d-desc');
+                const toggleBtn = document.getElementById('desc-toggle');
+                
+                if ((a.description || '').length > 100) {
+                    descEl.classList.remove('h-auto', 'overflow-visible');
+                    descEl.classList.add('h-20', 'overflow-hidden');
+                    toggleBtn.style.display = 'block';
+                    toggleBtn.innerText = 'Daha Fazla Oku';
+                } else {
+                    descEl.classList.remove('h-20', 'overflow-hidden');
+                    descEl.classList.add('h-auto', 'overflow-visible');
+                    toggleBtn.style.display = 'none';
+                }
+                
                 const isFav = state.favorites.includes(id);
                 const favBtn = document.getElementById('d-fav-btn');
                 favBtn.innerHTML = isFav ? '<i class="fa-solid fa-heart text-danger"></i>' : '<i class="fa-regular fa-heart"></i>';
@@ -1073,7 +1153,7 @@
                     ];
                     
                     if (order.isSeller) {
-                        steps.shift(); // Satıcı için "Sipariş Alındı" atla
+                        steps.shift();
                         steps[0].status = 'Hazırlanıyor';
                         steps[3].status = 'Ödeme Yapıldı';
                         steps[3].icon = 'fa-wallet';
@@ -1083,7 +1163,7 @@
                     steps.forEach((step, index) => {
                         let stepStatus = step.isCompleted ? 'active' : 'passive';
                         if (order.status === step.status && step.status !== 'Ödeme Yapıldı') stepStatus = 'pending';
-                        if (order.status === 'Kargoda' && step.status === 'Teslim Edildi' && !order.isSeller) stepStatus = 'passive'; // Alıcıda otomatik onay beklerken gri kalsın
+                        if (order.status === 'Kargoda' && step.status === 'Teslim Edildi' && !order.isSeller) stepStatus = 'passive';
 
                         html += `
                             <li class="timeline-item ${stepStatus}">
