@@ -28,49 +28,21 @@
         }
     </script>
     <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #f1f2f6; color: #1a1a1a; -webkit-font-smoothing: antialiased; }
-        
-        /* Scrollbar Gizle */
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        
-        /* Modern Input */
-        .bk-input { 
-            width: 100%; 
-            padding: 12px 16px; 
-            border: 1px solid #e5e7eb; 
-            border-radius: 8px; 
-            outline: none; 
-            transition: all 0.2s; 
-            font-size: 14px;
-            background: white;
-        }
-        .bk-input:focus { 
-            border-color: #2962FF; 
-            box-shadow: 0 0 0 3px rgba(41, 98, 255, 0.1); 
-        }
-
-        /* Dropdown Menü Animasyonu */
-        .dropdown-menu { 
-            transform-origin: top right; 
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); 
-            transform: scale(0.95); 
-            opacity: 0; 
-            pointer-events: none; 
-        }
-        .dropdown-menu.active { 
-            transform: scale(1); 
-            opacity: 1; 
-            pointer-events: auto; 
-        }
-
-        /* Modal Animasyonları */
-        .modal-enter { animation: modalPop 0.3s ease-out forwards; }
-        @keyframes modalPop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        /* Doping Kartı */
-        .doping-card { border: 2px solid transparent; transition: 0.2s; cursor: pointer; }
-        .doping-card:hover { border-color: #e5e7eb; }
-        .doping-card.selected { border-color: #2962FF; background-color: #eff6ff; }
+/* YENİ KATEGORİ STİLİ */
+.cat-item { transition: all 0.2s ease; }
+.cat-item:hover { background-color: #eff6ff; } /* Açık Mavi Arka Plan */
+.cat-item:hover .cat-icon-box { 
+    background-color: #2962FF; 
+    color: white; 
+    border-color: #2962FF; 
+    transform: scale(1.1); 
+}
+.cat-item:hover .cat-arrow { 
+    transform: translateX(5px); 
+    color: #2962FF; 
+}
+.cat-icon-box { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.cat-arrow { transition: all 0.3s ease; }
     </style>
 </head>
 <body class="pb-24 md:pb-0" onclick="app.closeDropdown(event)">
@@ -411,7 +383,15 @@
         const state = {
             user: JSON.parse(localStorage.getItem('bk_v17_user')) || null,
             ads: JSON.parse(localStorage.getItem('bk_v17_ads')) || [],
-            cats: ['Emlak', 'Vasıta', 'Telefon', 'Elektronik', 'Giyim', 'Diğer'],
+// state nesnesinin içindeki cats kısmını bununla değiştir:
+cats: [
+    {name:'Emlak', icon:'fa-house-chimney', color:'text-orange-500'},
+    {name:'Vasıta', icon:'fa-car-side', color:'text-red-500'},
+    {name:'Telefon', icon:'fa-mobile-screen', color:'text-blue-500'},
+    {name:'Elektronik', icon:'fa-laptop', color:'text-gray-600'},
+    {name:'Giyim', icon:'fa-shirt', color:'text-purple-500'},
+    {name:'Diğer', icon:'fa-layer-group', color:'text-green-500'}
+],
             chats: [], 
             dopingTotal: 0,
             tempReg: null
@@ -609,7 +589,25 @@
         const ui = {
             render: () => {
                 ui.renderHeader();
-                ui.renderCats();
+// ui nesnesinin içindeki renderCats fonksiyonunu bununla değiştir:
+renderCats: () => {
+    const l = document.getElementById('category-list'); 
+    l.innerHTML = '';
+    
+    state.cats.forEach(c => {
+        l.innerHTML += `
+            <li onclick="app.search('${c.name}')" class="cat-item cursor-pointer border-b border-gray-100 last:border-0 p-3 flex items-center justify-between group">
+                <div class="flex items-center gap-3">
+                    <div class="cat-icon-box w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 shadow-sm">
+                        <i class="fa-solid ${c.icon} text-sm"></i>
+                    </div>
+                    <span class="text-sm font-semibold text-gray-700 group-hover:text-accent">${c.name}</span>
+                </div>
+                <i class="cat-arrow fa-solid fa-chevron-right text-[10px] text-gray-300"></i>
+            </li>
+        `;
+    });
+},
                 ui.renderAds(state.ads);
                 ui.renderVitrin();
                 const s = document.getElementById('p-cat'); s.innerHTML='<option>Seçiniz</option>'; state.cats.forEach(c=>s.innerHTML+=`<option>${c}</option>`);
