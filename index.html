@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - V31 Kritik Z-Index Düzeltmesi</title>
+    <title>BiKirala - V32 Z-Index & Event Listener Final Düzeltmesi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -75,17 +75,18 @@
         .spec-row:nth-child(odd) { background-color: rgba(0,0,0,0.02); }
         .dark .spec-row:nth-child(odd) { background-color: rgba(255,255,255,0.05); }
         
-        /* Z-INDEX DÜZELTMELERİ */
-        /* Header ve Mobil Nav kesinlikle en üstte olmalı */
+        /* Z-INDEX VE TIKLAMA DÜZELTMELERİ */
         header, nav { z-index: 1000; } 
-        /* Modallar her şeyin üstünde olmalı */
+        /* Ana içerik, navigasyon altındaki her şeyden üstte olmalı */
+        .container { z-index: 50; position: relative; } 
+        /* İlan kartları tıklanabilirliğini garantilemek için */
+        #ads-grid > div { position: relative; z-index: 5; }
+        /* Modallar en üstte olmalı */
         .fixed:not(header):not(nav) { z-index: 100; }
         .modal { z-index: 200; } 
     </style>
 </head>
-<body class="bg-graybg text-dark pb-24 md:pb-0" onclick="app.closeDropdown(event)">
-
-    <div id="toast-container" class="fixed top-24 right-5 z-[300] flex flex-col gap-3 pointer-events-none"></div>
+<body class="bg-graybg text-dark pb-24 md:pb-0"> <div id="toast-container" class="fixed top-24 right-5 z-[300] flex flex-col gap-3 pointer-events-none"></div>
 
     <header class="fixed top-0 w-full bg-white z-[1000] h-20 shadow-sm border-b flex items-center justify-between px-4 md:px-8 transition-colors">
         <div class="flex items-center gap-1 cursor-pointer select-none" onclick="app.goHome()">
@@ -165,7 +166,7 @@
         <div onclick="app.openPanel('info')" class="flex flex-col items-center gap-1 cursor-pointer"><i class="fa-regular fa-user text-xl"></i><span class="text-[10px]">Hesabım</span></div>
     </nav>
 
-    <div id="detail-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="detail-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-4 backdrop-blur-sm modal">
         <div class="bg-white w-full max-w-6xl h-[95vh] md:h-[90vh] rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-2xl modal-enter relative">
             <button onclick="app.modal('detail-modal', false)" class="absolute top-4 right-4 z-[250] bg-white/90 w-10 h-10 rounded-full flex items-center justify-center shadow hover:bg-gray-100 text-dark"><i class="fa-solid fa-xmark text-xl"></i></button>
             
@@ -230,7 +231,7 @@
         </div>
     </div>
 
-    <div id="post-ad-modal" class="fixed inset-0 bg-white z-[200] hidden overflow-y-auto">
+    <div id="post-ad-modal" class="fixed inset-0 bg-white z-[200] hidden overflow-y-auto modal">
         <div class="max-w-3xl mx-auto min-h-screen bg-white pb-20">
             <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10 shadow-sm"><h2 class="text-xl font-bold">İlan Ver</h2><button onclick="app.modal('post-ad-modal', false)" class="text-2xl text-gray-400 hover:text-danger">&times;</button></div>
             <div class="p-6 space-y-6">
@@ -285,7 +286,7 @@
         </div>
     </div>
 
-    <div id="profile-panel" class="fixed inset-0 bg-black/60 hidden z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="profile-panel" class="fixed inset-0 bg-black/60 hidden z-[200] flex items-center justify-center p-4 backdrop-blur-sm modal">
         <div class="bg-white w-full max-w-5xl h-[85vh] rounded-2xl shadow-float overflow-hidden flex flex-col md:flex-row relative modal-enter">
             <button onclick="app.modal('profile-panel', false)" class="absolute top-4 right-4 text-2xl z-[250] md:hidden">&times;</button>
             <div class="w-full md:w-64 bg-gray-50 border-r flex flex-col p-4 dark:bg-gray-900 dark:border-gray-800">
@@ -353,7 +354,7 @@
         </div>
     </div>
 
-    <div id="cart-modal" class="fixed inset-0 bg-black/60 hidden z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="cart-modal" class="fixed inset-0 bg-black/60 hidden z-[200] flex items-center justify-center p-4 backdrop-blur-sm modal">
         <div class="bg-white w-full max-w-lg rounded-2xl p-0 overflow-hidden relative shadow-float modal-enter max-h-[90vh] overflow-y-auto dark:bg-gray-800">
             <div class="p-5 border-b bg-white sticky top-0 z-10 flex justify-between items-center dark:bg-gray-900 dark:border-gray-800">
                 <h2 class="text-xl font-bold">Sepetim</h2>
@@ -379,7 +380,7 @@
         </div>
     </div>
 
-    <div id="login-modal" class="fixed inset-0 bg-black/60 hidden z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="login-modal" class="fixed inset-0 bg-black/60 hidden z-[200] flex items-center justify-center p-4 backdrop-blur-sm modal">
         <div class="bg-white w-full max-w-sm rounded-2xl p-8 relative shadow-float modal-enter dark:bg-gray-800">
             <button onclick="app.modal('login-modal', false)" class="absolute top-4 right-4 text-2xl text-gray-400 hover:text-dark">&times;</button>
             <div class="text-center mb-8">
@@ -396,7 +397,7 @@
         </div>
     </div>
 
-    <div id="payment-modal" class="fixed inset-0 bg-black/80 hidden z-[250] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="payment-modal" class="fixed inset-0 bg-black/80 hidden z-[250] flex items-center justify-center p-4 backdrop-blur-sm modal">
         <div class="bg-white w-full max-w-md rounded-2xl p-0 overflow-hidden relative shadow-float modal-enter dark:bg-gray-800">
             <div class="bg-gray-50 p-4 border-b flex justify-between items-center dark:bg-gray-900 dark:border-gray-700">
                 <div class="font-bold text-gray-500 text-xs tracking-widest">PAYTR GÜVENLİ ÖDEME</div>
@@ -422,7 +423,7 @@
         </div>
     </div>
     
-    <div id="forgot-modal" class="fixed inset-0 bg-black/60 hidden z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="forgot-modal" class="fixed inset-0 bg-black/60 hidden z-[200] flex items-center justify-center p-4 backdrop-blur-sm modal">
         <div class="bg-white w-full max-w-sm rounded-2xl p-8 relative shadow-float modal-enter dark:bg-gray-800">
             <button onclick="app.modal('forgot-modal', false)" class="absolute top-4 right-4 text-2xl text-gray-400">&times;</button>
             <h3 class="font-bold text-xl mb-4 text-center">Şifre Sıfırlama</h3>
@@ -430,7 +431,7 @@
             <button onclick="ui.toast('Sıfırlama bağlantısı gönderildi.', 'success'); app.modal('forgot-modal', false)" class="w-full bg-dark text-white font-bold py-3 rounded-xl">Gönder</button>
         </div>
     </div>
-    <div id="register-modal" class="fixed inset-0 bg-black/60 hidden z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="register-modal" class="fixed inset-0 bg-black/60 hidden z-[200] flex items-center justify-center p-4 backdrop-blur-sm modal">
         <div class="bg-white w-full max-w-lg rounded-2xl p-0 overflow-hidden relative shadow-float modal-enter max-h-[90vh] overflow-y-auto dark:bg-gray-800">
             <div class="p-5 border-b bg-white sticky top-0 z-10 flex justify-between items-center dark:bg-gray-900 dark:border-gray-700">
                 <h2 class="text-xl font-bold">Aramıza Katıl</h2>
@@ -456,7 +457,7 @@
             </div>
         </div>
     </div>
-    <div id="send-msg-modal" class="fixed inset-0 bg-black/60 z-[200] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="send-msg-modal" class="fixed inset-0 bg-black/60 z-[200] hidden flex items-center justify-center p-4 backdrop-blur-sm modal">
         <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-float modal-enter dark:bg-gray-800">
             <button onclick="app.modal('send-msg-modal', false)" class="absolute top-4 right-4 text-gray-400 hover:text-dark"><i class="fa-solid fa-xmark text-xl"></i></button>
             <h3 class="font-bold text-lg mb-4">Mesaj Gönder</h3>
