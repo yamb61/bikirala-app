@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - V23 Platinum Edition</title>
+    <title>BiKirala - V25 Final Professional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -38,7 +39,7 @@
         }
     </script>
     <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #f1f2f6; color: #1a1a1a; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; transition: background-color 0.3s, color 0.3s; }
         .hide-scroll::-webkit-scrollbar { display: none; }
         .bk-input { width: 100%; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 8px; outline: none; transition: 0.2s; font-size: 14px; background: white; }
         .bk-input:focus { border-color: #2962FF; box-shadow: 0 0 0 3px rgba(41, 98, 255, 0.1); }
@@ -52,18 +53,34 @@
         .toast-item.success { border-left-color: #00d26a; }
         .toast-item.error { border-left-color: #ff4757; }
 
-        /* YENİ CHAT STİLLERİ */
         .chat-bubble { max-width: 80%; padding: 10px 15px; border-radius: 12px; font-size: 14px; position: relative; margin-bottom: 8px; }
         .chat-bubble.me { background-color: #2962FF; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         .chat-bubble.you { background-color: #f1f2f6; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
-        .chat-time { font-size: 10px; opacity: 0.7; margin-top: 4px; text-align: right; }
+        
+        /* Dark Mode Ayarları */
+        .dark body { background-color: #111; color: #eee; }
+        .dark .bg-white { background-color: #1e1e1e; color: #eee; border-color: #333; }
+        .dark .text-dark { color: #eee; }
+        .dark .bk-input { background-color: #2d2d2d; border-color: #444; color: white; }
+        .dark .bg-gray-50 { background-color: #252525; }
+        .dark header { background-color: #1e1e1e; border-color: #333; }
+        .dark .doping-card { background-color: #2d2d2d; }
+        .dark .chat-bubble.you { background-color: #333; color: white; }
+
+        /* Galeri Thumbnails */
+        .gallery-thumb { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .gallery-thumb.active { border-color: #2962FF; transform: scale(1.1); }
+
+        /* Tablo Stili */
+        .spec-row:nth-child(odd) { background-color: rgba(0,0,0,0.02); }
+        .dark .spec-row:nth-child(odd) { background-color: rgba(255,255,255,0.05); }
     </style>
 </head>
-<body class="pb-24 md:pb-0" onclick="app.closeDropdown(event)">
+<body class="bg-graybg text-dark pb-24 md:pb-0" onclick="app.closeDropdown(event)">
 
     <div id="toast-container" class="fixed top-24 right-5 z-[200] flex flex-col gap-3 pointer-events-none"></div>
 
-    <header class="fixed top-0 w-full bg-white z-50 h-20 shadow-sm border-b flex items-center justify-between px-4 md:px-8">
+    <header class="fixed top-0 w-full bg-white z-50 h-20 shadow-sm border-b flex items-center justify-between px-4 md:px-8 transition-colors">
         <div class="flex items-center gap-1 cursor-pointer select-none" onclick="app.goHome()">
             <div class="bg-primary px-3 py-1 rounded text-dark font-black text-2xl transform -skew-x-12 shadow-sm">Bi</div>
             <div class="text-2xl font-bold text-accent tracking-tight">Kirala</div>
@@ -75,7 +92,14 @@
             <button class="absolute right-2 top-2 h-8 px-4 bg-primary text-dark font-bold text-xs rounded-full hover:bg-yellow-400 transition">ARA</button>
         </div>
 
-        <div class="flex items-center gap-4" id="header-auth-area"></div>
+        <div class="flex items-center gap-4">
+            <button onclick="document.documentElement.classList.toggle('dark')" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-yellow-400 transition"><i class="fa-solid fa-moon"></i></button>
+            <button onclick="app.modal('cart-modal', true)" id="cart-btn" class="relative w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-white transition hover:text-accent">
+                <i class="fa-solid fa-shopping-cart text-lg"></i>
+                <span id="cart-count" class="absolute top-0 right-0 w-5 h-5 bg-danger text-white text-[10px] font-bold rounded-full flex items-center justify-center hidden">0</span>
+            </button>
+            <div id="header-auth-area" class="flex items-center gap-3"></div>
+        </div>
     </header>
 
     <div class="container mx-auto mt-32 md:mt-24 px-4 flex gap-8 min-h-screen">
@@ -92,7 +116,7 @@
                     <input type="number" id="min-price" placeholder="Min" class="bk-input text-sm">
                     <input type="number" id="max-price" placeholder="Max" class="bk-input text-sm">
                 </div>
-                <button onclick="app.filterPrice()" class="w-full bg-gray-100 hover:bg-gray-200 text-dark font-bold py-2 rounded-lg text-sm transition">Uygula</button>
+                <button onclick="app.filterPrice()" class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 text-dark font-bold py-2 rounded-lg text-sm transition">Uygula</button>
             </div>
         </aside>
 
@@ -122,7 +146,7 @@
         </main>
     </div>
 
-    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t h-16 flex justify-around items-center z-50 text-gray-400 pb-safe shadow-[0_-5px_15px_rgba(0,0,0,0.03)]">
+    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t h-16 flex justify-around items-center z-50 text-gray-400 pb-safe shadow-[0_-5px_15px_rgba(0,0,0,0.03)] dark:bg-black dark:border-gray-800">
         <div onclick="app.goHome()" class="flex flex-col items-center gap-1 text-accent cursor-pointer"><i class="fa-solid fa-house text-xl"></i><span class="text-[10px]">Vitrin</span></div>
         <div onclick="app.checkAuth('favs')" class="flex flex-col items-center gap-1 cursor-pointer"><i class="fa-solid fa-heart text-xl"></i><span class="text-[10px]">Favoriler</span></div>
         <div onclick="app.checkAuth('post')" class="relative -top-6 cursor-pointer">
@@ -135,11 +159,15 @@
     </nav>
 
     <div id="detail-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-5xl h-[90vh] md:h-[80vh] rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-2xl modal-enter relative">
+        <div class="bg-white w-full max-w-6xl h-[95vh] md:h-[90vh] rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-2xl modal-enter relative">
             <button onclick="app.modal('detail-modal', false)" class="absolute top-4 right-4 z-50 bg-white/90 w-10 h-10 rounded-full flex items-center justify-center shadow hover:bg-gray-100 text-dark"><i class="fa-solid fa-xmark text-xl"></i></button>
             
-            <div class="w-full md:w-2/3 bg-black flex items-center justify-center relative group">
-                <img id="d-img" src="" class="max-h-full max-w-full object-contain">
+            <div class="w-full md:w-2/3 bg-black flex flex-col relative group">
+                <div class="flex-1 flex items-center justify-center p-4 overflow-hidden">
+                    <img id="d-main-img" src="" class="max-h-full max-w-full object-contain transition duration-300">
+                </div>
+                <div id="d-gallery" class="h-24 bg-black/80 flex items-center gap-3 px-4 overflow-x-auto hide-scroll pb-safe">
+                    </div>
             </div>
 
             <div class="w-full md:w-1/3 bg-white p-6 flex flex-col overflow-y-auto">
@@ -147,9 +175,16 @@
                     <h1 id="d-title" class="text-xl font-bold text-dark leading-tight">Başlık</h1>
                     <button id="d-fav-btn" onclick="" class="text-gray-300 hover:text-red-500 transition text-2xl"><i class="fa-solid fa-heart"></i></button>
                 </div>
-                <div id="d-price" class="text-3xl font-black text-accent mb-6 tracking-tight">0 TL</div>
+                <div id="d-price" class="text-3xl font-black text-accent mb-4 tracking-tight">0 TL</div>
+                <div class="text-sm text-gray-500 mb-6 flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> <span id="d-location">İstanbul</span></div>
 
-                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-4 border border-gray-100">
+                <div class="mb-6">
+                    <h3 class="font-bold text-sm text-gray-500 mb-2 uppercase">Teknik Özellikler</h3>
+                    <div id="d-specs" class="border rounded-lg overflow-hidden text-sm">
+                        </div>
+                </div>
+
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-4 border border-gray-100 dark:border-gray-700">
                     <div id="d-avatar" class="w-12 h-12 bg-white border rounded-full flex items-center justify-center font-bold text-gray-500 text-lg shadow-sm">A</div>
                     <div>
                         <div id="d-owner" class="font-bold text-sm text-dark">Satıcı</div>
@@ -167,26 +202,162 @@
 
                 <h3 class="font-bold text-sm text-gray-500 mb-2">AÇIKLAMA</h3>
                 <p id="d-desc" class="text-sm text-gray-600 mb-6 flex-1 whitespace-pre-wrap leading-relaxed">...</p>
-                <div id="d-actions" class="space-y-3 mt-auto pb-safe"></div>
+                <div id="d-actions" class="space-y-3 mt-auto pb-safe">
+                    <button onclick="app.addToCart(state.currentAdId)" class="w-full border-2 border-primary text-primary font-bold py-3 rounded-xl mb-2 hover:bg-yellow-50 transition"><i class="fa-solid fa-cart-plus"></i> Sepete Ekle</button>
+                    <button onclick="app.openMsgModal()" class="w-full border-2 border-accent text-accent font-bold py-3 rounded-xl mb-2 hover:bg-blue-50">Mesaj At</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="send-msg-modal" class="fixed inset-0 bg-black/60 z-[110] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-float modal-enter relative">
-            <button onclick="app.modal('send-msg-modal', false)" class="absolute top-4 right-4 text-gray-400 hover:text-dark"><i class="fa-solid fa-xmark text-xl"></i></button>
-            <h3 class="font-bold text-lg mb-4">Mesaj Gönder</h3>
-            <div class="bg-gray-50 p-3 rounded-lg mb-4 flex gap-3 items-center border">
-                <i class="fa-regular fa-envelope text-gray-400 text-xl"></i>
-                <div><div class="text-xs text-gray-500">Alıcı</div><div class="font-bold text-sm" id="msg-to-name">Satıcı</div></div>
+    <div id="post-ad-modal" class="fixed inset-0 bg-white z-[90] hidden overflow-y-auto">
+        <div class="max-w-3xl mx-auto min-h-screen bg-white pb-20">
+            <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10 shadow-sm"><h2 class="text-xl font-bold">İlan Ver</h2><button onclick="app.modal('post-ad-modal', false)" class="text-2xl text-gray-400 hover:text-danger">&times;</button></div>
+            <div class="p-6 space-y-6">
+                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-accent transition bg-gray-50 dark:bg-gray-800">
+                    <div id="upload-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-4">
+                        </div>
+                    <label class="cursor-pointer block">
+                        <input type="file" id="p-image-input" class="hidden" accept="image/*" multiple onchange="app.handleImageUpload(this)">
+                        <div class="p-4 border rounded-lg bg-white shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                            <i class="fa-solid fa-images text-2xl text-accent mb-2"></i>
+                            <p class="text-sm font-bold text-gray-600 dark:text-gray-200">Fotoğraf Ekle (Max 10)</p>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="space-y-4">
+                    <input type="text" id="p-title" class="bk-input text-lg font-bold" placeholder="İlan Başlığı">
+                    <div class="flex gap-4">
+                        <input type="number" id="p-price" class="bk-input" placeholder="Fiyat (TL)">
+                        <select id="p-cat" class="bk-input bg-white cursor-pointer" onchange="app.renderCatSpecs(this.value)"></select>
+                    </div>
+                    <input type="text" id="p-location" class="bk-input" placeholder="Şehir / İlçe (Örn: İstanbul, Kadıköy)">
+                    
+                    <div id="cat-specific-fields" class="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-xl border hidden dark:bg-gray-800 dark:border-gray-700">
+                        </div>
+
+                    <textarea id="p-desc" rows="5" class="bk-input" placeholder="İlan açıklaması..."></textarea>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fa-solid fa-rocket text-danger"></i> Hızlı Satış & Doping</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="doping-card bg-white p-4 rounded-xl shadow-sm" onclick="app.toggleDoping(this, 'vitrin', 150)">
+                            <div class="font-bold text-primary flex justify-between">Vitrin <span class="text-dark">150 TL</span></div>
+                            <div class="text-xs text-gray-500 mt-1">Ana sayfada en üstte.</div>
+                        </div>
+                        <div class="doping-card bg-white p-4 rounded-xl shadow-sm" onclick="app.toggleDoping(this, 'acil', 75)">
+                            <div class="font-bold text-danger flex justify-between">Acil <span class="text-dark">75 TL</span></div>
+                            <div class="text-xs text-gray-500 mt-1">Kırmızı "Acil" etiketi.</div>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-right pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <span class="text-sm text-gray-500">Ekstra Tutar:</span>
+                        <span class="text-2xl font-bold text-dark ml-2" id="doping-total">0 TL</span>
+                    </div>
+                </div>
+                <button onclick="app.submitAdFlow()" class="w-full bg-accent text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition text-lg">YAYINLA</button>
             </div>
-            <textarea id="msg-content" rows="4" class="bk-input mb-4" placeholder="Mesajınız..."></textarea>
-            <button onclick="app.sendMessage()" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition flex justify-center gap-2 items-center"><i class="fa-regular fa-paper-plane"></i> Gönder</button>
+        </div>
+    </div>
+
+    <div id="profile-panel" class="fixed inset-0 bg-black/60 hidden z-[90] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-5xl h-[85vh] rounded-2xl shadow-float overflow-hidden flex flex-col md:flex-row relative modal-enter">
+            <button onclick="app.modal('profile-panel', false)" class="absolute top-4 right-4 text-2xl z-50 md:hidden">&times;</button>
+            <div class="w-full md:w-64 bg-gray-50 border-r flex flex-col p-4 dark:bg-gray-900 dark:border-gray-800">
+                <div class="text-center mb-6">
+                    <img id="p-avatar" src="" class="w-24 h-24 rounded-full mx-auto border-4 border-white shadow-sm mb-3 object-cover">
+                    <h3 id="p-name" class="font-bold text-dark text-lg truncate">Kullanıcı</h3>
+                    <span id="p-type" class="text-[10px] bg-gray-200 px-2 py-1 rounded-full text-gray-600">Bireysel</span>
+                </div>
+                <nav class="flex-1 space-y-1">
+                    <button onclick="ui.switchDash('info')" id="nav-info" class="w-full text-left p-3 rounded-lg text-sm font-bold text-accent bg-white shadow-sm">Bilgilerim</button>
+                    <button onclick="ui.switchDash('favs')" id="nav-favs" class="w-full text-left p-3 rounded-lg text-sm text-gray-600 hover:bg-white">Favorilerim</button>
+                    <button onclick="ui.switchDash('orders')" id="nav-orders" class="w-full text-left p-3 rounded-lg text-sm text-gray-600 hover:bg-white">Siparişlerim</button>
+                    <button onclick="ui.switchDash('sales')" id="nav-sales" class="w-full text-left p-3 rounded-lg text-sm text-gray-600 hover:bg-white">Satışlarım</button>
+                    <button onclick="ui.switchDash('msgs')" id="nav-msgs" class="w-full text-left p-3 rounded-lg text-sm text-gray-600 hover:bg-white">Mesajlarım</button>
+                </nav>
+                <button onclick="auth.logout()" class="w-full text-left p-3 text-danger font-bold hover:bg-red-50 rounded-lg mt-4">Çıkış Yap</button>
+            </div>
+            <div class="flex-1 bg-white p-0 md:p-8 overflow-y-auto relative h-full">
+                <button onclick="app.modal('profile-panel', false)" class="hidden md:block absolute top-4 right-4 text-2xl text-gray-400 hover:text-dark z-50"><i class="fa-solid fa-xmark"></i></button>
+                
+                <div id="dash-info" class="block p-8">
+                    <h2 class="text-2xl font-bold mb-6">Hesap Bilgileri</h2>
+                    <form onsubmit="event.preventDefault(); app.updateProfile()">
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div><label class="text-xs font-bold text-gray-500 mb-1 block">Ad Soyad</label><input id="edit-name" class="bk-input" required></div>
+                            <div><label class="text-xs font-bold text-gray-500 mb-1 block">Telefon</label><input id="edit-phone" class="bk-input" value="5xx xxx xx xx"></div>
+                        </div>
+                        <div class="mb-4"><label class="text-xs font-bold text-gray-500 mb-1 block">E-Posta</label><input id="edit-email" class="bk-input bg-gray-100 dark:bg-gray-800 cursor-not-allowed" disabled></div>
+                        <div class="mb-4"><label class="text-xs font-bold text-gray-500 mb-1 block">Şehir / Adres</label><input id="edit-address" class="bk-input" placeholder="İstanbul, Kadıköy"></div>
+                        <button class="bg-accent text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition">Bilgileri Güncelle</button>
+                    </form>
+                </div>
+
+                <div id="dash-favs" class="hidden p-8"><h2 class="text-2xl font-bold mb-6">Favorilerim</h2><div id="fav-list" class="grid grid-cols-2 gap-4"></div></div>
+                
+                <div id="dash-orders" class="hidden p-8"><h2 class="text-2xl font-bold mb-6">Siparişlerim <span class="text-base text-gray-500">(Alıcı)</span></h2><div id="orders-list" class="space-y-4"></div></div>
+                
+                <div id="dash-sales" class="hidden p-8"><h2 class="text-2xl font-bold mb-6">Satışlarım <span class="text-base text-gray-500">(Satıcı)</span></h2><div id="sales-list" class="space-y-4"></div></div>
+                
+                <div id="dash-msgs" class="hidden h-full flex">
+                    <div class="w-1/3 border-r h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+                        <div class="p-4 border-b font-bold text-gray-700 dark:text-gray-200">Sohbetler</div>
+                        <div id="chat-list" class="flex-1 overflow-y-auto"></div>
+                    </div>
+                    <div class="w-2/3 flex flex-col h-full bg-white relative">
+                        <div id="chat-header" class="p-4 border-b font-bold flex items-center gap-3 bg-white z-10 hidden">
+                            <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">A</div>
+                            <span id="chat-user-name">Kullanıcı</span>
+                        </div>
+                        <div id="chat-area" class="flex-1 overflow-y-auto p-4 flex flex-col bg-gray-50/50 dark:bg-gray-800">
+                            <div class="h-full flex items-center justify-center text-gray-400 flex-col">
+                                <i class="fa-regular fa-comments text-4xl mb-3 opacity-30"></i>
+                                <p>Bir sohbet seçin</p>
+                            </div>
+                        </div>
+                        <div id="chat-input-area" class="p-4 border-t bg-white hidden">
+                            <div class="flex gap-2">
+                                <input type="text" id="chat-input" class="bk-input rounded-full bg-gray-100 dark:bg-gray-700" placeholder="Bir mesaj yazın...">
+                                <button onclick="app.sendChatMessage()" class="w-12 h-12 bg-accent text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition shadow-lg"><i class="fa-solid fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cart-modal" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-0 overflow-hidden relative shadow-float modal-enter max-h-[90vh] overflow-y-auto">
+            <div class="p-5 border-b bg-white sticky top-0 z-10 flex justify-between items-center dark:bg-gray-900 dark:border-gray-800">
+                <h2 class="text-xl font-bold">Sepetim</h2>
+                <button onclick="app.modal('cart-modal', false)" class="text-2xl text-gray-400 hover:text-danger">&times;</button>
+            </div>
+            <div class="p-6">
+                <div id="cart-items" class="space-y-4 mb-6">
+                    </div>
+
+                <div id="cart-empty" class="text-center py-10 text-gray-500 hidden">
+                    <i class="fa-solid fa-shopping-cart text-5xl mb-4 opacity-30"></i>
+                    <p>Sepetin şu an boş.</p>
+                </div>
+
+                <div id="cart-summary" class="bg-gray-50 p-4 rounded-xl border border-gray-200 dark:bg-gray-800 dark:border-gray-700 hidden">
+                    <div class="flex justify-between text-sm mb-2"><span>Ürün Toplamı:</span><span id="cart-total-price">0 TL</span></div>
+                    <div class="flex justify-between text-sm mb-3 border-b pb-2 border-gray-300 dark:border-gray-700"><span>Hizmet Bedeli (%10):</span><span id="cart-fee-price" class="text-danger">0 TL</span></div>
+                    <div class="flex justify-between text-xl font-bold"><span>Genel Toplam:</span><span id="cart-grand-total">0 TL</span></div>
+                </div>
+                
+                <button onclick="app.checkout()" id="checkout-btn" class="w-full bg-accent text-white font-bold py-3.5 mt-6 rounded-xl hover:bg-blue-700 transition shadow-lg hidden">Güvenli Ödeme Yap</button>
+            </div>
         </div>
     </div>
 
     <div id="login-modal" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-8 relative shadow-float modal-enter">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-8 relative shadow-float modal-enter dark:bg-gray-800">
             <button onclick="app.modal('login-modal', false)" class="absolute top-4 right-4 text-2xl text-gray-400 hover:text-dark">&times;</button>
             <div class="text-center mb-8">
                 <h2 class="text-3xl font-black text-accent mb-1 tracking-tight">BiKirala</h2>
@@ -202,36 +373,9 @@
         </div>
     </div>
 
-    <div id="register-modal" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-lg rounded-2xl p-0 overflow-hidden relative shadow-float modal-enter max-h-[90vh] overflow-y-auto">
-            <div class="p-5 border-b bg-white sticky top-0 z-10 flex justify-between items-center">
-                <h2 class="text-xl font-bold">Aramıza Katıl</h2>
-                <button onclick="app.modal('register-modal', false)" class="text-2xl text-gray-400 hover:text-dark">&times;</button>
-            </div>
-            <div class="p-6">
-                <div class="flex bg-gray-100 p-1.5 rounded-xl mb-6">
-                    <button onclick="auth.setRegType('ind')" id="btn-ind" class="flex-1 py-2.5 rounded-lg bg-white shadow-sm text-sm font-bold text-accent transition">Bireysel</button>
-                    <button onclick="auth.setRegType('corp')" id="btn-corp" class="flex-1 py-2.5 rounded-lg text-gray-500 text-sm font-bold transition">Kurumsal</button>
-                </div>
-                <form onsubmit="event.preventDefault(); auth.preRegister()">
-                    <div class="grid grid-cols-2 gap-3 mb-3"><input type="text" id="r-name" placeholder="Ad" class="bk-input"><input type="text" id="r-surname" placeholder="Soyad" class="bk-input"></div>
-                    <input type="email" id="r-email" placeholder="E-Posta" class="bk-input mb-3">
-                    <input type="password" id="r-pass" placeholder="Şifre" class="bk-input mb-3">
-                    <div id="corp-fields" class="hidden bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3 mt-2">
-                        <input type="text" id="r-store" placeholder="Mağaza Adı" class="bk-input bg-white">
-                        <input type="text" id="r-tax" placeholder="Vergi Numarası" class="bk-input bg-white">
-                        <input type="text" id="r-tax-addr" placeholder="Vergi Dairesi/Adresi" class="bk-input bg-white">
-                        <div class="flex items-center gap-2 text-xs text-blue-800 bg-blue-100 p-2 rounded"><i class="fa-solid fa-wallet"></i> <span>Kurumsal Üyelik Bedeli: <strong>450.00 TL / Ay</strong></span></div>
-                    </div>
-                    <button class="w-full bg-dark text-white font-bold py-4 mt-6 rounded-xl hover:bg-black transition shadow-lg" id="reg-btn">Ücretsiz Kayıt Ol</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <div id="payment-modal" class="fixed inset-0 bg-black/80 hidden z-[150] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-md rounded-2xl p-0 overflow-hidden relative shadow-float modal-enter">
-            <div class="bg-gray-50 p-4 border-b flex justify-between items-center">
+        <div class="bg-white w-full max-w-md rounded-2xl p-0 overflow-hidden relative shadow-float modal-enter dark:bg-gray-800">
+            <div class="bg-gray-50 p-4 border-b flex justify-between items-center dark:bg-gray-900 dark:border-gray-700">
                 <div class="font-bold text-gray-500 text-xs tracking-widest">PAYTR GÜVENLİ ÖDEME</div>
                 <div class="font-bold text-lg text-dark" id="pay-amount">0.00 TL</div>
             </div>
@@ -254,133 +398,78 @@
             <button onclick="app.modal('payment-modal', false)" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
     </div>
-
-    <div id="post-ad-modal" class="fixed inset-0 bg-white z-[90] hidden overflow-y-auto">
-        <div class="max-w-3xl mx-auto min-h-screen bg-white pb-20">
-            <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10 shadow-sm"><h2 class="text-xl font-bold">İlan Ver</h2><button onclick="app.modal('post-ad-modal', false)" class="text-2xl text-gray-400 hover:text-danger">&times;</button></div>
-            <div class="p-6 space-y-6">
-                <div id="upload-area" class="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center hover:border-accent hover:bg-blue-50 cursor-pointer transition relative bg-center bg-no-repeat bg-cover flex items-center justify-center h-64 group">
-                    <input type="file" id="p-image-input" class="absolute inset-0 opacity-0 cursor-pointer z-20" accept="image/*" onchange="app.handleImageUpload(this)">
-                    <div id="upload-placeholder" class="pointer-events-none group-hover:scale-105 transition">
-                        <i class="fa-solid fa-camera text-4xl text-gray-300 mb-2 group-hover:text-accent"></i>
-                        <p class="font-bold text-gray-500 group-hover:text-accent">Fotoğraf Yüklemek İçin Tıkla</p>
-                    </div>
-                </div>
-                <div class="space-y-4">
-                    <input type="text" id="p-title" class="bk-input text-lg font-bold" placeholder="İlan Başlığı">
-                    <div class="flex gap-4"><input type="number" id="p-price" class="bk-input" placeholder="Fiyat (TL)"><select id="p-cat" class="bk-input bg-white cursor-pointer"></select></div>
-                    <textarea id="p-desc" rows="5" class="bk-input" placeholder="İlan açıklaması..."></textarea>
-                </div>
-                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
-                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fa-solid fa-rocket text-danger"></i> Hızlı Satış & Doping</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div class="doping-card bg-white p-4 rounded-xl shadow-sm" onclick="app.toggleDoping(this, 'vitrin', 150)">
-                            <div class="font-bold text-primary flex justify-between">Vitrin <span class="text-dark">150 TL</span></div>
-                            <div class="text-xs text-gray-500 mt-1">Ana sayfada en üstte.</div>
-                        </div>
-                        <div class="doping-card bg-white p-4 rounded-xl shadow-sm" onclick="app.toggleDoping(this, 'acil', 75)">
-                            <div class="font-bold text-danger flex justify-between">Acil <span class="text-dark">75 TL</span></div>
-                            <div class="text-xs text-gray-500 mt-1">Kırmızı "Acil" etiketi.</div>
-                        </div>
-                        <div class="doping-card bg-white p-4 rounded-xl shadow-sm" onclick="app.toggleDoping(this, 'dopamin', 100)">
-                            <div class="font-bold text-purple-600 flex justify-between">Dopamin <span class="text-dark">100 TL</span></div>
-                            <div class="text-xs text-gray-500 mt-1">İlan öne çıkarılır.</div>
-                        </div>
-                        <div class="doping-card bg-white p-4 rounded-xl shadow-sm" onclick="app.toggleDoping(this, 'bold', 50)">
-                            <div class="font-bold text-dark flex justify-between">Kalın Yazı <span class="text-dark">50 TL</span></div>
-                            <div class="text-xs text-gray-500 mt-1">Başlık kalın görünür.</div>
-                        </div>
-                    </div>
-                    <div class="mt-4 text-right pt-4 border-t border-gray-200">
-                        <span class="text-sm text-gray-500">Ekstra Tutar:</span>
-                        <span class="text-2xl font-bold text-dark ml-2" id="doping-total">0 TL</span>
-                    </div>
-                </div>
-                <button onclick="app.submitAdFlow()" class="w-full bg-accent text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition text-lg">YAYINLA</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="profile-panel" class="fixed inset-0 bg-black/60 hidden z-[90] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-5xl h-[85vh] rounded-2xl shadow-float overflow-hidden flex flex-col md:flex-row relative modal-enter">
-            <button onclick="app.modal('profile-panel', false)" class="absolute top-4 right-4 text-2xl z-50 md:hidden">&times;</button>
-            <div class="w-full md:w-64 bg-gray-50 border-r flex flex-col p-4">
-                <div class="text-center mb-6">
-                    <img id="p-avatar" src="" class="w-24 h-24 rounded-full mx-auto border-4 border-white shadow-sm mb-3 object-cover">
-                    <h3 id="p-name" class="font-bold text-dark text-lg truncate">Kullanıcı</h3>
-                    <span id="p-type" class="text-[10px] bg-gray-200 px-2 py-1 rounded-full text-gray-600">Bireysel</span>
-                </div>
-                <nav class="flex-1 space-y-1">
-                    <button onclick="ui.switchDash('info')" id="nav-info" class="w-full text-left p-3 rounded-lg text-sm font-bold text-accent bg-white shadow-sm">Bilgilerim</button>
-                    <button onclick="ui.switchDash('favs')" id="nav-favs" class="w-full text-left p-3 rounded-lg text-sm text-gray-600 hover:bg-white">Favorilerim</button>
-                    <button onclick="ui.switchDash('msgs')" id="nav-msgs" class="w-full text-left p-3 rounded-lg text-sm text-gray-600 hover:bg-white">Mesajlarım</button>
-                </nav>
-                <button onclick="auth.logout()" class="w-full text-left p-3 text-danger font-bold hover:bg-red-50 rounded-lg mt-4">Çıkış Yap</button>
-            </div>
-            <div class="flex-1 bg-white p-0 md:p-8 overflow-y-auto relative h-full">
-                <button onclick="app.modal('profile-panel', false)" class="hidden md:block absolute top-4 right-4 text-2xl text-gray-400 hover:text-dark z-50"><i class="fa-solid fa-xmark"></i></button>
-                
-                <div id="dash-info" class="block p-8"><h2 class="text-2xl font-bold mb-6">Bilgilerim</h2><p class="text-gray-500">Profil bilgilerinizi buradan düzenleyebilirsiniz.</p></div>
-                <div id="dash-favs" class="hidden p-8"><h2 class="text-2xl font-bold mb-6">Favorilerim</h2><div id="fav-list" class="grid grid-cols-2 gap-4"></div></div>
-                
-                <div id="dash-msgs" class="hidden h-full flex">
-                    <div class="w-1/3 border-r h-full flex flex-col bg-gray-50">
-                        <div class="p-4 border-b font-bold text-gray-700">Sohbetler</div>
-                        <div id="chat-list" class="flex-1 overflow-y-auto">
-                            </div>
-                    </div>
-                    <div class="w-2/3 flex flex-col h-full bg-white relative">
-                        <div id="chat-header" class="p-4 border-b font-bold flex items-center gap-3 bg-white z-10 hidden">
-                            <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">A</div>
-                            <span id="chat-user-name">Kullanıcı</span>
-                        </div>
-                        <div id="chat-area" class="flex-1 overflow-y-auto p-4 flex flex-col bg-gray-50/50">
-                            <div class="h-full flex items-center justify-center text-gray-400 flex-col">
-                                <i class="fa-regular fa-comments text-4xl mb-3 opacity-30"></i>
-                                <p>Bir sohbet seçin</p>
-                            </div>
-                        </div>
-                        <div id="chat-input-area" class="p-4 border-t bg-white hidden">
-                            <div class="flex gap-2">
-                                <input type="text" id="chat-input" class="bk-input rounded-full bg-gray-100" placeholder="Bir mesaj yazın...">
-                                <button onclick="app.sendChatMessage()" class="w-12 h-12 bg-accent text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition shadow-lg"><i class="fa-solid fa-paper-plane"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    
     <div id="forgot-modal" class="fixed inset-0 bg-black/60 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-8 relative shadow-float modal-enter">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-8 relative shadow-float modal-enter dark:bg-gray-800">
             <button onclick="app.modal('forgot-modal', false)" class="absolute top-4 right-4 text-2xl text-gray-400">&times;</button>
             <h3 class="font-bold text-xl mb-4 text-center">Şifre Sıfırlama</h3>
             <input type="email" class="bk-input mb-4" placeholder="E-posta Adresi">
             <button onclick="ui.toast('Sıfırlama bağlantısı gönderildi.', 'success'); app.modal('forgot-modal', false)" class="w-full bg-dark text-white font-bold py-3 rounded-xl">Gönder</button>
         </div>
     </div>
+    <div id="register-modal" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-0 overflow-hidden relative shadow-float modal-enter max-h-[90vh] overflow-y-auto dark:bg-gray-800">
+            <div class="p-5 border-b bg-white sticky top-0 z-10 flex justify-between items-center dark:bg-gray-900 dark:border-gray-700">
+                <h2 class="text-xl font-bold">Aramıza Katıl</h2>
+                <button onclick="app.modal('register-modal', false)" class="text-2xl text-gray-400 hover:text-dark">&times;</button>
+            </div>
+            <div class="p-6">
+                <div class="flex bg-gray-100 p-1.5 rounded-xl mb-6 dark:bg-gray-700">
+                    <button onclick="auth.setRegType('ind')" id="btn-ind" class="flex-1 py-2.5 rounded-lg bg-white shadow-sm text-sm font-bold text-accent transition dark:bg-gray-800">Bireysel</button>
+                    <button onclick="auth.setRegType('corp')" id="btn-corp" class="flex-1 py-2.5 rounded-lg text-gray-500 text-sm font-bold transition">Kurumsal</button>
+                </div>
+                <form onsubmit="event.preventDefault(); auth.preRegister()">
+                    <div class="grid grid-cols-2 gap-3 mb-3"><input type="text" id="r-name" placeholder="Ad" class="bk-input"><input type="text" id="r-surname" placeholder="Soyad" class="bk-input"></div>
+                    <input type="email" id="r-email" placeholder="E-Posta" class="bk-input mb-3">
+                    <input type="password" id="r-pass" placeholder="Şifre" class="bk-input mb-3">
+                    <div id="corp-fields" class="hidden bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3 mt-2 dark:bg-blue-900/30 dark:border-blue-900">
+                        <input type="text" id="r-store" placeholder="Mağaza Adı" class="bk-input bg-white dark:bg-gray-700">
+                        <input type="text" id="r-tax" placeholder="Vergi Numarası" class="bk-input bg-white dark:bg-gray-700">
+                        <input type="text" id="r-tax-addr" placeholder="Vergi Dairesi/Adresi" class="bk-input bg-white dark:bg-gray-700">
+                        <div class="flex items-center gap-2 text-xs text-blue-800 bg-blue-100 p-2 rounded dark:bg-blue-900 dark:text-blue-200"><i class="fa-solid fa-wallet"></i> <span>Kurumsal Üyelik Bedeli: <strong>450.00 TL / Ay</strong></span></div>
+                    </div>
+                    <button class="w-full bg-dark text-white font-bold py-4 mt-6 rounded-xl hover:bg-black transition shadow-lg">Ücretsiz Kayıt Ol</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="send-msg-modal" class="fixed inset-0 bg-black/60 z-[110] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-float modal-enter dark:bg-gray-800">
+            <button onclick="app.modal('send-msg-modal', false)" class="absolute top-4 right-4 text-gray-400 hover:text-dark"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="font-bold text-lg mb-4">Mesaj Gönder</h3>
+            <div class="bg-gray-50 p-3 rounded-lg mb-4 flex gap-3 items-center border dark:bg-gray-900 dark:border-gray-700">
+                <i class="fa-regular fa-envelope text-gray-400 text-xl"></i>
+                <div><div class="text-xs text-gray-500">Alıcı</div><div class="font-bold text-sm" id="msg-to-name">Satıcı</div></div>
+            </div>
+            <textarea id="msg-content" rows="4" class="bk-input mb-4" placeholder="Mesajınız..."></textarea>
+            <button onclick="app.sendMessage()" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition flex justify-center gap-2 items-center"><i class="fa-regular fa-paper-plane"></i> Gönder</button>
+        </div>
+    </div>
 
     <script>
+        const STORAGE_KEY = 'bk_v25_';
         const state = {
-            user: JSON.parse(localStorage.getItem('bk_v23_user')) || null,
-            ads: JSON.parse(localStorage.getItem('bk_v23_ads')) || [],
-            messages: JSON.parse(localStorage.getItem('bk_v23_msgs')) || [],
-            favorites: JSON.parse(localStorage.getItem('bk_v23_favs')) || [],
+            user: JSON.parse(localStorage.getItem(STORAGE_KEY + 'user')) || null,
+            ads: JSON.parse(localStorage.getItem(STORAGE_KEY + 'ads')) || [],
+            messages: JSON.parse(localStorage.getItem(STORAGE_KEY + 'msgs')) || [],
+            favorites: JSON.parse(localStorage.getItem(STORAGE_KEY + 'favs')) || [],
+            cart: JSON.parse(localStorage.getItem(STORAGE_KEY + 'cart')) || [], // Yeni Sepet
+            orders: JSON.parse(localStorage.getItem(STORAGE_KEY + 'orders')) || [], // Yeni Siparişler (Alıcı)
+            profileData: JSON.parse(localStorage.getItem(STORAGE_KEY + 'profile')) || { phone: '', address: '' }, // Yeni Profil Bilgileri
             cats: [
-                {name:'Emlak', icon:'fa-house-chimney', color:'text-orange-500'},
-                {name:'Vasıta', icon:'fa-car-side', color:'text-red-500'},
-                {name:'Telefon', icon:'fa-mobile-screen', color:'text-blue-500'},
-                {name:'Elektronik', icon:'fa-laptop', color:'text-gray-600'},
-                {name:'Giyim', icon:'fa-shirt', color:'text-purple-500'},
-                {name:'Diğer', icon:'fa-layer-group', color:'text-green-500'}
+                {name:'Emlak', icon:'fa-house-chimney', color:'text-orange-500', specs: [{name: 'm²', type: 'number'}, {name: 'Oda Sayısı', type: 'select', options: ['1+0', '1+1', '2+1', '3+1', '4+1+']}]},
+                {name:'Vasıta', icon:'fa-car-side', color:'text-red-500', specs: [{name: 'Yıl', type: 'number'}, {name: 'KM', type: 'number'}, {name: 'Yakıt', type: 'select', options: ['Benzin', 'Dizel', 'LPG', 'Hibrit']}, {name: 'Vites', type: 'select', options: ['Otomatik', 'Manuel']}]},
+                {name:'Telefon', icon:'fa-mobile-screen', color:'text-blue-500', specs: [{name: 'Marka', type: 'text'}, {name: 'Hafıza', type: 'select', options: ['64 GB', '128 GB', '256 GB', '512 GB']}]},
+                {name:'Elektronik', icon:'fa-laptop', color:'text-gray-600', specs: [{name: 'Marka', type: 'text'}, {name: 'Garanti Durumu', type: 'select', options: ['Var', 'Yok']}]},
+                {name:'Giyim', icon:'fa-shirt', color:'text-purple-500', specs: [{name: 'Beden', type: 'select', options: ['S', 'M', 'L', 'XL']}]},
+                {name:'Diğer', icon:'fa-layer-group', color:'text-green-500', specs: []}
             ],
-            tempImage: null,
+            tempImages: [], // Çoklu resim
             currentAdId: null,
             dopingTotal: 0,
             selectedDopings: [],
             tempRegData: null,
-            activeChatUser: null // Şu an kiminle konuşuluyor
+            activeChatUser: null
         };
 
         const payment = {
@@ -410,17 +499,8 @@
                 const btn = document.getElementById('reg-btn');
                 const btns = {ind: document.getElementById('btn-ind'), corp: document.getElementById('btn-corp')};
                 
-                if(t === 'corp') {
-                    f.classList.remove('hidden');
-                    btn.innerText = 'Ödeme Yap ve Kaydı Tamamla';
-                    btns.corp.className = 'flex-1 py-2.5 rounded-lg bg-white shadow-sm text-sm font-bold text-accent transition';
-                    btns.ind.className = 'flex-1 py-2.5 rounded-lg text-gray-500 text-sm font-bold transition';
-                } else {
-                    f.classList.add('hidden');
-                    btn.innerText = 'Ücretsiz Kayıt Ol';
-                    btns.ind.className = 'flex-1 py-2.5 rounded-lg bg-white shadow-sm text-sm font-bold text-accent transition';
-                    btns.corp.className = 'flex-1 py-2.5 rounded-lg text-gray-500 text-sm font-bold transition';
-                }
+                if(t === 'corp') { f.classList.remove('hidden'); btn.innerText = 'Ödeme Yap ve Kaydı Tamamla'; btns.corp.className = 'flex-1 py-2.5 rounded-lg bg-white shadow-sm text-sm font-bold text-accent transition dark:bg-gray-800'; btns.ind.className = 'flex-1 py-2.5 rounded-lg text-gray-500 text-sm font-bold transition';
+                } else { f.classList.add('hidden'); btn.innerText = 'Ücretsiz Kayıt Ol'; btns.ind.className = 'flex-1 py-2.5 rounded-lg bg-white shadow-sm text-sm font-bold text-accent transition dark:bg-gray-800'; btns.corp.className = 'flex-1 py-2.5 rounded-lg text-gray-500 text-sm font-bold transition'; }
             },
             preRegister: () => {
                 const name = document.getElementById('r-name').value;
@@ -436,16 +516,19 @@
                     if(!tax || !store) return ui.toast('Kurumsal bilgiler eksik.', 'error');
                     app.modal('register-modal', false);
                     payment.open(450, 'Kurumsal Üyelik', 'Yıllık 450 TL Abonelik Bedeli', auth.completeReg);
-                } else {
-                    auth.completeReg();
-                }
+                } else { auth.completeReg(); }
             },
             completeReg: () => {
-                state.user = state.tempRegData; app.save(); app.modal('register-modal', false); ui.renderHeader(); ui.toast('Kayıt Başarıyla Tamamlandı!', 'success');
+                state.user = state.tempRegData; 
+                state.profileData.name = state.user.name; // Profili başlangıçta doldur
+                state.profileData.email = state.user.email;
+                app.save(); app.modal('register-modal', false); ui.renderHeader(); ui.toast('Kayıt Başarıyla Tamamlandı!', 'success');
             },
             login: () => {
                 const e = document.getElementById('l-email').value; if(!e) return ui.toast('E-Posta gerekli', 'error');
                 state.user = { id: 999, name: 'Demo Kullanıcı', email: e, avatar: 'D', isStore: false };
+                state.profileData.name = state.user.name;
+                state.profileData.email = state.user.email;
                 app.save(); app.modal('login-modal', false); ui.renderHeader(); ui.toast('Giriş Yapıldı', 'success');
             },
             logout: () => { state.user = null; app.save(); location.reload(); }
@@ -454,15 +537,18 @@
         const app = {
             init: () => { if(state.ads.length === 0) app.seed(); ui.render(); },
             save: () => {
-                localStorage.setItem('bk_v23_user', JSON.stringify(state.user));
-                localStorage.setItem('bk_v23_ads', JSON.stringify(state.ads));
-                localStorage.setItem('bk_v23_msgs', JSON.stringify(state.messages));
-                localStorage.setItem('bk_v23_favs', JSON.stringify(state.favorites));
+                localStorage.setItem(STORAGE_KEY + 'user', JSON.stringify(state.user));
+                localStorage.setItem(STORAGE_KEY + 'ads', JSON.stringify(state.ads));
+                localStorage.setItem(STORAGE_KEY + 'msgs', JSON.stringify(state.messages));
+                localStorage.setItem(STORAGE_KEY + 'favs', JSON.stringify(state.favorites));
+                localStorage.setItem(STORAGE_KEY + 'cart', JSON.stringify(state.cart));
+                localStorage.setItem(STORAGE_KEY + 'orders', JSON.stringify(state.orders));
+                localStorage.setItem(STORAGE_KEY + 'profile', JSON.stringify(state.profileData));
             },
             seed: () => {
                 state.ads = [
-                    { id: 101, title: 'BMW 520i M Sport', price: 3250000, cat: 'Vasıta', owner: 'OtoGaleri', isStore: true, vitrin: true, dopings: ['vitrin', 'bold'], image: 'https://images.unsplash.com/photo-1555215696-b9776f188899?w=500' },
-                    { id: 102, title: 'iPhone 14 Pro', price: 52000, cat: 'Telefon', owner: 'Mert', isStore: false, vitrin: false, dopings: [], image: 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=500' }
+                    { id: 101, title: 'BMW 520i M Sport', price: 3250000, cat: 'Vasıta', owner: 'OtoGaleri', isStore: true, vitrin: true, dopings: ['vitrin', 'bold'], image: 'https://images.unsplash.com/photo-1555215696-b9776f188899?w=500', location: 'İstanbul, Kadıköy', images: ['https://images.unsplash.com/photo-1555215696-b9776f188899?w=500', 'https://images.unsplash.com/photo-1558231015-3733a1e9484b?w=500'], specs: {Yıl: 2020, KM: '45000', Yakıt: 'Benzin', Vites: 'Otomatik'} },
+                    { id: 102, title: 'iPhone 14 Pro', price: 52000, cat: 'Telefon', owner: 'Mert', isStore: false, vitrin: false, dopings: [], image: 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=500', location: 'Ankara, Çankaya', images: ['https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=500'], specs: {Marka: 'Apple', Hafıza: '128 GB'} }
                 ];
                 app.save();
             },
@@ -470,50 +556,182 @@
             modal: (id, show) => {
                 document.getElementById(id).style.display = show ? 'flex' : 'none';
                 if(id === 'post-ad-modal' && show) {
-                    state.tempImage = null; state.dopingTotal = 0; state.selectedDopings = [];
-                    document.getElementById('upload-area').style.backgroundImage = 'none'; 
-                    document.getElementById('upload-placeholder').style.display='block'; 
-                    document.getElementById('doping-total').innerText = '0 TL';
+                    state.tempImages = []; state.dopingTotal = 0; state.selectedDopings = [];
+                    document.getElementById('upload-grid').innerHTML = ''; document.getElementById('doping-total').innerText = '0 TL';
                     document.querySelectorAll('.doping-card').forEach(c => c.classList.remove('selected'));
+                    app.renderCatSpecs(document.getElementById('p-cat').value); // Özellikleri yenile
                 }
             },
 
+            // --- ÇOKLU FOTOĞRAF YÜKLEME ---
             handleImageUpload: (input) => {
-                const f = input.files[0]; if(!f) return;
-                const r = new FileReader();
-                r.onload = (e) => { state.tempImage = e.target.result; document.getElementById('upload-area').style.backgroundImage = `url(${state.tempImage})`; document.getElementById('upload-placeholder').style.display = 'none'; };
-                r.readAsDataURL(f);
+                const files = input.files;
+                if(files.length + state.tempImages.length > 10) { ui.toast('Maksimum 10 fotoğraf yükleyebilirsiniz.', 'error'); return; }
+                
+                Array.from(files).forEach(f => {
+                    const r = new FileReader();
+                    r.onload = (e) => { state.tempImages.push(e.target.result); app.renderUploadGrid(); };
+                    r.readAsDataURL(f);
+                });
+                input.value = ''; // Inputu temizle
+            },
+            renderUploadGrid: () => {
+                const grid = document.getElementById('upload-grid');
+                grid.innerHTML = '';
+                state.tempImages.forEach((img, index) => {
+                    grid.innerHTML += `
+                        <div class="relative group">
+                            <img src="${img}" class="w-full h-20 object-cover rounded-lg border shadow-sm">
+                            <button onclick="app.removeImage(${index})" class="absolute top-1 right-1 w-5 h-5 bg-danger text-white rounded-full text-xs opacity-80 hover:opacity-100 flex items-center justify-center">&times;</button>
+                        </div>
+                    `;
+                });
+            },
+            removeImage: (index) => {
+                state.tempImages.splice(index, 1);
+                app.renderUploadGrid();
             },
 
-            toggleDoping: (el, type, price) => {
-                el.classList.toggle('selected');
-                if(state.selectedDopings.includes(type)) {
-                    state.selectedDopings = state.selectedDopings.filter(t => t !== type); state.dopingTotal -= price;
-                } else {
-                    state.selectedDopings.push(type); state.dopingTotal += price;
-                }
-                document.getElementById('doping-total').innerText = state.dopingTotal + ' TL';
+            // --- DİNAMİK KATEGORİ ÖZELLİKLERİ ---
+            renderCatSpecs: (catName) => {
+                const fieldsDiv = document.getElementById('cat-specific-fields');
+                const cat = state.cats.find(c => c.name === catName);
+                if (!cat || cat.specs.length === 0) { fieldsDiv.classList.add('hidden'); return; }
+
+                fieldsDiv.classList.remove('hidden');
+                fieldsDiv.innerHTML = '<h4 class="font-bold text-sm col-span-2">Kategoriye Özgü Detaylar</h4>';
+
+                cat.specs.forEach(spec => {
+                    let inputHtml;
+                    const id = 'spec-' + spec.name.replace(/\s/g, '');
+
+                    if (spec.type === 'select') {
+                        const options = spec.options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+                        inputHtml = `<select id="${id}" class="bk-input bg-white cursor-pointer"><option value="">Seçiniz</option>${options}</select>`;
+                    } else {
+                        inputHtml = `<input type="${spec.type}" id="${id}" class="bk-input" placeholder="${spec.name}">`;
+                    }
+                    
+                    fieldsDiv.innerHTML += `<div><label class="text-xs font-bold text-gray-500 mb-1 block">${spec.name}</label>${inputHtml}</div>`;
+                });
             },
 
+            // İlan Finalize
             submitAdFlow: () => {
-                const t = document.getElementById('p-title').value; const p = document.getElementById('p-price').value; 
-                if(!t || !p) return ui.toast('Eksik bilgi', 'error');
+                const t = document.getElementById('p-title').value; const p = document.getElementById('p-price').value; const c = document.getElementById('p-cat').value;
+                const loc = document.getElementById('p-location').value;
+                if(!t || !p || !c || state.tempImages.length === 0) return ui.toast('Başlık, Fiyat, Kategori ve en az 1 Resim zorunludur.', 'error');
+                
+                // Özellikleri topla
+                const adSpecs = {};
+                const currentCat = state.cats.find(cat => cat.name === c);
+                if(currentCat) {
+                    currentCat.specs.forEach(spec => {
+                        const id = 'spec-' + spec.name.replace(/\s/g, '');
+                        const value = document.getElementById(id)?.value;
+                        if(value) adSpecs[spec.name] = value;
+                    });
+                }
+
                 if(state.dopingTotal > 0) {
                     app.modal('post-ad-modal', false);
-                    payment.open(state.dopingTotal, 'Doping Ödemesi', 'Seçilen İlan Özellikleri', app.finalizeAd);
+                    payment.open(state.dopingTotal, 'Doping Ödemesi', 'Seçilen İlan Özellikleri', () => app.finalizeAd(t, p, c, loc, adSpecs));
                 } else {
-                    app.finalizeAd();
+                    app.finalizeAd(t, p, c, loc, adSpecs);
                 }
             },
-
-            finalizeAd: () => {
-                const t = document.getElementById('p-title').value; const p = document.getElementById('p-price').value; const c = document.getElementById('p-cat').value;
+            finalizeAd: (title, price, cat, location, specs) => {
                 state.ads.unshift({ 
-                    id: Date.now(), title: t, price: parseInt(p), cat: c, owner: state.user.name, isStore: state.user.isStore, 
-                    image: state.tempImage || ('https://via.placeholder.com/500?text='+c), vitrin: state.selectedDopings.includes('vitrin'), dopings: state.selectedDopings 
+                    id: Date.now(), title: title, price: parseInt(price), cat: cat, location: location,
+                    owner: state.user.name, isStore: state.user.isStore, 
+                    image: state.tempImages[0], 
+                    images: state.tempImages, // Tüm resimleri kaydet
+                    specs: specs, // Özellikleri kaydet
+                    vitrin: state.selectedDopings.includes('vitrin'), 
+                    dopings: state.selectedDopings 
                 });
                 app.save(); app.modal('post-ad-modal', false); ui.renderAds(state.ads); ui.renderVitrin(); ui.toast('İlan Yayında!', 'success');
             },
+
+            // --- PROFİL GÜNCELLEME ---
+            updateProfile: () => {
+                state.profileData.name = document.getElementById('edit-name').value;
+                state.profileData.phone = document.getElementById('edit-phone').value;
+                state.profileData.address = document.getElementById('edit-address').value;
+                state.user.name = state.profileData.name;
+                app.save(); 
+                ui.renderHeader();
+                ui.toast('Profil Bilgileri Güncellendi', 'success');
+            },
+
+            // --- SİPARİŞ TAKİP ---
+            confirmDelivery: (orderId) => {
+                const order = state.orders.find(o => o.id === orderId);
+                if (!order || order.status !== 'Kargoda') return;
+
+                if (confirm(`${order.title} ürününü teslim aldığınızı onaylıyor musunuz? Onaylarsanız ödeme satıcıya aktarılacaktır.`)) {
+                    order.status = 'Teslim Edildi';
+                    const sellerOrder = state.orders.find(o => o.id === orderId && o.isSeller);
+                    if (sellerOrder) {
+                        sellerOrder.status = 'Ödeme Yapıldı';
+                        sellerOrder.paymentDate = new Date().toLocaleDateString();
+                    }
+                    app.save();
+                    ui.renderOrderLists();
+                    ui.toast('Teslimat onaylandı. Ödeme satıcıya aktarıldı!', 'success');
+                }
+            },
+            
+            // --- SEPET MANTIKLARI ---
+            addToCart: (adId) => {
+                if(!state.user) return app.modal('login-modal', true);
+                if(state.cart.some(item => item.id === adId)) { ui.toast('Bu ürün zaten sepette!', 'info'); return; }
+                
+                const ad = state.ads.find(a => a.id === adId);
+                if (ad.owner === state.user.name) { ui.toast('Kendi ilanınızı sepete ekleyemezsiniz.', 'error'); return; }
+
+                state.cart.push({ id: adId, title: ad.title, price: ad.price, image: ad.image, owner: ad.owner });
+                app.save();
+                ui.renderCart();
+                ui.toast('Sepete eklendi!', 'success');
+            },
+            removeFromCart: (adId) => {
+                state.cart = state.cart.filter(item => item.id !== adId);
+                app.save();
+                ui.renderCart();
+                ui.toast('Sepetten çıkarıldı.');
+            },
+            checkout: () => {
+                if(state.cart.length === 0) return ui.toast('Sepet boş.', 'error');
+                
+                const summary = app.calculateCartSummary();
+                app.modal('cart-modal', false);
+
+                payment.open(summary.grandTotal, 'Sepet Ödemesi', `${summary.totalPrice} TL Ürün + ${summary.fee} TL Hizmet Bedeli`, app.finalizeOrder);
+            },
+            finalizeOrder: () => {
+                const date = new Date().toLocaleDateString();
+                state.cart.forEach(item => {
+                    const orderId = Date.now() + item.id;
+                    const orderItem = { id: orderId, adId: item.id, title: item.title, price: item.price, image: item.image, date: date, status: 'Kargoda', isSeller: false };
+                    const salesItem = { ...orderItem, status: 'Kargoda', buyer: state.user.name, isSeller: true };
+
+                    state.orders.unshift(orderItem);
+                    state.orders.unshift(salesItem); // Satıcı için kopyasını ekle
+                });
+
+                state.cart = [];
+                app.save();
+                ui.renderCart();
+                ui.toast('Siparişleriniz başarıyla oluşturuldu ve kargoya verildi.', 'success');
+            },
+            calculateCartSummary: () => {
+                const totalPrice = state.cart.reduce((sum, item) => sum + item.price, 0);
+                const fee = totalPrice * 0.10;
+                const grandTotal = totalPrice + fee;
+                return { totalPrice: totalPrice, fee: fee.toFixed(2), grandTotal: grandTotal.toFixed(2) };
+            },
+
 
             openDetail: (id) => {
                 state.currentAdId = id;
@@ -521,9 +739,10 @@
                 document.getElementById('d-title').innerText = a.title;
                 document.getElementById('d-price').innerText = a.price.toLocaleString() + ' TL';
                 document.getElementById('d-owner').innerText = a.owner;
-                document.getElementById('d-img').src = a.image;
-                document.getElementById('d-desc').innerText = "Bu ürün hakkında detaylı bilgi için satıcı ile iletişime geçin."; 
+                document.getElementById('d-main-img').src = a.images[0];
+                document.getElementById('d-desc').innerText = "Bu ürün hakkında detaylı bilgi için satıcı ile iletişime geçin.";
                 document.getElementById('d-avatar').innerText = a.owner[0].toUpperCase();
+                document.getElementById('d-location').innerText = a.location || 'Bilinmiyor';
 
                 const isFav = state.favorites.includes(id);
                 const favBtn = document.getElementById('d-fav-btn');
@@ -534,38 +753,66 @@
                 if(state.user && state.user.name === a.owner) {
                     acts.innerHTML = `<button onclick="app.deleteAd(${a.id})" class="w-full bg-red-100 text-danger font-bold py-3 rounded-xl hover:bg-red-200">İlanı Sil</button>`;
                 } else {
-                    // Güvenli Ödeme ve Mesaj Butonları
                     acts.innerHTML = `
+                        <button onclick="app.addToCart(${a.id})" class="w-full border-2 border-primary text-primary font-bold py-3 rounded-xl mb-2 hover:bg-yellow-50 transition"><i class="fa-solid fa-cart-plus"></i> Sepete Ekle</button>
                         <button onclick="app.openMsgModal()" class="w-full border-2 border-accent text-accent font-bold py-3 rounded-xl mb-2 hover:bg-blue-50">Mesaj At</button>
-                        <button onclick="app.buyProduct(${a.price})" class="w-full bg-accent text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700">Güvenli Al</button>
                     `;
                 }
+
+                // Galeri ve Özellikler
+                app.renderDetailGallery(a.images);
+                app.renderDetailSpecs(a.specs);
                 app.modal('detail-modal', true);
             },
-
-            deleteAd: (id) => {
-                if(confirm('Emin misin?')) {
-                    state.ads = state.ads.filter(a => a.id !== id);
-                    app.save(); app.modal('detail-modal', false); ui.renderAds(state.ads); ui.renderVitrin(); ui.toast('İlan Silindi', 'success');
-                }
+            renderDetailGallery: (images) => {
+                const galleryDiv = document.getElementById('d-gallery');
+                galleryDiv.innerHTML = '';
+                images.forEach((img, index) => {
+                    galleryDiv.innerHTML += `<img src="${img}" class="gallery-thumb ${index === 0 ? 'active' : ''}" onclick="app.changeMainImage('${img}', this)">`;
+                });
             },
+            changeMainImage: (src, el) => {
+                document.getElementById('d-main-img').src = src;
+                document.querySelectorAll('.gallery-thumb').forEach(thumb => thumb.classList.remove('active'));
+                el.classList.add('active');
+            },
+            renderDetailSpecs: (specs) => {
+                const specsDiv = document.getElementById('d-specs');
+                specsDiv.innerHTML = '';
+                
+                const table = document.createElement('div');
+                table.className = 'w-full';
+
+                if (Object.keys(specs).length === 0) {
+                    specsDiv.innerHTML = '<p class="text-gray-400 p-4 text-center text-xs">Bu ilana özel teknik özellikler girilmemiştir.</p>';
+                    return;
+                }
+
+                for (const key in specs) {
+                    table.innerHTML += `
+                        <div class="flex spec-row p-3 border-b border-gray-100 dark:border-gray-700">
+                            <span class="w-1/2 text-gray-600 dark:text-gray-400 font-medium">${key}:</span>
+                            <span class="w-1/2 font-bold">${specs[key]}</span>
+                        </div>
+                    `;
+                }
+                specsDiv.appendChild(table);
+            },
+            
+            toggleDoping: (el, type, price) => {
+                el.classList.toggle('selected');
+                if(state.selectedDopings.includes(type)) { state.selectedDopings = state.selectedDopings.filter(t => t !== type); state.dopingTotal -= price;
+                } else { state.selectedDopings.push(type); state.dopingTotal += price; }
+                document.getElementById('doping-total').innerText = state.dopingTotal + ' TL';
+            },
+
+            // Mesajlar, Arama, Filtreleme, Profil Geri kalanı aynı kalacak
 
             toggleFavorite: (id) => {
                 if(!state.user) return ui.toast('Giriş yapmalısın', 'error');
                 if(state.favorites.includes(id)) { state.favorites = state.favorites.filter(fid => fid !== id); ui.toast('Favorilerden çıkarıldı'); } 
                 else { state.favorites.push(id); ui.toast('Favorilere eklendi', 'success'); }
                 app.save(); app.openDetail(id);
-            },
-
-            // --- GÜVENLİ ÖDEME (PARAM GÜVENDE) ---
-            buyProduct: (price) => {
-                if(!state.user) return app.modal('login-modal', true);
-                const fee = price * 0.10; // %10 Hizmet Bedeli
-                const total = price + fee;
-                app.modal('detail-modal', false);
-                payment.open(total, 'Güvenli Ödeme', `${price} TL Ürün + ${fee.toFixed(2)} TL Hizmet Bedeli`, () => {
-                    ui.toast('Sipariş başarıyla oluşturuldu! Satıcı onayı bekleniyor.', 'success');
-                });
             },
 
             openMsgModal: () => {
@@ -584,27 +831,23 @@
                 app.save(); app.modal('send-msg-modal', false); ui.toast('Mesaj Gönderildi!', 'success');
             },
             
-            // --- YENİ SOHBET FONKSİYONLARI ---
             openChat: (withUser) => {
                 state.activeChatUser = withUser;
                 document.getElementById('chat-header').classList.remove('hidden');
                 document.getElementById('chat-input-area').classList.remove('hidden');
                 document.getElementById('chat-user-name').innerText = withUser;
                 app.renderChatMessages();
-                
-                // Mobilde liste gizlenir, chat açılır (Basitçe)
-                if(window.innerWidth < 768) { /* Mobil uyumluluk eklenebilir */ }
             },
             renderChatMessages: () => {
                 const area = document.getElementById('chat-area');
                 area.innerHTML = '';
                 const msgs = state.messages.filter(m => m.with === state.activeChatUser).reverse();
-                if(msgs.length === 0) { area.innerHTML = '<div class="text-center text-gray-400 mt-10">Sohbet geçmişi yok.</div>'; return; }
+                if(msgs.length === 0) { area.innerHTML = '<div class="h-full flex items-center justify-center text-gray-400 flex-col"><i class="fa-regular fa-comments text-4xl mb-3 opacity-30"></i><p>Sohbet geçmişi yok.</p></div>'; return; }
                 
                 msgs.forEach(m => {
                     const bubble = document.createElement('div');
                     bubble.className = `chat-bubble ${m.fromMe ? 'me' : 'you'}`;
-                    bubble.innerHTML = `${m.content} <div class="chat-time">${m.date}</div>`;
+                    bubble.innerHTML = `${m.content} <div class="chat-time text-xs">${m.date}</div>`;
                     area.appendChild(bubble);
                 });
                 area.scrollTop = area.scrollHeight;
@@ -640,6 +883,14 @@
                 document.getElementById('p-avatar').src = `https://ui-avatars.com/api/?name=${state.user.name}&background=random`; 
                 document.getElementById('p-type').innerText = state.user.isStore ? 'Kurumsal Mağaza' : 'Bireysel Hesap';
                 document.getElementById('p-type').className = state.user.isStore ? 'text-[10px] bg-accent text-white px-2 py-1 rounded-full' : 'text-[10px] bg-gray-200 px-2 py-1 rounded-full text-gray-600';
+                
+                // Profil Bilgilerini Yükle
+                document.getElementById('edit-name').value = state.profileData.name || state.user.name;
+                document.getElementById('edit-phone').value = state.profileData.phone || '';
+                document.getElementById('edit-address').value = state.profileData.address || '';
+                document.getElementById('edit-email').value = state.profileData.email || state.user.email;
+
+
                 ui.switchDash(tab); app.modal('profile-panel', true);
             },
             goHome: () => { window.scrollTo(0,0); ui.renderAds(state.ads); document.getElementById('page-title').innerText = 'Tüm İlanlar'; }
@@ -649,6 +900,7 @@
             render: () => {
                 ui.renderHeader(); ui.renderCats(); ui.renderAds(state.ads); ui.renderVitrin();
                 const s = document.getElementById('p-cat'); s.innerHTML='<option>Kategori Seç</option>'; state.cats.forEach(c=>s.innerHTML+=`<option>${c.name}</option>`);
+                ui.renderCart();
             },
             renderHeader: () => {
                 const d = document.getElementById('header-auth-area');
@@ -701,8 +953,89 @@
                     v.innerHTML += `<div onclick="app.openDetail(${ad.id})" class="flex-shrink-0 w-24 flex flex-col items-center gap-2 cursor-pointer group"><div class="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-primary to-orange-500 group-hover:scale-105 transition"><img src="${ad.image}" class="w-full h-full rounded-full object-cover border-2 border-white"></div><span class="text-[10px] font-bold text-center truncate w-full text-dark group-hover:text-accent">${ad.title}</span></div>`;
                 });
             },
+            
+            // --- SEPET RENDER ---
+            renderCart: () => {
+                const itemsDiv = document.getElementById('cart-items');
+                const summaryDiv = document.getElementById('cart-summary');
+                const emptyDiv = document.getElementById('cart-empty');
+                const checkoutBtn = document.getElementById('checkout-btn');
+                const cartCount = document.getElementById('cart-count');
+                const count = state.cart.length;
+
+                cartCount.innerText = count;
+                cartCount.classList.toggle('hidden', count === 0);
+                emptyDiv.classList.toggle('hidden', count > 0);
+                summaryDiv.classList.toggle('hidden', count === 0);
+                checkoutBtn.classList.toggle('hidden', count === 0);
+
+                if (count === 0) { itemsDiv.innerHTML = ''; return; }
+
+                const summary = app.calculateCartSummary();
+                document.getElementById('cart-total-price').innerText = summary.totalPrice.toLocaleString('tr-TR') + ' TL';
+                document.getElementById('cart-fee-price').innerText = summary.fee.toLocaleString('tr-TR') + ' TL';
+                document.getElementById('cart-grand-total').innerText = summary.grandTotal.toLocaleString('tr-TR') + ' TL';
+
+                itemsDiv.innerHTML = state.cart.map(item => `
+                    <div class="flex items-center gap-4 p-3 border rounded-xl dark:border-gray-700">
+                        <img src="${item.image}" class="w-16 h-16 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <div class="font-bold text-sm">${item.title}</div>
+                            <div class="text-accent font-bold">${item.price.toLocaleString('tr-TR')} TL</div>
+                        </div>
+                        <button onclick="app.removeFromCart(${item.id})" class="text-danger hover:text-red-700"><i class="fa-solid fa-trash-alt"></i></button>
+                    </div>
+                `).join('');
+            },
+
+            // --- SİPARİŞ TAKİP RENDER ---
+            renderOrderLists: () => {
+                const ordersList = document.getElementById('orders-list');
+                const salesList = document.getElementById('sales-list');
+                const userOrders = state.orders.filter(o => !o.isSeller); // Alıcı siparişleri
+                const userSales = state.orders.filter(o => o.isSeller && o.title !== 'Sohbet'); // Satıcı satışları
+                
+                const getStatusColor = (status) => {
+                    if (status === 'Teslim Edildi' || status === 'Ödeme Yapıldı') return 'bg-green-100 text-green-700';
+                    if (status === 'Kargoda') return 'bg-blue-100 text-blue-700';
+                    return 'bg-gray-100 text-gray-700';
+                };
+
+                // 1. Siparişlerim (Alıcı)
+                ordersList.innerHTML = userOrders.length === 0 ? '<p class="text-gray-400">Henüz siparişiniz yok.</p>' : userOrders.map(order => `
+                    <div class="flex items-center gap-4 p-4 border rounded-xl dark:border-gray-700">
+                        <img src="${order.image}" class="w-16 h-16 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <div class="font-bold text-sm">${order.title}</div>
+                            <div class="text-xs text-gray-500 mb-1">Sipariş No: ${order.id}</div>
+                            <div class="font-bold text-accent">${order.price.toLocaleString('tr-TR')} TL</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-bold ${getStatusColor(order.status)} px-3 py-1 rounded-full">${order.status}</span>
+                            ${order.status === 'Kargoda' ? `<button onclick="app.confirmDelivery(${order.id})" class="mt-2 text-xs font-bold bg-primary px-3 py-1 rounded-full hover:bg-yellow-400">Teslim Aldım</button>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+                // 2. Satışlarım (Satıcı)
+                salesList.innerHTML = userSales.length === 0 ? '<p class="text-gray-400">Henüz satışınız yok.</p>' : userSales.map(sale => `
+                    <div class="flex items-center gap-4 p-4 border rounded-xl dark:border-gray-700">
+                        <img src="${sale.image}" class="w-16 h-16 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <div class="font-bold text-sm">${sale.title}</div>
+                            <div class="text-xs text-gray-500 mb-1">Alıcı: ${sale.buyer}</div>
+                            <div class="font-bold text-accent">${sale.price.toLocaleString('tr-TR')} TL</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-bold ${getStatusColor(sale.status)} px-3 py-1 rounded-full">${sale.status}</span>
+                            ${sale.status === 'Ödeme Yapıldı' ? `<div class="text-xs text-green-600 mt-1">Ödeme Hesabınıza Geçti</div>` : `<div class="text-xs text-gray-500 mt-1">Alıcı Onayını Bekliyor</div>`}
+                        </div>
+                    </div>
+                `).join('');
+            },
+
             switchDash: (t) => {
-                ['info','favs','msgs'].forEach(x => { document.getElementById('dash-'+x).style.display='none'; document.getElementById('nav-'+x).className='w-full text-left p-3 rounded-lg text-sm text-gray-600 hover:bg-white'; });
+                ['info','favs','orders','sales','msgs'].forEach(x => { document.getElementById('dash-'+x).style.display='none'; document.getElementById('nav-'+x).className='w-full text-left p-3 rounded-lg text-sm text-gray-600 hover:bg-white'; });
                 document.getElementById('dash-'+t).style.display = t === 'msgs' ? 'flex' : 'block';
                 document.getElementById('nav-'+t).className='w-full text-left p-3 rounded-lg text-sm font-bold text-accent bg-white shadow-sm';
                 
@@ -712,9 +1045,9 @@
                     if(myFavs.length===0) l.innerHTML = '<p class="col-span-2 text-gray-400">Favori ilanınız yok.</p>';
                     myFavs.forEach(ad => l.innerHTML += `<div onclick="app.openDetail(${ad.id})" class="flex gap-3 border p-3 rounded-lg cursor-pointer hover:bg-gray-50"><img src="${ad.image}" class="w-16 h-16 rounded object-cover"><div><div class="font-bold text-sm">${ad.title}</div><div class="text-accent font-bold">${ad.price} TL</div></div></div>`);
                 }
+                if(t==='orders' || t==='sales') { ui.renderOrderLists(); }
                 if(t==='msgs') {
                     const list = document.getElementById('chat-list'); list.innerHTML = '';
-                    // Mesajları grupla
                     const conversations = [...new Set(state.messages.map(m => m.with))];
                     if(conversations.length === 0) list.innerHTML = '<p class="p-4 text-gray-400 text-sm">Hiç mesajınız yok.</p>';
                     conversations.forEach(user => {
