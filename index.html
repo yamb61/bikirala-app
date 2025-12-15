@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiKirala - V22 Business Edition</title>
+    <title>BiKirala - V23 Platinum Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -17,7 +17,9 @@
                         danger: '#ff3f55',        
                         dark: '#1a1a1a',          
                         surface: '#ffffff',       
-                        graybg: '#f1f2f6'         
+                        graybg: '#f1f2f6',
+                        chatme: '#e3f2fd',
+                        chatyou: '#f1f2f6'
                     },
                     boxShadow: {
                         'float': '0 10px 40px rgba(0,0,0,0.1)',
@@ -46,10 +48,15 @@
         .doping-card:hover { border-color: #e5e7eb; }
         .doping-card.selected { border-color: #2962FF; background-color: #eff6ff; }
         
-        /* Toast Bildirim */
         .toast-item { background: rgba(25, 25, 25, 0.95); backdrop-filter: blur(10px); color: white; border-left: 4px solid #2962FF; }
         .toast-item.success { border-left-color: #00d26a; }
         .toast-item.error { border-left-color: #ff4757; }
+
+        /* YENİ CHAT STİLLERİ */
+        .chat-bubble { max-width: 80%; padding: 10px 15px; border-radius: 12px; font-size: 14px; position: relative; margin-bottom: 8px; }
+        .chat-bubble.me { background-color: #2962FF; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .chat-bubble.you { background-color: #f1f2f6; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .chat-time { font-size: 10px; opacity: 0.7; margin-top: 4px; text-align: right; }
     </style>
 </head>
 <body class="pb-24 md:pb-0" onclick="app.closeDropdown(event)">
@@ -154,7 +161,7 @@
                     <i class="fa-solid fa-shield-halved text-green-600 text-2xl"></i>
                     <div>
                         <div class="text-green-800 font-bold text-sm">Güvenli Ödeme</div>
-                        <div class="text-[10px] text-green-700">Para havuzda tutulur, onaylayınca aktarılır.</div>
+                        <div class="text-[10px] text-green-700">Para havuzda tutulur, ürün teslim edilince satıcıya aktarılır.</div>
                     </div>
                 </div>
 
@@ -206,19 +213,16 @@
                     <button onclick="auth.setRegType('ind')" id="btn-ind" class="flex-1 py-2.5 rounded-lg bg-white shadow-sm text-sm font-bold text-accent transition">Bireysel</button>
                     <button onclick="auth.setRegType('corp')" id="btn-corp" class="flex-1 py-2.5 rounded-lg text-gray-500 text-sm font-bold transition">Kurumsal</button>
                 </div>
-
                 <form onsubmit="event.preventDefault(); auth.preRegister()">
                     <div class="grid grid-cols-2 gap-3 mb-3"><input type="text" id="r-name" placeholder="Ad" class="bk-input"><input type="text" id="r-surname" placeholder="Soyad" class="bk-input"></div>
                     <input type="email" id="r-email" placeholder="E-Posta" class="bk-input mb-3">
                     <input type="password" id="r-pass" placeholder="Şifre" class="bk-input mb-3">
-                    
                     <div id="corp-fields" class="hidden bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3 mt-2">
                         <input type="text" id="r-store" placeholder="Mağaza Adı" class="bk-input bg-white">
                         <input type="text" id="r-tax" placeholder="Vergi Numarası" class="bk-input bg-white">
                         <input type="text" id="r-tax-addr" placeholder="Vergi Dairesi/Adresi" class="bk-input bg-white">
                         <div class="flex items-center gap-2 text-xs text-blue-800 bg-blue-100 p-2 rounded"><i class="fa-solid fa-wallet"></i> <span>Kurumsal Üyelik Bedeli: <strong>450.00 TL / Ay</strong></span></div>
                     </div>
-
                     <button class="w-full bg-dark text-white font-bold py-4 mt-6 rounded-xl hover:bg-black transition shadow-lg" id="reg-btn">Ücretsiz Kayıt Ol</button>
                 </form>
             </div>
@@ -234,31 +238,16 @@
             <div class="p-6">
                 <h3 class="font-bold text-lg mb-1" id="pay-title">Başlık</h3>
                 <p class="text-sm text-gray-500 mb-6" id="pay-desc">Açıklama</p>
-                
                 <div class="bg-gradient-to-br from-gray-800 to-black text-white p-5 rounded-xl mb-6 shadow-2xl relative overflow-hidden transform transition hover:scale-105">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                    <div class="flex justify-between mb-8">
-                        <i class="fa-solid fa-chip text-3xl text-yellow-400 opacity-90"></i>
-                        <span class="font-bold italic text-lg opacity-80">PayTR</span>
-                    </div>
+                    <div class="flex justify-between mb-8"><i class="fa-solid fa-chip text-3xl text-yellow-400 opacity-90"></i><span class="font-bold italic text-lg opacity-80">PayTR</span></div>
                     <div class="font-mono text-xl tracking-widest mb-6">**** **** **** 4242</div>
-                    <div class="flex justify-between font-bold text-xs uppercase opacity-70">
-                        <span>Kart Sahibi</span>
-                        <span>SKT</span>
-                    </div>
-                    <div class="flex justify-between font-bold text-sm tracking-wide">
-                        <span id="card-name-prev">AD SOYAD</span>
-                        <span>12/28</span>
-                    </div>
+                    <div class="flex justify-between font-bold text-sm tracking-wide"><span id="card-name-prev">AD SOYAD</span><span>12/28</span></div>
                 </div>
-
                 <div class="space-y-3">
                     <input type="text" class="bk-input" placeholder="Kart Üzerindeki İsim" oninput="document.getElementById('card-name-prev').innerText = this.value.toUpperCase() || 'AD SOYAD'">
                     <input type="text" class="bk-input" placeholder="Kart Numarası (4543...)" value="4543 **** **** 4242">
-                    <div class="flex gap-3">
-                        <input type="text" class="bk-input" placeholder="AA/YY" value="12/28">
-                        <input type="text" class="bk-input" placeholder="CVC" value="***">
-                    </div>
+                    <div class="flex gap-3"><input type="text" class="bk-input" placeholder="AA/YY" value="12/28"><input type="text" class="bk-input" placeholder="CVC" value="***"></div>
                 </div>
                 <button onclick="payment.process()" class="w-full bg-green-600 text-white font-bold py-4 mt-6 rounded-xl shadow-lg hover:bg-green-700 transition flex items-center justify-center gap-2"><i class="fa-solid fa-lock"></i> <span>Güvenli Öde ve Onayla</span></button>
             </div>
@@ -277,31 +266,29 @@
                         <p class="font-bold text-gray-500 group-hover:text-accent">Fotoğraf Yüklemek İçin Tıkla</p>
                     </div>
                 </div>
-
                 <div class="space-y-4">
                     <input type="text" id="p-title" class="bk-input text-lg font-bold" placeholder="İlan Başlığı">
                     <div class="flex gap-4"><input type="number" id="p-price" class="bk-input" placeholder="Fiyat (TL)"><select id="p-cat" class="bk-input bg-white cursor-pointer"></select></div>
                     <textarea id="p-desc" rows="5" class="bk-input" placeholder="İlan açıklaması..."></textarea>
                 </div>
-
                 <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
                     <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fa-solid fa-rocket text-danger"></i> Hızlı Satış & Doping</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div class="doping-card bg-white p-4 rounded-xl shadow-sm" onclick="app.toggleDoping(this, 'vitrin', 150)">
                             <div class="font-bold text-primary flex justify-between">Vitrin <span class="text-dark">150 TL</span></div>
-                            <div class="text-xs text-gray-500 mt-1">Ana sayfada en üstte listelenir.</div>
+                            <div class="text-xs text-gray-500 mt-1">Ana sayfada en üstte.</div>
                         </div>
                         <div class="doping-card bg-white p-4 rounded-xl shadow-sm" onclick="app.toggleDoping(this, 'acil', 75)">
                             <div class="font-bold text-danger flex justify-between">Acil <span class="text-dark">75 TL</span></div>
-                            <div class="text-xs text-gray-500 mt-1">Kırmızı "Acil" etiketi eklenir.</div>
+                            <div class="text-xs text-gray-500 mt-1">Kırmızı "Acil" etiketi.</div>
                         </div>
                         <div class="doping-card bg-white p-4 rounded-xl shadow-sm" onclick="app.toggleDoping(this, 'dopamin', 100)">
                             <div class="font-bold text-purple-600 flex justify-between">Dopamin <span class="text-dark">100 TL</span></div>
-                            <div class="text-xs text-gray-500 mt-1">İlanınız öne çıkarılır ve renklenir.</div>
+                            <div class="text-xs text-gray-500 mt-1">İlan öne çıkarılır.</div>
                         </div>
                         <div class="doping-card bg-white p-4 rounded-xl shadow-sm" onclick="app.toggleDoping(this, 'bold', 50)">
                             <div class="font-bold text-dark flex justify-between">Kalın Yazı <span class="text-dark">50 TL</span></div>
-                            <div class="text-xs text-gray-500 mt-1">İlan başlığı listede kalın görünür.</div>
+                            <div class="text-xs text-gray-500 mt-1">Başlık kalın görünür.</div>
                         </div>
                     </div>
                     <div class="mt-4 text-right pt-4 border-t border-gray-200">
@@ -309,14 +296,13 @@
                         <span class="text-2xl font-bold text-dark ml-2" id="doping-total">0 TL</span>
                     </div>
                 </div>
-
                 <button onclick="app.submitAdFlow()" class="w-full bg-accent text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition text-lg">YAYINLA</button>
             </div>
         </div>
     </div>
 
     <div id="profile-panel" class="fixed inset-0 bg-black/60 hidden z-[90] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-4xl h-[85vh] rounded-2xl shadow-float overflow-hidden flex flex-col md:flex-row relative modal-enter">
+        <div class="bg-white w-full max-w-5xl h-[85vh] rounded-2xl shadow-float overflow-hidden flex flex-col md:flex-row relative modal-enter">
             <button onclick="app.modal('profile-panel', false)" class="absolute top-4 right-4 text-2xl z-50 md:hidden">&times;</button>
             <div class="w-full md:w-64 bg-gray-50 border-r flex flex-col p-4">
                 <div class="text-center mb-6">
@@ -331,11 +317,37 @@
                 </nav>
                 <button onclick="auth.logout()" class="w-full text-left p-3 text-danger font-bold hover:bg-red-50 rounded-lg mt-4">Çıkış Yap</button>
             </div>
-            <div class="flex-1 bg-white p-8 overflow-y-auto relative">
-                <button onclick="app.modal('profile-panel', false)" class="hidden md:block absolute top-4 right-4 text-2xl text-gray-400 hover:text-dark"><i class="fa-solid fa-xmark"></i></button>
-                <div id="dash-info" class="block"><h2 class="text-2xl font-bold mb-6">Bilgilerim</h2><p class="text-gray-500">Profil bilgilerinizi buradan düzenleyebilirsiniz.</p></div>
-                <div id="dash-favs" class="hidden"><h2 class="text-2xl font-bold mb-6">Favorilerim</h2><div id="fav-list" class="grid grid-cols-2 gap-4"></div></div>
-                <div id="dash-msgs" class="hidden h-full flex flex-col"><h2 class="text-2xl font-bold mb-4">Gelen Kutusu</h2><div id="inbox-list" class="space-y-3 flex-1 overflow-y-auto"></div></div>
+            <div class="flex-1 bg-white p-0 md:p-8 overflow-y-auto relative h-full">
+                <button onclick="app.modal('profile-panel', false)" class="hidden md:block absolute top-4 right-4 text-2xl text-gray-400 hover:text-dark z-50"><i class="fa-solid fa-xmark"></i></button>
+                
+                <div id="dash-info" class="block p-8"><h2 class="text-2xl font-bold mb-6">Bilgilerim</h2><p class="text-gray-500">Profil bilgilerinizi buradan düzenleyebilirsiniz.</p></div>
+                <div id="dash-favs" class="hidden p-8"><h2 class="text-2xl font-bold mb-6">Favorilerim</h2><div id="fav-list" class="grid grid-cols-2 gap-4"></div></div>
+                
+                <div id="dash-msgs" class="hidden h-full flex">
+                    <div class="w-1/3 border-r h-full flex flex-col bg-gray-50">
+                        <div class="p-4 border-b font-bold text-gray-700">Sohbetler</div>
+                        <div id="chat-list" class="flex-1 overflow-y-auto">
+                            </div>
+                    </div>
+                    <div class="w-2/3 flex flex-col h-full bg-white relative">
+                        <div id="chat-header" class="p-4 border-b font-bold flex items-center gap-3 bg-white z-10 hidden">
+                            <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">A</div>
+                            <span id="chat-user-name">Kullanıcı</span>
+                        </div>
+                        <div id="chat-area" class="flex-1 overflow-y-auto p-4 flex flex-col bg-gray-50/50">
+                            <div class="h-full flex items-center justify-center text-gray-400 flex-col">
+                                <i class="fa-regular fa-comments text-4xl mb-3 opacity-30"></i>
+                                <p>Bir sohbet seçin</p>
+                            </div>
+                        </div>
+                        <div id="chat-input-area" class="p-4 border-t bg-white hidden">
+                            <div class="flex gap-2">
+                                <input type="text" id="chat-input" class="bk-input rounded-full bg-gray-100" placeholder="Bir mesaj yazın...">
+                                <button onclick="app.sendChatMessage()" class="w-12 h-12 bg-accent text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition shadow-lg"><i class="fa-solid fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -351,10 +363,10 @@
 
     <script>
         const state = {
-            user: JSON.parse(localStorage.getItem('bk_v22_user')) || null,
-            ads: JSON.parse(localStorage.getItem('bk_v22_ads')) || [],
-            messages: JSON.parse(localStorage.getItem('bk_v22_msgs')) || [],
-            favorites: JSON.parse(localStorage.getItem('bk_v22_favs')) || [],
+            user: JSON.parse(localStorage.getItem('bk_v23_user')) || null,
+            ads: JSON.parse(localStorage.getItem('bk_v23_ads')) || [],
+            messages: JSON.parse(localStorage.getItem('bk_v23_msgs')) || [],
+            favorites: JSON.parse(localStorage.getItem('bk_v23_favs')) || [],
             cats: [
                 {name:'Emlak', icon:'fa-house-chimney', color:'text-orange-500'},
                 {name:'Vasıta', icon:'fa-car-side', color:'text-red-500'},
@@ -367,7 +379,8 @@
             currentAdId: null,
             dopingTotal: 0,
             selectedDopings: [],
-            tempRegData: null
+            tempRegData: null,
+            activeChatUser: null // Şu an kiminle konuşuluyor
         };
 
         const payment = {
@@ -413,22 +426,14 @@
                 const name = document.getElementById('r-name').value;
                 const surname = document.getElementById('r-surname').value;
                 const email = document.getElementById('r-email').value;
-                
                 if(!name || !email) return ui.toast('Eksik bilgi girdiniz.', 'error');
 
-                state.tempRegData = {
-                    id: Date.now(),
-                    name: auth.regType === 'corp' ? document.getElementById('r-store').value : (name + ' ' + surname),
-                    email: email,
-                    isStore: auth.regType === 'corp',
-                    avatar: (name[0]).toUpperCase()
-                };
+                state.tempRegData = { id: Date.now(), name: auth.regType === 'corp' ? document.getElementById('r-store').value : (name + ' ' + surname), email: email, isStore: auth.regType === 'corp', avatar: (name[0]).toUpperCase() };
 
                 if(auth.regType === 'corp') {
                     const tax = document.getElementById('r-tax').value;
                     const store = document.getElementById('r-store').value;
                     if(!tax || !store) return ui.toast('Kurumsal bilgiler eksik.', 'error');
-                    
                     app.modal('register-modal', false);
                     payment.open(450, 'Kurumsal Üyelik', 'Yıllık 450 TL Abonelik Bedeli', auth.completeReg);
                 } else {
@@ -436,15 +441,10 @@
                 }
             },
             completeReg: () => {
-                state.user = state.tempRegData;
-                app.save(); 
-                app.modal('register-modal', false); 
-                ui.renderHeader(); 
-                ui.toast('Kayıt Başarıyla Tamamlandı!', 'success');
+                state.user = state.tempRegData; app.save(); app.modal('register-modal', false); ui.renderHeader(); ui.toast('Kayıt Başarıyla Tamamlandı!', 'success');
             },
             login: () => {
-                const e = document.getElementById('l-email').value; 
-                if(!e) return ui.toast('E-Posta gerekli', 'error');
+                const e = document.getElementById('l-email').value; if(!e) return ui.toast('E-Posta gerekli', 'error');
                 state.user = { id: 999, name: 'Demo Kullanıcı', email: e, avatar: 'D', isStore: false };
                 app.save(); app.modal('login-modal', false); ui.renderHeader(); ui.toast('Giriş Yapıldı', 'success');
             },
@@ -454,10 +454,10 @@
         const app = {
             init: () => { if(state.ads.length === 0) app.seed(); ui.render(); },
             save: () => {
-                localStorage.setItem('bk_v22_user', JSON.stringify(state.user));
-                localStorage.setItem('bk_v22_ads', JSON.stringify(state.ads));
-                localStorage.setItem('bk_v22_msgs', JSON.stringify(state.messages));
-                localStorage.setItem('bk_v22_favs', JSON.stringify(state.favorites));
+                localStorage.setItem('bk_v23_user', JSON.stringify(state.user));
+                localStorage.setItem('bk_v23_ads', JSON.stringify(state.ads));
+                localStorage.setItem('bk_v23_msgs', JSON.stringify(state.messages));
+                localStorage.setItem('bk_v23_favs', JSON.stringify(state.favorites));
             },
             seed: () => {
                 state.ads = [
@@ -469,36 +469,28 @@
             
             modal: (id, show) => {
                 document.getElementById(id).style.display = show ? 'flex' : 'none';
-                if(id === 'post-ad-modal') {
-                    if(show) {
-                        state.tempImage = null; state.dopingTotal = 0; state.selectedDopings = [];
-                        document.getElementById('upload-area').style.backgroundImage = 'none'; 
-                        document.getElementById('upload-placeholder').style.display='block'; 
-                        document.getElementById('doping-total').innerText = '0 TL';
-                        document.querySelectorAll('.doping-card').forEach(c => c.classList.remove('selected'));
-                    }
+                if(id === 'post-ad-modal' && show) {
+                    state.tempImage = null; state.dopingTotal = 0; state.selectedDopings = [];
+                    document.getElementById('upload-area').style.backgroundImage = 'none'; 
+                    document.getElementById('upload-placeholder').style.display='block'; 
+                    document.getElementById('doping-total').innerText = '0 TL';
+                    document.querySelectorAll('.doping-card').forEach(c => c.classList.remove('selected'));
                 }
             },
 
             handleImageUpload: (input) => {
                 const f = input.files[0]; if(!f) return;
                 const r = new FileReader();
-                r.onload = (e) => {
-                    state.tempImage = e.target.result;
-                    document.getElementById('upload-area').style.backgroundImage = `url(${state.tempImage})`;
-                    document.getElementById('upload-placeholder').style.display = 'none';
-                };
+                r.onload = (e) => { state.tempImage = e.target.result; document.getElementById('upload-area').style.backgroundImage = `url(${state.tempImage})`; document.getElementById('upload-placeholder').style.display = 'none'; };
                 r.readAsDataURL(f);
             },
 
             toggleDoping: (el, type, price) => {
                 el.classList.toggle('selected');
                 if(state.selectedDopings.includes(type)) {
-                    state.selectedDopings = state.selectedDopings.filter(t => t !== type);
-                    state.dopingTotal -= price;
+                    state.selectedDopings = state.selectedDopings.filter(t => t !== type); state.dopingTotal -= price;
                 } else {
-                    state.selectedDopings.push(type);
-                    state.dopingTotal += price;
+                    state.selectedDopings.push(type); state.dopingTotal += price;
                 }
                 document.getElementById('doping-total').innerText = state.dopingTotal + ' TL';
             },
@@ -506,7 +498,6 @@
             submitAdFlow: () => {
                 const t = document.getElementById('p-title').value; const p = document.getElementById('p-price').value; 
                 if(!t || !p) return ui.toast('Eksik bilgi', 'error');
-                
                 if(state.dopingTotal > 0) {
                     app.modal('post-ad-modal', false);
                     payment.open(state.dopingTotal, 'Doping Ödemesi', 'Seçilen İlan Özellikleri', app.finalizeAd);
@@ -518,11 +509,8 @@
             finalizeAd: () => {
                 const t = document.getElementById('p-title').value; const p = document.getElementById('p-price').value; const c = document.getElementById('p-cat').value;
                 state.ads.unshift({ 
-                    id: Date.now(), title: t, price: parseInt(p), cat: c, 
-                    owner: state.user.name, isStore: state.user.isStore, 
-                    image: state.tempImage || ('https://via.placeholder.com/500?text='+c), 
-                    vitrin: state.selectedDopings.includes('vitrin'),
-                    dopings: state.selectedDopings 
+                    id: Date.now(), title: t, price: parseInt(p), cat: c, owner: state.user.name, isStore: state.user.isStore, 
+                    image: state.tempImage || ('https://via.placeholder.com/500?text='+c), vitrin: state.selectedDopings.includes('vitrin'), dopings: state.selectedDopings 
                 });
                 app.save(); app.modal('post-ad-modal', false); ui.renderAds(state.ads); ui.renderVitrin(); ui.toast('İlan Yayında!', 'success');
             },
@@ -535,22 +523,21 @@
                 document.getElementById('d-owner').innerText = a.owner;
                 document.getElementById('d-img').src = a.image;
                 document.getElementById('d-desc').innerText = "Bu ürün hakkında detaylı bilgi için satıcı ile iletişime geçin."; 
-                
+                document.getElementById('d-avatar').innerText = a.owner[0].toUpperCase();
+
                 const isFav = state.favorites.includes(id);
                 const favBtn = document.getElementById('d-fav-btn');
                 favBtn.innerHTML = isFav ? '<i class="fa-solid fa-heart text-danger"></i>' : '<i class="fa-regular fa-heart"></i>';
                 favBtn.onclick = () => app.toggleFavorite(id);
 
-                // Satıcı Puanı ve Rozet
-                document.getElementById('d-avatar').innerText = a.owner[0].toUpperCase();
-                
                 const acts = document.getElementById('d-actions');
                 if(state.user && state.user.name === a.owner) {
                     acts.innerHTML = `<button onclick="app.deleteAd(${a.id})" class="w-full bg-red-100 text-danger font-bold py-3 rounded-xl hover:bg-red-200">İlanı Sil</button>`;
                 } else {
+                    // Güvenli Ödeme ve Mesaj Butonları
                     acts.innerHTML = `
                         <button onclick="app.openMsgModal()" class="w-full border-2 border-accent text-accent font-bold py-3 rounded-xl mb-2 hover:bg-blue-50">Mesaj At</button>
-                        <button onclick="ui.toast('Güvenli ödeme sistemi şu an bakımda.','info')" class="w-full bg-accent text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700">Güvenli Al</button>
+                        <button onclick="app.buyProduct(${a.price})" class="w-full bg-accent text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700">Güvenli Al</button>
                     `;
                 }
                 app.modal('detail-modal', true);
@@ -565,15 +552,20 @@
 
             toggleFavorite: (id) => {
                 if(!state.user) return ui.toast('Giriş yapmalısın', 'error');
-                if(state.favorites.includes(id)) {
-                    state.favorites = state.favorites.filter(fid => fid !== id);
-                    ui.toast('Favorilerden çıkarıldı');
-                } else {
-                    state.favorites.push(id);
-                    ui.toast('Favorilere eklendi', 'success');
-                }
-                app.save();
-                app.openDetail(id);
+                if(state.favorites.includes(id)) { state.favorites = state.favorites.filter(fid => fid !== id); ui.toast('Favorilerden çıkarıldı'); } 
+                else { state.favorites.push(id); ui.toast('Favorilere eklendi', 'success'); }
+                app.save(); app.openDetail(id);
+            },
+
+            // --- GÜVENLİ ÖDEME (PARAM GÜVENDE) ---
+            buyProduct: (price) => {
+                if(!state.user) return app.modal('login-modal', true);
+                const fee = price * 0.10; // %10 Hizmet Bedeli
+                const total = price + fee;
+                app.modal('detail-modal', false);
+                payment.open(total, 'Güvenli Ödeme', `${price} TL Ürün + ${fee.toFixed(2)} TL Hizmet Bedeli`, () => {
+                    ui.toast('Sipariş başarıyla oluşturuldu! Satıcı onayı bekleniyor.', 'success');
+                });
             },
 
             openMsgModal: () => {
@@ -587,10 +579,45 @@
             sendMessage: () => {
                 const content = document.getElementById('msg-content').value;
                 if(!content) return ui.toast('Mesaj boş olamaz', 'error');
-                
                 const a = state.ads.find(x => x.id === state.currentAdId);
-                state.messages.unshift({ id: Date.now(), adTitle: a.title, with: a.owner, content: content, date: new Date().toLocaleDateString('tr-TR') });
+                state.messages.unshift({ id: Date.now(), adTitle: a.title, with: a.owner, content: content, date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), fromMe: true });
                 app.save(); app.modal('send-msg-modal', false); ui.toast('Mesaj Gönderildi!', 'success');
+            },
+            
+            // --- YENİ SOHBET FONKSİYONLARI ---
+            openChat: (withUser) => {
+                state.activeChatUser = withUser;
+                document.getElementById('chat-header').classList.remove('hidden');
+                document.getElementById('chat-input-area').classList.remove('hidden');
+                document.getElementById('chat-user-name').innerText = withUser;
+                app.renderChatMessages();
+                
+                // Mobilde liste gizlenir, chat açılır (Basitçe)
+                if(window.innerWidth < 768) { /* Mobil uyumluluk eklenebilir */ }
+            },
+            renderChatMessages: () => {
+                const area = document.getElementById('chat-area');
+                area.innerHTML = '';
+                const msgs = state.messages.filter(m => m.with === state.activeChatUser).reverse();
+                if(msgs.length === 0) { area.innerHTML = '<div class="text-center text-gray-400 mt-10">Sohbet geçmişi yok.</div>'; return; }
+                
+                msgs.forEach(m => {
+                    const bubble = document.createElement('div');
+                    bubble.className = `chat-bubble ${m.fromMe ? 'me' : 'you'}`;
+                    bubble.innerHTML = `${m.content} <div class="chat-time">${m.date}</div>`;
+                    area.appendChild(bubble);
+                });
+                area.scrollTop = area.scrollHeight;
+            },
+            sendChatMessage: () => {
+                const input = document.getElementById('chat-input');
+                const val = input.value;
+                if(!val.trim()) return;
+                
+                state.messages.unshift({ id: Date.now(), adTitle: 'Sohbet', with: state.activeChatUser, content: val, date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), fromMe: true });
+                app.save();
+                input.value = '';
+                app.renderChatMessages();
             },
 
             search: (val) => ui.renderAds(state.ads.filter(a => a.title.toLowerCase().includes(val.toLowerCase()) || a.cat.toLowerCase().includes(val.toLowerCase()))),
@@ -598,8 +625,7 @@
                 const min = document.getElementById('min-price').value || 0;
                 const max = document.getElementById('max-price').value || 999999999;
                 const filtered = state.ads.filter(a => a.price >= min && a.price <= max);
-                ui.renderAds(filtered);
-                ui.toast(`${filtered.length} ilan bulundu.`);
+                ui.renderAds(filtered); ui.toast(`${filtered.length} ilan bulundu.`);
             },
             
             checkAuth: (action) => {
@@ -649,25 +675,21 @@
                 if(list.length===0) document.getElementById('empty-state').style.display='block'; else document.getElementById('empty-state').style.display='none';
                 list.forEach(ad => {
                     const dopings = ad.dopings || [];
-                    const isAcil = dopings.includes('acil');
-                    const isBold = dopings.includes('bold');
-                    const isDopamin = dopings.includes('dopamin');
-                    
                     let cardClass = "bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden cursor-pointer hover:shadow-float transition relative group";
-                    if(isDopamin) cardClass = "bg-white rounded-xl shadow-float border-2 border-purple-200 overflow-hidden cursor-pointer transform scale-105 z-10 relative group";
-                    if(isAcil) cardClass += " border-danger border-2";
+                    if(dopings.includes('dopamin')) cardClass = "bg-white rounded-xl shadow-float border-2 border-purple-200 overflow-hidden cursor-pointer transform scale-105 z-10 relative group";
+                    if(dopings.includes('acil')) cardClass += " border-danger border-2";
 
                     g.innerHTML += `
                         <div onclick="app.openDetail(${ad.id})" class="${cardClass}">
                             <div class="aspect-square bg-gray-100 relative">
                                 <img src="${ad.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                 ${ad.vitrin ? '<span class="absolute top-2 left-2 bg-primary text-dark text-[10px] font-bold px-2 py-0.5 rounded shadow">VİTRİN</span>' : ''}
-                                ${isAcil ? '<span class="absolute top-2 right-2 bg-danger text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">ACİL</span>' : ''}
+                                ${dopings.includes('acil') ? '<span class="absolute top-2 right-2 bg-danger text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">ACİL</span>' : ''}
                                 ${ad.isStore ? '<span class="absolute bottom-0 w-full bg-dark/80 text-white text-[10px] text-center py-1 backdrop-blur-sm">KURUMSAL</span>' : ''}
                             </div>
                             <div class="p-4">
                                 <div class="font-bold text-lg text-accent">${ad.price.toLocaleString()} TL</div>
-                                <div class="text-sm ${isBold ? 'font-black' : 'font-bold'} text-dark truncate">${ad.title}</div>
+                                <div class="text-sm ${dopings.includes('bold') ? 'font-black' : 'font-bold'} text-dark truncate">${ad.title}</div>
                                 <div class="text-xs text-gray-400 mt-1 flex justify-between"><span>${ad.cat}</span><span>${ad.owner}</span></div>
                             </div>
                         </div>`;
@@ -681,7 +703,7 @@
             },
             switchDash: (t) => {
                 ['info','favs','msgs'].forEach(x => { document.getElementById('dash-'+x).style.display='none'; document.getElementById('nav-'+x).className='w-full text-left p-3 rounded-lg text-sm text-gray-600 hover:bg-white'; });
-                document.getElementById('dash-'+t).style.display='block';
+                document.getElementById('dash-'+t).style.display = t === 'msgs' ? 'flex' : 'block';
                 document.getElementById('nav-'+t).className='w-full text-left p-3 rounded-lg text-sm font-bold text-accent bg-white shadow-sm';
                 
                 if(t==='favs') {
@@ -691,9 +713,22 @@
                     myFavs.forEach(ad => l.innerHTML += `<div onclick="app.openDetail(${ad.id})" class="flex gap-3 border p-3 rounded-lg cursor-pointer hover:bg-gray-50"><img src="${ad.image}" class="w-16 h-16 rounded object-cover"><div><div class="font-bold text-sm">${ad.title}</div><div class="text-accent font-bold">${ad.price} TL</div></div></div>`);
                 }
                 if(t==='msgs') {
-                    const l = document.getElementById('inbox-list'); l.innerHTML = '';
-                    if(state.messages.length===0) l.innerHTML = '<p class="text-gray-400">Mesajınız yok.</p>';
-                    state.messages.forEach(m => l.innerHTML += `<div class="bg-gray-50 p-4 rounded-xl border border-gray-200"><div class="flex justify-between mb-2"><span class="font-bold text-dark">${m.with}</span><span class="text-xs text-gray-400">${m.date}</span></div><div class="text-xs font-bold text-accent mb-1">${m.adTitle}</div><p class="text-sm text-gray-600">${m.content}</p></div>`);
+                    const list = document.getElementById('chat-list'); list.innerHTML = '';
+                    // Mesajları grupla
+                    const conversations = [...new Set(state.messages.map(m => m.with))];
+                    if(conversations.length === 0) list.innerHTML = '<p class="p-4 text-gray-400 text-sm">Hiç mesajınız yok.</p>';
+                    conversations.forEach(user => {
+                        const lastMsg = state.messages.find(m => m.with === user);
+                        list.innerHTML += `
+                            <div onclick="app.openChat('${user}')" class="p-3 border-b cursor-pointer hover:bg-gray-100 flex items-center gap-3 transition">
+                                <div class="w-10 h-10 bg-accent text-white rounded-full flex items-center justify-center font-bold">${user[0]}</div>
+                                <div class="flex-1 overflow-hidden">
+                                    <div class="font-bold text-sm flex justify-between">${user} <span class="text-[10px] text-gray-400">${lastMsg.date}</span></div>
+                                    <div class="text-xs text-gray-500 truncate">${lastMsg.content}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
                 }
             },
             toast: (msg, type='info') => {
